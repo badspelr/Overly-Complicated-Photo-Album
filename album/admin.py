@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
+from django import forms
 from .models import SiteSettings, Category, Album, Photo, Video, Tag, AlbumShareLink, Favorite, AIProcessingSettings
 
 
@@ -266,6 +267,32 @@ class AIProcessingSettingsAdmin(admin.ModelAdmin):
     Admin interface for AI processing settings.
     Singleton model - only one instance exists.
     """
+    
+    class AIProcessingSettingsForm(forms.ModelForm):
+        """Custom form to disable the auto_process_on_upload field"""
+        class Meta:
+            model = AIProcessingSettings
+            fields = '__all__'
+            widgets = {
+                'auto_process_on_upload': forms.CheckboxInput(attrs={
+                    'disabled': 'disabled',
+                    'title': 'Future Feature - Not yet implemented'
+                })
+            }
+        
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            # Make the field disabled and add visual indicator
+            self.fields['auto_process_on_upload'].disabled = True
+            self.fields['auto_process_on_upload'].label = '🚧 Auto Process on Upload (Future Feature)'
+            self.fields['auto_process_on_upload'].help_text = (
+                '<strong style="color: #666;">FUTURE FEATURE - Not yet implemented.</strong><br>'
+                'This feature will automatically process photos/videos with AI when uploaded. '
+                'Currently disabled. Use <strong>Scheduled Processing</strong> or manual processing instead.'
+            )
+    
+    form = AIProcessingSettingsForm
+    
     list_display = (
         'auto_process_on_upload',
         'scheduled_processing', 
@@ -279,7 +306,13 @@ class AIProcessingSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Processing Modes', {
             'fields': ('auto_process_on_upload', 'scheduled_processing'),
-            'description': 'Control when AI processing occurs'
+            'description': (
+                '<div style="background: #fef3cd; border-left: 4px solid #ffc107; padding: 10px; margin-bottom: 15px;">'
+                '<strong>ℹ️ Note:</strong> Auto Process on Upload is a <strong>future feature</strong> and currently disabled. '
+                'Use <strong>Scheduled Processing</strong> below for automatic AI processing.'
+                '</div>'
+                'Control when AI processing occurs'
+            )
         }),
         ('Batch Processing Settings', {
             'fields': ('batch_size', 'processing_timeout'),

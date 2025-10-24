@@ -296,8 +296,8 @@ class Favorite(models.Model):
 class AIProcessingSettings(models.Model):
     """Singleton model for AI processing configuration"""
     auto_process_on_upload = models.BooleanField(
-        default=True,
-        help_text="Automatically process photos/videos with AI when uploaded"
+        default=False,
+        help_text="[FUTURE FEATURE] Automatically process photos/videos with AI when uploaded. Currently disabled - use scheduled processing or manual processing instead."
     )
     scheduled_processing = models.BooleanField(
         default=True,
