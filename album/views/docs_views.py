@@ -25,6 +25,7 @@ def documentation_index(request):
         'Deployment & Docker': [
             {'title': '⭐ Complete Docker Setup Guide', 'file': 'docs/deployment/DOCKER_SETUP.md'},
             {'title': '🌐 Nginx Setup & Configuration', 'file': 'docs/deployment/NGINX_SETUP.md'},
+            {'title': '🌍 Virtual Domains Setup', 'file': 'docs/deployment/VIRTUAL_DOMAINS_SETUP.md'},
             {'title': 'Docker Hub Publishing', 'file': 'docs/deployment/DOCKER_HUB_PUBLISHING.md'},
             {'title': 'Docker Overview', 'file': 'docs/deployment/DOCKER.md'},
             {'title': 'Docker README', 'file': 'docs/deployment/DOCKER_README.md'},

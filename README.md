@@ -7,6 +7,7 @@
 - **[Quick Start Guide](docs/getting-started/INSTALL.md)** - Get up and running quickly
 - **[Docker Setup](docs/deployment/DOCKER.md)** - Detailed Docker deployment guide  
 - **[Nginx Setup](docs/deployment/NGINX_SETUP.md)** - Production Nginx configuration with SSL
+- **[Virtual Domains Setup](docs/deployment/VIRTUAL_DOMAINS_SETUP.md)** - Multiple domains on one server
 - **[Production Deployment](docs/deployment/PRODUCTION_QUICK_START.md)** - Deploy to production servers
 - **[User Manual](docs/user-guides/USER_MANUAL.md)** - Complete feature documentation
 - **[Admin Guide](docs/admin-guides/ADMIN_GUIDE_AI_SETTINGS.md)** - AI processing and admin features
