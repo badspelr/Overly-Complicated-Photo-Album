@@ -89,12 +89,26 @@ AI_PROCESSING = {
 # Cache configuration
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': config('REDIS_URL', default='redis://redis:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'SOCKET_CONNECT_TIMEOUT': 5,
+            'SOCKET_TIMEOUT': 5,
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 50,
+            },
+        },
+        'KEY_PREFIX': 'photo_album',
+        'TIMEOUT': 300,  # 5 minutes default
     },
     'ai_cache': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'ai-embeddings',
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': config('REDIS_URL', default='redis://redis:6379/2'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'ai_embeddings',
         'TIMEOUT': 86400,  # 24 hours
     }
 }
@@ -368,13 +382,17 @@ REST_FRAMEWORK = {
 }
 
 # CORS settings
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",  # React development server
-#     "http://127.0.0.1:3000",
-#     "http://localhost:8000",  # Django development server
-#     "http://127.0.0.1:8000",
-# ]
-CORS_ALLOW_ALL_ORIGINS = True # WARNING: This is for debugging only and should not be used in production.
+# Configure allowed origins from environment variable for security
+# In production, set CORS_ALLOWED_ORIGINS in .env to your specific domains
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
+
+# SECURITY WARNING: Never set CORS_ALLOW_ALL_ORIGINS=True in production!
+# This is a major security vulnerability that allows any website to access your API.
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
 
 CORS_ALLOW_CREDENTIALS = True
 
