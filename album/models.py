@@ -40,6 +40,10 @@ class CustomAlbum(models.Model):
 class SiteSettings(models.Model):
     title = models.CharField(max_length=100, default='Photo Album Site', help_text='The main title displayed on the homepage.')
     description = models.TextField(blank=True, help_text='Optional description for the site.')
+    allow_registration = models.BooleanField(
+        default=True, 
+        help_text='Allow new users to register. Uncheck to disable public registration.'
+    )
 
     class Meta:
         verbose_name = 'Site Settings'
@@ -47,6 +51,12 @@ class SiteSettings(models.Model):
 
     def __str__(self):
         return self.title
+    
+    @classmethod
+    def get_settings(cls):
+        """Get or create the singleton settings instance."""
+        settings, created = cls.objects.get_or_create(pk=1)
+        return settings
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True, help_text='Category name.')

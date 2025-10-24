@@ -24,6 +24,12 @@ logger = logging.getLogger(__name__)
 
 def register(request):
     """Register a new user."""
+    # Check if registration is allowed
+    site_settings = SiteSettings.get_settings()
+    if not site_settings.allow_registration:
+        messages.error(request, 'Registration is currently disabled. Please contact the administrator.')
+        return redirect('login')
+    
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():

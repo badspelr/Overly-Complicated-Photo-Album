@@ -58,6 +58,7 @@ def documentation_index(request):
         ],
         'Features': [
             {'title': '📚 Admin Documentation Feature', 'file': 'docs/features/ADMIN_DOCUMENTATION_FEATURE.md'},
+            {'title': '🔐 Registration Control', 'file': 'docs/features/REGISTRATION_CONTROL.md'},
         ],
         'Reference': [
             {'title': 'Changelog', 'file': 'CHANGELOG.md'},

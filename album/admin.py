@@ -9,12 +9,24 @@ from .models import SiteSettings, Category, Album, Photo, Video, Tag, AlbumShare
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description')
+    list_display = ('title', 'description', 'allow_registration')
     fieldsets = (
         ('Basic Settings', {
             'fields': ('title', 'description')
         }),
+        ('Registration Settings', {
+            'fields': ('allow_registration',),
+            'description': 'Control whether new users can register for accounts.'
+        }),
     )
+    
+    def has_add_permission(self, request):
+        """Only allow one SiteSettings instance."""
+        return not SiteSettings.objects.exists()
+    
+    def has_delete_permission(self, request, obj=None):
+        """Prevent deletion of site settings."""
+        return False
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
