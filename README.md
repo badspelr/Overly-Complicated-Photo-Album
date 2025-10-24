@@ -2,7 +2,17 @@
 
 > Modern, AI-powered photo management system built with Django 5.2
 
-[![Django](https://img.shields.io/badge/Django-5.2-green.svg)](https://www.djangoproject.com/)
+[![Django](https://img.shields.io/bad## 📚 Documentation
+
+- **[Quick Start Guide](docs/getting-started/INSTALL.md)** - Get up and running quickly
+- **[Docker Setup](docs/deployment/DOCKER.md)** - Detailed Docker deployment guide  
+- **[Nginx Setup](docs/deployment/NGINX_SETUP.md)** - Production Nginx configuration with SSL
+- **[Production Deployment](docs/deployment/PRODUCTION_QUICK_START.md)** - Deploy to production servers
+- **[User Manual](docs/user-guides/USER_MANUAL.md)** - Complete feature documentation
+- **[Admin Guide](docs/admin-guides/ADMIN_GUIDE_AI_SETTINGS.md)** - AI processing and admin features
+- **[API Documentation](docs/technical/API.md)** - REST API reference
+
+## 🤝 Contributingn.svg)](https://www.djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue.svg)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -94,6 +104,11 @@ Different compose files for different use cases:
   - No GPU dependencies
   - Smaller image size
   - Use: `docker-compose -f docker-compose.light.yml up -d`
+
+- **`docker-compose.nginx.yml`** - Production with Nginx
+  - Includes Nginx reverse proxy
+  - SSL/TLS support with Let's Encrypt
+  - See [NGINX_SETUP.md](docs/deployment/NGINX_SETUP.md)
 
 ### Local Development (Without Docker)
 
