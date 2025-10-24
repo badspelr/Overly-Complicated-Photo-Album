@@ -1,0 +1,48 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Delete Category{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/delete_category.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-1">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="material-icons">delete_forever</i> Delete Category</h2>
+                <p class="card-text mb-0">This action cannot be undone. All associated media will remain but will no longer be categorized.</p>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="material-icons">warning</i>
+                    Are you sure you want to delete the category "<strong>{{ category.name }}</strong>"?
+                </div>
+
+                <div class="category-info">
+                    <h4><i class="material-icons">info</i> Category Details</h4>
+                    <p><strong>Name:</strong> {{ category.name }}</p>
+                    {% if category.description %}
+                        <p><strong>Description:</strong> {{ category.description }}</p>
+                    {% endif %}
+                    <p><strong>Created:</strong> {{ category.created_at|date:"M j, Y" }}</p>
+                </div>
+
+                <form method="post" class="delete-form">
+                    {% csrf_token %}
+                    <div class="flex gap-4">
+                        <button type="submit" class="btn btn-error btn-lg">
+                            <i class="material-icons">delete_forever</i>
+                            Delete Category
+                        </button>
+                        <a href="{% url 'album:category_list' %}" class="btn btn-secondary">
+                            <i class="material-icons">cancel</i>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

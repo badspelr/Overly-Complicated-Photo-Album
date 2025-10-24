@@ -1,0 +1,1 @@
+# Template tags for album app

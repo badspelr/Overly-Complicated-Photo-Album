@@ -1,0 +1,232 @@
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+.album-card {
+    background-color: var(--bg-paper);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--divider);
+}
+.album-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+}
+.album-card-cover {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background-color: #333;
+}
+.album-card-content {
+    padding: 1rem;
+    flex-grow: 1;
+}
+.album-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+.album-card-owner {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.album-card-owner .material-icons {
+    font-size: 1rem;
+}
+.album-card-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+.album-card-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.btn-create {
+    background-color: var(--primary-main);
+    color: var(--bg-default);
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+.btn-create:hover {
+    background-color: #a6d4fa;
+}
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+.empty-state .btn-create {
+    margin-top: 1rem;
+    display: inline-block;
+}
+
+/* Search Section Styles */
+.search-sections-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.search-section {
+    background: var(--bg-paper);
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--divider);
+}
+
+.album-search-section {
+    margin-bottom: 0;
+}
+
+.album-search-header {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.album-search-icon {
+    margin-right: 0.5rem;
+}
+
+.quick-search-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.quick-search-input {
+    flex: 1;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    background: var(--bg-default);
+    color: var(--text-primary);
+}
+
+.quick-search-input:focus {
+    outline: none;
+    border-color: var(--primary-main);
+    box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.2);
+}
+
+.search-btn {
+    padding: 0.625rem 0.875rem;
+    min-width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-btn .material-icons {
+    font-size: 1.25rem;
+}
+
+.album-search-clear-button {
+    margin-left: 0;
+}
+
+.album-search-help {
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    display: block;
+    font-size: 0.8rem;
+}
+
+.album-search-results {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: var(--surface-variant);
+    border-radius: 8px;
+}
+
+.album-search-results-success {
+    color: var(--primary);
+}
+
+.album-search-results-error {
+    color: var(--error);
+}
+
+/* Media Search Section */
+.media-search-header {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.media-search-icon {
+    margin-right: 0.5rem;
+}
+
+.media-search-help {
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    display: block;
+    font-size: 0.8rem;
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+    .search-sections-wrapper {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .quick-search-form {
+        flex-wrap: wrap;
+    }
+    
+    .quick-search-input {
+        min-width: 100%;
+    }
+}
+
+/* Modal Search Examples */
+.search-example-text {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.search-type-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}

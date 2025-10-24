@@ -1,0 +1,263 @@
+/* Profile Edit Page Styles */
+
+.form-card {
+    max-width: 600px;
+    margin: 2rem auto;
+    background-color: var(--bg-paper);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--divider);
+}
+
+.form-card h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.form-description {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: var(--bg-default);
+    color: var(--text-primary);
+}
+
+/* Specific styling for regular input fields (not checkboxes) */
+.form-group input:not([type="checkbox"]),
+.form-group textarea,
+.form-group select {
+    max-width: 400px;
+}
+
+/* Special styling for checkboxes */
+.form-group input[type="checkbox"] {
+    display: inline-block;
+    width: auto;
+    padding: 0;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+    transform: scale(1.2);
+    margin-left: 0;
+}
+
+/* Make checkbox labels inline and aligned */
+.form-group:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-group:has(input[type="checkbox"]) label {
+    margin-bottom: 0;
+    display: inline;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Fallback for browsers that don't support :has() */
+.form-group.checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    flex-direction: column;
+}
+
+.form-group.checkbox-group label {
+    margin-bottom: 0;
+    display: inline;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Styles for checkbox select multiple (groups field) */
+.checkbox-group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.checkbox-group li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+}
+
+.checkbox-group li:last-child {
+    margin-bottom: 0;
+}
+
+.checkbox-group label {
+    margin-bottom: 0;
+    cursor: pointer;
+    user-select: none;
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkbox-group small {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-main);
+    box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.2);
+}
+
+.form-group input[type="checkbox"]:focus {
+    box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.4);
+}
+
+
+
+/* Styling for multiple checkbox groups (like user groups) */
+.form-group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+}
+
+.form-group ul li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-group ul li input[type="checkbox"] {
+    margin-right: 0.5rem;
+    margin-left: 0;
+}
+
+.form-group ul li label {
+    margin-bottom: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-submit {
+    background-color: var(--primary-main);
+    color: var(--bg-default);
+}
+
+.btn-submit:hover {
+    background-color: #1565c0;
+}
+
+.btn-cancel {
+    background-color: var(--bg-paper);
+    color: var(--text-secondary);
+    border: 1px solid var(--divider);
+}
+
+.btn-cancel:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.error-message {
+    color: var(--secondary-main);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+/* Danger Zone */
+.danger-zone {
+    margin-top: 3rem;
+    padding: 2rem;
+    border: 2px solid #ffcdd2;
+    border-radius: 8px;
+    background-color: #ffebee;
+    text-align: center;
+}
+
+.danger-zone h3 {
+    color: #d32f2f;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.danger-zone p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.btn-danger {
+    background-color: #f44336;
+    color: white;
+    border: 1px solid #f44336;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background-color 0.3s;
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+    border-color: #d32f2f;
+    text-decoration: none;
+    color: white;
+}
+
+.btn-danger .material-icons {
+    font-size: 1rem;
+}

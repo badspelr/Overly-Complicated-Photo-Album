@@ -1,0 +1,57 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/registration.css' %}">
+{% endblock %}
+
+{% block body_class %}no-sidebar{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>Create an Account</h1>
+    <p class="form-subheading">Join to start sharing your photo albums</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            {% if field.name == 'agree_to_terms' %}
+                <div class="form-group terms-agreement">
+                    <div class="form-check">
+                        {{ field }}
+                        <label for="{{ field.id_for_label }}" class="form-check-label">
+                            I have read and agree to the 
+                            <a href="{% url 'album:terms' %}" target="_blank">Terms of Conduct</a> 
+                            and 
+                            <a href="{% url 'album:csam_policy' %}" target="_blank">CSAM Policy</a>
+                        </label>
+                    </div>
+                    {% for error in field.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small>{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <button type="submit" class="btn-submit">Sign Up</button>
+    </form>
+
+    <div class="form-footer-link">
+        <p>Already have an account? <a href="{% url 'login' %}">Sign In</a></p>
+    </div>
+</div>
+{% endblock %}

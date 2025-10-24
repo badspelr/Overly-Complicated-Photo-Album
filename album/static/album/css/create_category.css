@@ -1,0 +1,16 @@
+.card-title .material-icons,
+.form-label .material-icons,
+.btn .material-icons,
+.card-header h3 .material-icons,
+.card-body h4 .material-icons {
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+
+.form-label .material-icons {
+    font-size: 18px;
+}
+
+.card-body h4 .material-icons {
+    font-size: 20px;
+}

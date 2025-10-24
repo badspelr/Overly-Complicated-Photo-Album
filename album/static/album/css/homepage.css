@@ -1,0 +1,82 @@
+.hero-section {
+    background-color: var(--bg-paper);
+    padding: 4rem 2rem;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--divider);
+}
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+.hero-description {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+.action-buttons .btn {
+    text-decoration: none;
+    color: var(--bg-default);
+    padding: 0.75rem 2rem;
+    border-radius: 4px;
+    font-weight: 500;
+    margin: 0 0.5rem;
+    transition: background-color 0.3s;
+}
+.btn-primary { background-color: var(--primary-main); }
+.btn-primary:hover { background-color: #a6d4fa; }
+.btn-secondary { background-color: var(--bg-default); color: var(--primary-main); border: 1px solid var(--primary-main); }
+.btn-secondary:hover { background-color: rgba(144, 202, 249, 0.1); }
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+/* Re-using album grid styles from other pages */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+.album-card {
+    background-color: var(--bg-paper);
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--divider);
+    transition: transform 0.2s ease-in-out;
+}
+.album-card:hover {
+    transform: translateY(-5px);
+}
+.album-card-cover {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background-color: #333;
+}
+.album-card-content {
+    padding: 1rem;
+    flex-grow: 1;
+}
+.album-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+.album-card-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}

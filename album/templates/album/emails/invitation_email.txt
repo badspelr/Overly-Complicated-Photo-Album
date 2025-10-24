@@ -1,0 +1,14 @@
+Hello!
+
+{{ inviter_name }} has invited you to view their photo albums: {{ album_titles }}.
+
+Please register at {{ site_url }} to access the albums.
+
+You can create an account and start viewing these albums right away!
+
+Best regards,
+{{ inviter_name }}
+
+---
+Photo Album System
+{{ site_url }}

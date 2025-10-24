@@ -1,0 +1,99 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Delete User{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/delete_user.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-1">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Delete User</h3>
+                <p class="card-text">Confirm deletion of user account</p>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <h4>⚠️ Warning: This action cannot be undone!</h4>
+                    <p>You are about to delete the user account for <strong>{{ user_to_delete.username }}</strong>.</p>
+                    <p>This will permanently remove:</p>
+                    <ul>
+                        <li>The user account and all associated data</li>
+                        <li>All albums owned by this user</li>
+                        <li>All photos and videos uploaded by this user</li>
+                        <li>All viewer permissions for this user</li>
+                    </ul>
+                </div>
+
+                <div class="mt-4">
+                    <h5>User Details:</h5>
+                    <table class="table">
+                        <tr>
+                            <td><strong>Username:</strong></td>
+                            <td>{{ user_to_delete.username }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email:</strong></td>
+                            <td>{{ user_to_delete.email }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Full Name:</strong></td>
+                            <td>{{ user_to_delete.get_full_name|default:"Not set" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Status:</strong></td>
+                            <td>
+                                {% if user_to_delete.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Inactive</span>
+                                {% endif %}
+                                {% if user_to_delete.is_superuser %}
+                                    <span class="badge badge-primary">Superuser</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Groups:</strong></td>
+                            <td>
+                                {% for group in user_to_delete.groups.all %}
+                                    <span class="badge badge-info">{{ group.name }}</span>
+                                {% empty %}
+                                    <span class="text-muted">No groups</span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Albums Owned:</strong></td>
+                            <td>{{ user_to_delete.album_set.count }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Photos Uploaded:</strong></td>
+                            <td>{{ user_to_delete.photo_set.count }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Videos Uploaded:</strong></td>
+                            <td>{{ user_to_delete.video_set.count }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="flex gap-2 mt-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="material-icons">delete_forever</i>
+                            Yes, Delete User
+                        </button>
+                    </form>
+                    <a href="{% url 'album:manage_users' %}" class="btn btn-secondary">
+                        <i class="material-icons">cancel</i>
+                        Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

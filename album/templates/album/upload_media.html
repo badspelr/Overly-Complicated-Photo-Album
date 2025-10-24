@@ -1,0 +1,201 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Upload Media{% endblock %}
+
+{% block extra_head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="cache-version" content="v{{ 'now'|date:'YmdHis' }}">
+<link rel="stylesheet" href="{% static 'album/css/upload_media.css' %}?v={{ 'now'|date:'YmdHis' }}">
+{% endblock %}
+
+{% block content %}
+<!-- TEMPLATE UPDATED: {{ 'now'|date:'Y-m-d H:i:s' }} -->
+<div class="form-card">
+    <div class="upload-status-box">
+        <h3>✅ Upload Page Status</h3>
+        <p>
+            <strong>Page loaded at:</strong> {{ 'now'|date:"Y-m-d H:i:s" }}<br>
+            <strong>Server:</strong> Running<br>
+            <strong>Status:</strong> All upload options available
+        </p>
+    </div>
+    
+    <h1>Upload Media</h1>
+    
+    <!-- Upload Methods Help -->
+    <details class="upload-help">
+        <summary>
+            <i class="material-icons">help_outline</i>
+            Upload Methods & Browser Compatibility
+        </summary>
+        <div class="upload-help-content">
+            <h4>📁 Folder Upload</h4>
+            <ul>
+                <li><strong>Best:</strong> Drag & drop folders directly onto the "Select Entire Folder" card</li>
+                <li><strong>Alternative:</strong> Click the card to open folder picker (Chrome, Edge, Safari)</li>
+                <li><strong>Fallback:</strong> Select individual files if folder selection isn't supported</li>
+            </ul>
+            
+            <h4>📄 Individual Files</h4>
+            <ul>
+                <li>Click "Select Individual Files" to choose specific files</li>
+                <li>Works in all modern browsers</li>
+                <li>Supports multiple file selection</li>
+            </ul>
+            
+            <h4>🎯 Main Drop Zone</h4>
+            <ul>
+                <li>Drag & drop files or folders onto the center area</li>
+                <li>Most reliable method across all browsers</li>
+                <li>Shows visual feedback during drag operations</li>
+            </ul>
+            
+            <p class="pro-tip">
+                <strong>💡 Pro Tip:</strong> If folder selection doesn't work in your browser, drag & drop always works!
+            </p>
+        </div>
+    </details>
+
+    <!-- Offline indicator -->
+    <div id="offline-indicator" class="offline-indicator">
+        <i class="material-icons">wifi_off</i>
+        You're offline. Files will be queued for upload when connection is restored.
+    </div>
+
+    <!-- Camera controls for mobile -->
+    <div id="camera-controls" class="camera-controls">
+        <h3>📸 Quick Capture</h3>
+        <button type="button" id="camera-btn" class="camera-btn">
+            <i class="material-icons">camera_alt</i>
+            Open Camera
+        </button>
+        <button type="button" id="switch-camera-btn" class="camera-btn">
+            <i class="material-icons">flip_camera_ios</i>
+            Switch Camera
+        </button>
+
+        <div id="camera-preview" class="camera-preview">
+            <video id="camera-video" autoplay playsinline muted></video>
+            <button type="button" id="capture-btn" class="capture-btn" title="Take Photo"></button>
+            <button type="button" id="close-camera-btn">
+                <i class="material-icons">close</i>
+            </button>
+        </div>
+    </div>
+
+    <!-- File list for offline queue -->
+    <div id="file-list" class="file-list">
+        <h4>Queued Files</h4>
+        <div id="queued-files"></div>
+    </div>
+
+    <!-- Upload Messages Area -->
+    <div id="upload-messages" class="upload-messages">
+        <div class="messages-header">
+            <span>Upload Status</span>
+            <button type="button" id="close-all-messages" class="btn btn-sm">Close All</button>
+        </div>
+    </div>
+
+    <!-- Upload Progress Area -->
+    <div id="upload-progress" class="upload-progress">
+        <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="progress-text" class="progress-text">Preparing upload...</div>
+        <div id="file-progress" class="file-progress"></div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="upload-form" action="{% url 'album:upload_media' %}">
+        {% csrf_token %}
+        
+        <!-- Upload Details Section -->
+        <div class="upload-details-section">
+            <h3><i class="material-icons">info</i>Upload Details</h3>
+            
+            {% for field in form %}
+                {% if field.name != 'media_files' and field.name != 'media_dir' %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Upload Options Section -->
+        <div class="upload-options-section">
+            <h3><i class="material-icons">file_upload</i>Select Files</h3>
+            
+            <!-- Drag & Drop Zone -->
+            <div class="upload-options">
+                <div class="drag-drop-zone" id="drag-drop-zone">
+                    <div class="drop-zone" id="drop-zone">
+                        <i class="material-icons upload-icon">cloud_upload</i>
+                        <h4>Drag & Drop Files Here</h4>
+                        <p>Or click to browse your files</p>
+                        <span class="drop-text">Supports multiple files, folders, and all image/video formats</span>
+                        <input type="file" id="drag-drop-input" multiple accept="image/*,video/*">
+                    </div>
+                    <div class="file-preview" id="file-preview">
+                        <h5>Selected Files: <span id="file-count">0</span> / 1000</h5>
+                        <div id="selected-files-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Traditional Upload Options -->
+            <div class="upload-options full-width">
+                <div class="option-card" id="select-files-card">
+                    <h4><i class="material-icons">description</i>Select Individual Files</h4>
+                    <p>Choose specific files from your device</p>
+                    <input type="file" id="individual-files-input" name="media_files" multiple accept="image/*,video/*">
+                </div>
+                
+                <div class="option-card" id="select-folder-card" title="Click to select folder, or drag & drop folders here">
+                    <h4><i class="material-icons">folder</i>Select Entire Folder</h4>
+                    <p>Upload all files from a folder <span id="folder-support-status">(checking browser support...)</span></p>
+                    <small class="tip">💡 Tip: You can also drag & drop folders directly onto this card</small>
+                    <input type="file" id="folder-input" name="media_dir" webkitdirectory directory mozdirectory multiple accept="image/*,video/*">
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submit-btn">
+            <i class="material-icons">cloud_upload</i>
+            Upload
+        </button>
+        
+        <!-- Debug: Test button for form submission without files -->
+        <button type="button" id="test-submit-btn" class="test-submit-btn">
+            <i class="material-icons">bug_report</i>
+            Test Form (No Files)
+        </button>
+        
+        <!-- Debug: Clear files button -->
+        <button type="button" id="clear-files-btn" class="clear-files-btn">
+            <i class="material-icons">clear</i>
+            Clear All Files
+        </button>
+
+        <!-- Debug: Test drag and drop button -->
+        <button type="button" id="test-drag-drop-btn" class="test-drag-drop-btn">
+            <i class="material-icons">bug_report</i>
+            Test Drag & Drop
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'album/js/upload_media.js' %}?v={{ 'now'|date:'YmdHis' }}"></script>
+{% endblock %}

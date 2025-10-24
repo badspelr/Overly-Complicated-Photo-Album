@@ -1,0 +1,100 @@
+.form-card {
+    max-width: 600px;
+    margin: 2rem auto;
+    background-color: var(--bg-paper);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--divider);
+}
+.form-card h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+.form-group {
+    margin-bottom: 1.5rem;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.form-group input, .form-group textarea, .form-group select {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: var(--bg-default);
+    color: var(--text-primary);
+}
+
+/* Checkbox-specific styling */
+.form-group input[type="checkbox"] {
+    display: inline-block;
+    width: auto;
+    padding: 0;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+/* Make checkbox labels inline with checkbox */
+.form-group:has(input[type="checkbox"]) label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--primary-main);
+    box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.2);
+}
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-submit {
+    background-color: var(--primary-main);
+    color: var(--bg-default);
+}
+.btn-submit:hover {
+    background-color: #a6d4fa;
+}
+.btn-cancel {
+    background-color: var(--bg-paper);
+    color: var(--text-secondary);
+    border: 1px solid var(--divider);
+}
+.btn-cancel:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.form-help-text {
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.form-error {
+    color: var(--secondary-main);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}

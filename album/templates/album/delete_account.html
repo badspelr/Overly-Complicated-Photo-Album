@@ -1,0 +1,111 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Delete Account{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'album/css/delete_account.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="delete-account-container">
+    <div class="delete-account-card">
+        <div class="warning-icon">
+            <i class="material-icons">warning</i>
+        </div>
+        
+        <h1>Delete Account</h1>
+        
+        <div class="warning-message">
+            <h2>⚠️ This action cannot be undone!</h2>
+            <p>Deleting your account will permanently remove:</p>
+        </div>
+        
+        <div class="data-summary">
+            <div class="data-item">
+                <i class="material-icons">photo_library</i>
+                <span class="count">{{ albums_count }}</span>
+                <span class="label">Album{{ albums_count|pluralize }}</span>
+            </div>
+            
+            <div class="data-item">
+                <i class="material-icons">photo</i>
+                <span class="count">{{ photos_count }}</span>
+                <span class="label">Photo{{ photos_count|pluralize }}</span>
+            </div>
+            
+            <div class="data-item">
+                <i class="material-icons">videocam</i>
+                <span class="count">{{ videos_count }}</span>
+                <span class="label">Video{{ videos_count|pluralize }}</span>
+            </div>
+            
+            <div class="data-item">
+                <i class="material-icons">local_offer</i>
+                <span class="count">{{ tags_count }}</span>
+                <span class="label">Tag{{ tags_count|pluralize }}</span>
+            </div>
+            
+            <div class="data-item">
+                <i class="material-icons">collections</i>
+                <span class="count">{{ custom_albums_count }}</span>
+                <span class="label">Custom Album{{ custom_albums_count|pluralize }}</span>
+            </div>
+        </div>
+        
+        <div class="additional-info">
+            <h3>What happens when you delete your account:</h3>
+            <ul>
+                <li>All your albums and media files will be permanently deleted</li>
+                <li>All tags and custom albums you created will be removed</li>
+                <li>You will be removed from any shared albums</li>
+                <li>All share links you created will be deactivated</li>
+                <li>Your account cannot be recovered</li>
+            </ul>
+        </div>
+        
+        <form method="post" class="delete-form">
+            {% csrf_token %}
+            
+            <div class="confirmation-checkbox">
+                <label>
+                    <input type="checkbox" id="confirm-delete" required>
+                    <span class="checkmark"></span>
+                    I understand that this action cannot be undone and all my data will be permanently lost
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'album:profile_edit' %}" class="btn btn-cancel">Cancel</a>
+                <button type="submit" class="btn btn-danger" id="delete-button" disabled>
+                    <i class="material-icons">delete_forever</i>
+                    Delete My Account
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('confirm-delete');
+    const deleteButton = document.getElementById('delete-button');
+    
+    checkbox.addEventListener('change', function() {
+        deleteButton.disabled = !this.checked;
+        if (this.checked) {
+            deleteButton.classList.add('enabled');
+        } else {
+            deleteButton.classList.remove('enabled');
+        }
+    });
+    
+    // Double confirmation on button click
+    deleteButton.addEventListener('click', function(e) {
+        if (!confirm('Are you absolutely sure you want to delete your account? This cannot be undone!')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

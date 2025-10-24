@@ -1,0 +1,82 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Manage Share Links - {{ album.title }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/manage_share_links.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-1">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">🔗 Share Links for {{ album.title }}</h1>
+            <p class="card-text">Manage shareable links for this album</p>
+        </div>
+
+        <div class="card-body">
+            <div class="share-links-header">
+                <a href="{% url 'album:create_share_link' album.pk %}" class="btn btn-primary">
+                    <i class="material-icons">add</i> Create New Share Link
+                </a>
+            </div>
+
+            {% if share_links %}
+                <div class="share-links-list">
+                    {% for link in share_links %}
+                    <div class="share-link-item">
+                        <div class="share-link-info">
+                            <div class="share-link-url">
+                                <strong>Share URL:</strong>
+                                <code>{{ request.scheme }}://{{ request.get_host }}{% url 'album:shared_album' link.share_token %}</code>
+                            </div>
+                            <div class="share-link-details">
+                                <span><strong>Created:</strong> {{ link.created_at|date:"M j, Y g:i A" }}</span>
+                                {% if link.expires_at %}
+                                    <span><strong>Expires:</strong> {{ link.expires_at|date:"M j, Y g:i A" }}</span>
+                                {% else %}
+                                    <span><strong>Expires:</strong> Never</span>
+                                {% endif %}
+                                <span><strong>Views:</strong> {{ link.view_count }}</span>
+                                <span><strong>Status:</strong>
+                                    {% if link.is_active and not link.is_expired %}
+                                        <span class="status-active">Active</span>
+                                    {% else %}
+                                        <span class="status-expired">Expired</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="share-link-actions">
+                            <button type="button" class="btn btn-sm btn-secondary copy-btn" data-copy-text="{{ request.scheme }}://{{ request.get_host }}{% url 'album:shared_album' link.share_token %}">Copy</button>
+                            <form method="post" action="{% url 'album:delete_share_link' link.id %}" class="delete-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="material-icons">link_off</i>
+                    <h3>No share links yet</h3>
+                    <p>You haven't created any shareable links for this album.</p>
+                    <a href="{% url 'album:create_share_link' album.pk %}" class="btn btn-primary">Create Your First Share Link</a>
+                </div>
+            {% endif %}
+
+            <div class="back-actions">
+                <a href="{% url 'album:album_detail' album.pk %}" class="btn btn-secondary">Back to Album</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'album/js/manage_share_links.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,405 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}My Albums{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/album_list.css' %}">
+<style>
+/* Search Modal Styles */
+.search-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.search-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-paper);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--divider);
+}
+
+.search-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--divider);
+    padding-bottom: 1rem;
+}
+
+.search-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.search-modal-close:hover {
+    color: var(--text-primary);
+}
+
+.search-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.search-form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.search-form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--divider);
+    border-radius: 6px;
+    font-size: 1rem;
+    background: var(--bg-default);
+    color: var(--text-primary);
+}
+
+.search-form-control:focus {
+    outline: none;
+    border-color: var(--primary-main);
+    box-shadow: 0 0 0 3px rgba(144, 202, 249, 0.2);
+}
+
+.search-type-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.search-type-option {
+    position: relative;
+}
+
+.search-type-radio {
+    position: absolute;
+    opacity: 0;
+}
+
+.search-type-label {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid var(--divider);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg-default);
+    color: var(--text-primary);
+}
+
+.search-type-radio:checked + .search-type-label {
+    border-color: var(--primary-main);
+    background-color: rgba(144, 202, 249, 0.1);
+}
+
+.search-type-icon {
+    margin-right: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.search-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--primary-main);
+    color: var(--bg-default);
+}
+
+.btn-primary:hover {
+    background: #a6d4fa;
+}
+
+.btn-secondary {
+    background: var(--text-secondary);
+    color: var(--bg-default);
+}
+
+.btn-secondary:hover {
+    background: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .search-modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .search-type-options {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">My Albums</h1>
+    <a href="{% url 'album:create_album' %}" class="btn-create">
+        Create New Album
+    </a>
+</div>
+
+<!-- Album Search Section -->
+<div class="search-sections-wrapper">
+    <div class="search-section album-search-section">
+        <div class="search-header">
+            <h3 class="album-search-header">
+                <i class="material-icons album-search-icon">folder_open</i>
+                Find Albums
+            </h3>
+        </div>
+        
+        <form method="get" class="quick-search-form">
+            <input type="text" name="q" class="quick-search-input" placeholder="Search albums..." value="{{ search_query }}">
+            <button type="submit" class="btn btn-primary search-btn">
+                <i class="material-icons">search</i>
+            </button>
+            {% if search_query %}
+            <a href="{% url 'album:album_list' %}" class="btn btn-secondary search-btn album-search-clear-button">
+                <i class="material-icons">clear</i>
+            </a>
+            {% endif %}
+        </form>
+        <small class="album-search-help">
+            Search by title, description, or content
+        </small>
+        {% if search_query %}
+        <div class="album-search-results">
+            <strong>Results for:</strong> "{{ search_query }}"
+            {% if albums %}
+                <span class="album-search-results-success">({{ albums|length }} found)</span>
+            {% else %}
+                <span class="album-search-results-error">(none found)</span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Media Search Section -->
+    <div class="search-section">
+        <div class="search-header">
+            <h3 class="media-search-header">
+                <i class="material-icons media-search-icon">search</i>
+                Search Media
+            </h3>
+        </div>
+        
+        <!-- Quick Search -->
+        <form method="get" action="{% url 'album:search_media' %}" class="quick-search-form">
+            <input type="text" name="search" class="quick-search-input" placeholder="AI search (e.g., 'beach', 'sunset')..." required>
+            <input type="hidden" name="search_type" value="ai">
+            <button type="submit" class="btn btn-primary search-btn">
+                <i class="material-icons">auto_fix_high</i>
+            </button>
+            <button type="button" class="btn btn-secondary search-btn" id="search-modal-toggle" title="Advanced Search">
+                <i class="material-icons">tune</i>
+            </button>
+        </form>
+        <small class="media-search-help">
+            AI search finds photos by content and scenes
+        </small>
+    </div>
+</div>
+
+{% if albums %}
+    <div class="album-grid">
+        {% for album in albums %}
+        <a href="{% url 'album:album_detail' album.pk %}" class="album-card">
+            <img class="album-card-cover" src="{% if album.cover_image %}{{ album.cover_image.url }}{% elif album.photos.first %}{{ album.photos.first.thumbnail.url }}{% elif album.videos.first.thumbnail %}{{ album.videos.first.thumbnail.url }}{% else %}https://via.placeholder.com/300x160.png?text=No+Media{% endif %}" alt="{{ album.title }} cover">
+            <div class="album-card-content">
+                <h2 class="album-card-title">{{ album.title }}</h2>
+                <p class="album-card-owner">
+                    <i class="material-icons">person</i>
+                    {{ album.owner.get_full_name|default:album.owner.username }}
+                </p>
+                <p class="album-card-description">{{ album.description|truncatewords:15 }}</p>
+                <div class="album-card-meta">
+                    <span>{{ album.photos.count }} Photos, {{ album.videos.count }} Videos</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+        <div class="card">
+            <div class="card-body">
+                <div class="pagination">
+                    <span class="page-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1" class="btn btn-secondary">&laquo; First</a>
+                            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">‹ Previous</a>
+                        {% endif %}
+
+                        <span class="page-current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">Next ›</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-secondary">Last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+{% else %}
+    <div class="empty-state">
+        <p>You haven't created any albums yet.</p>
+        <a href="{% url 'album:create_album' %}" class="btn-create">
+            Create Your First Album
+        </a>
+    </div>
+{% endif %}
+
+<!-- Search Modal -->
+<div class="search-modal" id="search-modal">
+    <div class="search-modal-content">
+        <div class="search-modal-header">
+            <h3>🔍 Advanced Search</h3>
+            <button type="button" class="search-modal-close" id="search-modal-close">
+                <i class="material-icons">close</i>
+            </button>
+        </div>
+        
+        <form method="get" action="{% url 'album:search_media' %}" id="advanced-search-form">
+            <div class="search-form-group">
+                <label for="search-query">Search Query</label>
+                <input type="text" id="search-query" name="search" class="search-form-control" 
+                       placeholder="Enter your search terms..." required>
+                <small class="search-example-text">Examples: "beach sunset", "children playing", "birthday party"</small>
+            </div>
+            
+            <div class="search-form-group">
+                <label>Search Type</label>
+                <div class="search-type-options">
+                    <div class="search-type-option">
+                        <input type="radio" id="ai-search" name="search_type" value="ai" class="search-type-radio" checked>
+                        <label for="ai-search" class="search-type-label">
+                            <i class="material-icons search-type-icon">auto_fix_high</i>
+                            <div>
+                                <strong>AI Search</strong>
+                                <div class="search-type-description">Find by content, objects, scenes</div>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="search-type-option">
+                        <input type="radio" id="text-search" name="search_type" value="text" class="search-type-radio">
+                        <label for="text-search" class="search-type-label">
+                            <i class="material-icons search-type-icon">search</i>
+                            <div>
+                                <strong>Text Search</strong>
+                                <div class="search-type-description">Find by titles, descriptions</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="search-form-group">
+                <label for="search-album">Specific Album (Optional)</label>
+                <select id="search-album" name="album" class="search-form-control">
+                    <option value="">Search all albums</option>
+                    {% for album in albums %}
+                        <option value="{{ album.id }}">{{ album.title }} ({{ album.photos.count }} photos, {{ album.videos.count }} videos)</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="search-form-group">
+                <label for="search-media-type">Media Type</label>
+                <select id="search-media-type" name="media_type" class="search-form-control">
+                    <option value="all">Photos and Videos</option>
+                    <option value="photos">Photos Only</option>
+                    <option value="videos">Videos Only</option>
+                </select>
+            </div>
+            
+            <div class="search-actions">
+                <button type="button" class="btn btn-secondary" id="search-cancel">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="material-icons">search</i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchModal = document.getElementById('search-modal');
+    const searchModalToggle = document.getElementById('search-modal-toggle');
+    const searchModalClose = document.getElementById('search-modal-close');
+    const searchCancel = document.getElementById('search-cancel');
+    
+    // Open modal
+    searchModalToggle.addEventListener('click', function() {
+        searchModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        // Focus on search input
+        document.getElementById('search-query').focus();
+    });
+    
+    // Close modal
+    function closeModal() {
+        searchModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    searchModalClose.addEventListener('click', closeModal);
+    searchCancel.addEventListener('click', closeModal);
+    
+    // Close on overlay click
+    searchModal.addEventListener('click', function(e) {
+        if (e.target === searchModal) {
+            closeModal();
+        }
+    });
+    
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && searchModal.style.display === 'block') {
+            closeModal();
+        }
+    });
+});
+</script>
+
+{% endblock %}

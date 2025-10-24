@@ -1,0 +1,29 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Invalid Share Link{% endblock %}
+
+{% block content %}
+<div class="grid grid-1">
+    <div class="card">
+        <div class="card-body text-center">
+            <i class="material-icons error-icon">link_off</i>
+            <h1>Share Link Invalid</h1>
+            <p class="error-message">
+                {% if messages %}
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                {% else %}
+                    This share link is invalid or has expired.
+                {% endif %}
+            </p>
+            <div class="error-actions">
+                <a href="{% url 'album:homepage' %}" class="btn btn-primary">Go to Homepage</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="{% static 'album/css/share_link_invalid.css' %}">
+{% endblock %}

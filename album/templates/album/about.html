@@ -1,0 +1,142 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<div class="grid grid-1">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="material-icons">info</i>
+                About Us
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="about-content">
+                <section class="about-section">
+                    <h3>Welcome to Our Photo Album</h3>
+                    <p>
+                        Our photo album application is designed to help you organize, share, and preserve your precious memories. 
+                        Whether you're a professional photographer or simply love capturing life's moments, our platform provides 
+                        the tools you need to manage your photo collection efficiently.
+                    </p>
+                </section>
+
+                <section class="about-section">
+                    <h3><i class="material-icons">star</i> Features</h3>
+                    <ul class="feature-list">
+                        <li><i class="material-icons">photo_library</i> <strong>Album Management:</strong> Create and organize multiple albums for different occasions</li>
+                        <li><i class="material-icons">share</i> <strong>Easy Sharing:</strong> Share your albums with friends and family using secure links</li>
+                        <li><i class="material-icons">category</i> <strong>Categorization:</strong> Tag and categorize your photos for easy searching</li>
+                        <li><i class="material-icons">search</i> <strong>Smart Search:</strong> Find your photos quickly with our powerful search features</li>
+                        <li><i class="material-icons">cloud_download</i> <strong>Bulk Downloads:</strong> Download multiple photos at once as a ZIP file</li>
+                        <li><i class="material-icons">favorite</i> <strong>Favorites:</strong> Mark your favorite photos for quick access</li>
+                        <li><i class="material-icons">dark_mode</i> <strong>Dark Mode:</strong> Comfortable viewing in any lighting condition</li>
+                        <li><i class="material-icons">security</i> <strong>Privacy Controls:</strong> Keep your albums private or share them with specific users</li>
+                    </ul>
+                </section>
+
+                <section class="about-section">
+                    <h3><i class="material-icons">group</i> Our Mission</h3>
+                    <p>
+                        We believe that every photo tells a story. Our mission is to provide a secure, user-friendly platform 
+                        that makes it easy to store, organize, and share your visual memories. We're committed to continuously 
+                        improving our service and adding new features based on user feedback.
+                    </p>
+                </section>
+
+                <section class="about-section">
+                    <h3><i class="material-icons">contact_support</i> Get in Touch</h3>
+                    <p>
+                        Have questions, suggestions, or feedback? We'd love to hear from you! 
+                        <a href="{% url 'album:contact' %}" class="text-primary">Contact us</a> and let us know how we can improve your experience.
+                    </p>
+                </section>
+
+                <section class="about-section">
+                    <h3><i class="material-icons">code</i> Technology</h3>
+                    <p>
+                        Our platform is built with modern web technologies to ensure reliability, security, and performance. 
+                        We use industry-standard encryption to protect your data and regularly update our systems to maintain 
+                        the highest level of security.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.about-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--divider);
+}
+
+.about-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.about-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.about-section h3 i {
+    color: var(--primary-main);
+}
+
+.about-section p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-default);
+    border-radius: 4px;
+    color: var(--text-secondary);
+}
+
+.feature-list li i {
+    color: var(--primary-main);
+    font-size: 20px;
+    margin-top: 2px;
+}
+
+.feature-list li strong {
+    color: var(--text-primary);
+}
+
+.text-primary {
+    color: var(--primary-main) !important;
+    text-decoration: none;
+}
+
+.text-primary:hover {
+    text-decoration: underline;
+}
+</style>
+{% endblock %}

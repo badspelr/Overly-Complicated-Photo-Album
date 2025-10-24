@@ -1,0 +1,151 @@
+<!-- Cookie Consent Banner -->
+<div id="cookieConsentBanner" style="display: none;">
+    <div class="cookie-banner-content">
+        <div class="cookie-banner-text">
+            <h3><i class="fas fa-cookie-bite"></i> We Use Cookies</h3>
+            <p>
+                This website uses essential cookies to ensure proper functionality and security. 
+                We do not use tracking or marketing cookies. 
+                <a href="{% url 'album:cookie_policy' %}" target="_blank">Learn more</a>
+            </p>
+        </div>
+        <div class="cookie-banner-actions">
+            <button onclick="acceptCookies()" class="btn-accept">
+                <i class="fas fa-check"></i> Accept
+            </button>
+            <button onclick="declineCookies()" class="btn-decline">
+                <i class="fas fa-times"></i> Essential Only
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+#cookieConsentBanner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-paper);
+    border-top: 2px solid var(--primary-main);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    padding: 1.5rem;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.cookie-banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.cookie-banner-text {
+    flex: 1;
+}
+
+.cookie-banner-text h3 {
+    color: var(--text-primary);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cookie-banner-text p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.938rem;
+    line-height: 1.5;
+}
+
+.cookie-banner-text a {
+    color: var(--primary-main);
+    text-decoration: underline;
+}
+
+.cookie-banner-text a:hover {
+    color: #5a9fd4;
+}
+
+.cookie-banner-actions {
+    display: flex;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.cookie-banner-actions button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.938rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.btn-accept {
+    background: var(--primary-main);
+    color: #fff;
+}
+
+.btn-accept:hover {
+    background: #5a9fd4;
+    transform: translateY(-1px);
+}
+
+.btn-decline {
+    background: var(--bg-default);
+    color: var(--text-primary);
+    border: 1px solid var(--divider);
+}
+
+.btn-decline:hover {
+    background: rgba(144, 202, 249, 0.1);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    #cookieConsentBanner {
+        padding: 1rem;
+    }
+    
+    .cookie-banner-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .cookie-banner-actions {
+        flex-direction: column;
+    }
+    
+    .cookie-banner-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+{% load static %}
+<script src="{% static 'album/js/cookie-consent.js' %}"></script>

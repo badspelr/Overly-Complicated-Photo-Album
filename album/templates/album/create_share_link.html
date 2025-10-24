@@ -1,0 +1,42 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Create Share Link - {{ album.title }}{% endblock %}
+
+{% block content %}
+<div class="grid grid-1">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">🔗 Share Album: {{ album.title }}</h1>
+            <p class="card-text">Create a shareable link to give others access to this album</p>
+        </div>
+
+        <div class="card-body">
+            <form method="post" class="share-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="expires_days" class="form-label">Link Expiration (Optional)</label>
+                    <select name="expires_days" id="expires_days" class="form-control">
+                        <option value="">Never expires</option>
+                        <option value="1">Expires in 1 day</option>
+                        <option value="7">Expires in 1 week</option>
+                        <option value="30">Expires in 1 month</option>
+                        <option value="90">Expires in 3 months</option>
+                    </select>
+                    <small class="form-text text-muted">Choose when this share link should expire</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Create Share Link</button>
+                    <a href="{% url 'album:album_detail' album.pk %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/create_share_link.css' %}">
+{% endblock %}
+{% endblock %}

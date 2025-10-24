@@ -1,0 +1,42 @@
+{% load album_tags %}
+{% for item in media %}
+<div class="media-card" data-media-type="{{ item.media_type }}" data-media-id="{{ item.id }}">
+    {% if item.media_type == 'Photo' %}
+        {% check_delete_permission user item 'photo' as can_delete_item %}
+    {% else %}
+        {% check_delete_permission user item 'video' as can_delete_item %}
+    {% endif %}
+    {% if can_delete_item %}
+        <input type="checkbox" name="media_ids" value="{{ item.media_type|lower }}-{{ item.id }}" class="media-checkbox">
+    {% else %}
+        <input type="checkbox" name="media_ids" value="{{ item.media_type|lower }}-{{ item.id }}" class="media-checkbox" disabled>
+    {% endif %}
+    <a href="{% if item.media_type == 'Photo' %}{% url 'album:photo_detail' item.pk %}?return_url={{ request.get_full_path|urlencode }}{% else %}{% url 'album:video_detail' item.pk %}?return_url={{ request.get_full_path|urlencode }}{% endif %}" class="media-link">
+        {% if item.media_type == 'Photo' %}
+            <img src="{{ item.thumbnail.url }}" 
+                 srcset="{{ item.thumbnail.url }} 1x, {{ item.thumbnail_2x.url }} 2x"
+                 alt="{{ item.title }}" class="media-thumbnail">
+        {% else %}
+            {% if item.thumbnail %}
+                <img src="{{ item.thumbnail.url }}" alt="{{ item.title }}" class="media-thumbnail">
+            {% else %}
+                <div class="media-placeholder"></div>
+            {% endif %}
+            <div class="media-play-overlay">
+                <span class="material-icons">play_arrow</span>
+            </div>
+        {% endif %}
+        {% if item.media_type == 'Photo' %}
+        <div class="media-card-overlay">
+            <h3 class="media-title">{{ item.title }}</h3>
+        </div>
+        {% endif %}
+    </a>
+    {% if item.media_type == 'Photo' %}
+        {% is_favorited user item as favorited %}
+        <button class="favorite-btn {% if favorited %}favorited{% endif %}" data-photo-id="{{ item.id }}" title="{% if favorited %}Remove from favorites{% else %}Add to favorites{% endif %}">
+            <i class="material-icons">{% if favorited %}favorite{% else %}favorite_border{% endif %}</i>
+        </button>
+    {% endif %}
+</div>
+{% endfor %}

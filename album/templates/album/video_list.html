@@ -1,0 +1,111 @@
+{% extends 'album/base.html' %}
+{% load album_tags %}
+{% load static %}
+{% block title %}Videos{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/video_list.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-1">
+        <!-- Header Section -->
+        <div class="card">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1>🎥 All Videos</h1>
+                        <p class="text-secondary">Browse all your video collection</p>
+                    </div>
+                    <a href="{% url 'album:minimal_upload' %}" class="btn btn-primary">
+                        ➕ Upload Videos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Videos Grid -->
+        {% if videos %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="media-container">
+                        {% for video in videos %}
+                            {% check_delete_permission user video 'video' as can_delete_video %}
+                            <div class="media-item">
+                                {% if video.thumbnail %}
+                                    <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" class="media-image">
+                                {% else %}
+                                    <div class="no-thumbnail">
+                                        <span>▶</span>
+                                    </div>
+                                {% endif %}
+                                <div class="media-info">
+                                    <a href="{% url 'album:video_detail' video.pk %}" class="media-title">{{ video.title }}</a>
+                                    {% if video.description %}
+                                        <p class="media-meta">{{ video.description|truncatechars:100 }}</p>
+                                    {% endif %}
+                                    <div class="flex gap-2 mt-2">
+                                        <a href="{% url 'album:video_detail' video.pk %}" class="btn btn-sm btn-primary">👁️ View Details</a>
+                                        {% if can_delete_video %}
+                                            <a href="{% url 'album:delete_video' video.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>📭 No Videos Yet</h3>
+                    <p class="mb-4">You haven't uploaded any videos yet. Start building your collection!</p>
+                    <a href="{% url 'album:minimal_upload' %}" class="btn btn-primary">
+                        📤 Upload Your First Videos
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="pagination">
+                        <span class="page-links">
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1" class="btn btn-secondary">&laquo; First</a>
+                                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">‹ Previous</a>
+                            {% endif %}
+
+                            <span class="page-current">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">Next ›</a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-secondary">Last &raquo;</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Navigation -->
+        <div class="card">
+            <div class="card-body">
+                <div class="flex gap-4">
+                    <a href="{% url 'album:dashboard' %}" class="btn btn-secondary">
+                        ← Back to Dashboard
+                    </a>
+                    <a href="{% url 'album:photo_list' %}" class="btn btn-secondary">
+                        📸 View Photos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

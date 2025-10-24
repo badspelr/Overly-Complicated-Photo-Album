@@ -1,0 +1,101 @@
+/* Form styling to match profile_edit.css */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input:not([type="checkbox"]),
+.form-group textarea,
+.form-group select {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: var(--bg-default);
+    color: var(--text-primary);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary-main);
+    box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.2);
+}
+
+/* Single checkbox styling (like is_active) */
+.form-group:has(input[type="checkbox"]:not(.checkbox-list-compact input)) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-group:has(input[type="checkbox"]:not(.checkbox-list-compact input)) label {
+    margin-bottom: 0;
+    display: inline;
+    cursor: pointer;
+    user-select: none;
+}
+
+.form-group input[type="checkbox"]:not(.checkbox-list-compact input) {
+    display: inline-block;
+    width: auto;
+    padding: 0;
+    margin-right: 0.5rem;
+    margin-left: 0;
+    vertical-align: middle;
+    transform: scale(1.2);
+}
+
+/* Fallback for browsers that don't support :has() */
+.form-group.single-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-group.single-checkbox label {
+    margin-bottom: 0;
+    display: inline;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Multiple checkboxes styling */
+.checkbox-list-compact ul, .checkbox-list-compact {
+    list-style: none;
+    margin: 0.5rem 0;
+    padding: 0;
+}
+
+.checkbox-list-compact li {
+    margin-bottom: 0.5rem;
+}
+
+.checkbox-list-compact label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 0;
+}
+
+.checkbox-list-compact input[type="checkbox"] {
+    margin: 0;
+    transform: scale(1.1);
+}
+
+.checkbox-list-compact input[type="checkbox"]:focus {
+    box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.4);
+}

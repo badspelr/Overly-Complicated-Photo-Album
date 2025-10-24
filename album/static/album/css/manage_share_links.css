@@ -1,0 +1,110 @@
+/* Styles for manage_share_links.html extracted from inline <style> */
+.share-links-header {
+    margin-bottom: 2rem;
+}
+.share-links-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.share-link-item {
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    padding: 1.5rem;
+    background-color: var(--bg-paper);
+}
+.share-link-info {
+    margin-bottom: 1rem;
+}
+.share-link-url {
+    margin-bottom: 1rem;
+}
+.share-link-url code {
+    background-color: var(--bg-default);
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+    word-break: break-all;
+    display: block;
+    margin-top: 0.5rem;
+}
+.share-link-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+.share-link-details span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.share-link-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+.status-active {
+    color: #4caf50;
+    font-weight: 500;
+}
+.status-expired {
+    color: #f44336;
+    font-weight: 500;
+}
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+.back-actions {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.delete-form {
+    display: inline;
+}
+
+.clipboard-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4caf50;
+    color: white;
+    padding: 1rem;
+    border-radius: 4px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.clipboard-notification.fade-out {
+    animation: slideOut 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+@media (max-width: 768px) {
+    .share-link-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .share-link-actions {
+        flex-direction: column;
+    }
+    .share-link-url code {
+        font-size: 0.8rem;
+    }
+}

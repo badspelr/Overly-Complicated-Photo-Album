@@ -1,0 +1,19 @@
+{% extends 'album/base.html' %}
+{% block title %}{{ album.title }} (New){% endblock %}
+
+{% block content %}
+    <h1>{{ album.title }} (New)</h1>
+
+    {% if photos %}
+        <div class="media-container">
+            {% for photo in photos %}
+                <div class="media-item">
+                    <img src="{{ photo.thumbnail.url }}" alt="{{ photo.title }}">
+                    <p>{{ photo.title }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No photos in this album.</p>
+    {% endif %}
+{% endblock %}

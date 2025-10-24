@@ -1,0 +1,41 @@
+{
+  "status": "done",
+  "assets": {
+    "asset-manifest.json": {
+      "name": "asset-manifest.json",
+      "path": "/home/dniel/django/photo_album/frontend/build/asset-manifest.json",
+      "publicPath": "/static/asset-manifest.json"
+    },
+    "index.html": {
+      "name": "index.html",
+      "path": "/home/dniel/django/photo_album/frontend/build/index.html",
+      "publicPath": "/static/index.html"
+    },
+    "static/js/main.346bb1da9047fff9aaaa.js": {
+      "name": "static/js/main.346bb1da9047fff9aaaa.js",
+      "path": "/home/dniel/django/photo_album/frontend/build/static/js/main.346bb1da9047fff9aaaa.js",
+      "publicPath": "/static/static/js/main.346bb1da9047fff9aaaa.js"
+    },
+    "static/js/main.346bb1da9047fff9aaaa.js.map": {
+      "name": "static/js/main.346bb1da9047fff9aaaa.js.map",
+      "path": "/home/dniel/django/photo_album/frontend/build/static/js/main.346bb1da9047fff9aaaa.js.map",
+      "publicPath": "/static/static/js/main.346bb1da9047fff9aaaa.js.map"
+    },
+    "static/js/node_modules_web-vitals_dist_web-vitals_js.e285bec8a6f92d6e0792.chunk.js": {
+      "name": "static/js/node_modules_web-vitals_dist_web-vitals_js.e285bec8a6f92d6e0792.chunk.js",
+      "path": "/home/dniel/django/photo_album/frontend/build/static/js/node_modules_web-vitals_dist_web-vitals_js.e285bec8a6f92d6e0792.chunk.js",
+      "publicPath": "/static/static/js/node_modules_web-vitals_dist_web-vitals_js.e285bec8a6f92d6e0792.chunk.js"
+    },
+    "static/js/node_modules_web-vitals_dist_web-vitals_js.e285bec8a6f92d6e0792.chunk.js.map": {
+      "name": "static/js/node_modules_web-vitals_dist_web-vitals_js.e285bec8a6f92d6e0792.chunk.js.map",
+      "path": "/home/dniel/django/photo_album/frontend/build/static/js/node_modules_web-vitals_dist_web-vitals_js.e285bec8a6f92d6e0792.chunk.js.map",
+      "publicPath": "/static/static/js/node_modules_web-vitals_dist_web-vitals_js.e285bec8a6f92d6e0792.chunk.js.map"
+    }
+  },
+  "chunks": {
+    "main": [
+      "static/js/main.346bb1da9047fff9aaaa.js"
+    ]
+  },
+  "publicPath": "/static/"
+}

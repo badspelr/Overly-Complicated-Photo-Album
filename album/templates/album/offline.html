@@ -1,0 +1,44 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Offline - Photo Album{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/offline.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-1">
+    <div class="card">
+        <div class="card-body text-center">
+            <i class="material-icons offline-icon">wifi_off</i>
+            <h1>You're Offline</h1>
+            <p class="offline-message">
+                It looks like you're not connected to the internet.
+                Some features may not be available until you're back online.
+            </p>
+            
+            <div class="offline-content">
+                <h3>What you can do offline:</h3>
+                <ul class="offline-features">
+                    <li>View previously loaded albums and photos</li>
+                    <li>Access cached content</li>
+                    <li>Use basic navigation</li>
+                </ul>
+                
+                <p class="retry-message">
+                    Please check your internet connection and try again.
+                </p>
+                
+                <button class="btn btn-primary retry-btn">
+                    <i class="material-icons">refresh</i> Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'album/js/offline.js' %}"></script>
+{% endblock %}

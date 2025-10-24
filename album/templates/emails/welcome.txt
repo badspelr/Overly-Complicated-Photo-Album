@@ -1,0 +1,10 @@
+Subject: Welcome to Photo Album!
+
+Hi {{ user.username }},
+
+Welcome to Photo Album! We're excited to have you.
+
+You can now start creating albums and uploading your photos.
+
+Thanks,
+The Photo Album Team

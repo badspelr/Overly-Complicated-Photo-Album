@@ -1,0 +1,218 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}CSAM Policy - Child Safety{% endblock %}
+
+{% block content %}
+<div class="grid grid-1">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="material-icons">shield</i>
+                Child Sexual Abuse Material (CSAM) Policy
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="policy-content" style="max-width: 900px; margin: 0 auto; line-height: 1.6;">
+                <p style="color: #666; margin-bottom: 2rem;">
+                    <strong>Effective Date:</strong> October 18, 2025<br>
+                    <strong>Last Updated:</strong> October 18, 2025<br>
+                    <strong>Version:</strong> 1.0
+                </p>
+
+                <div style="background: #dc3545; color: white; padding: 1.5rem; border-radius: 4px; margin: 2rem 0;">
+                    <h3 style="color: white; margin: 0 0 1rem 0;">
+                        <i class="material-icons" style="vertical-align: middle;">warning</i>
+                        ZERO TOLERANCE
+                    </h3>
+                    <p style="margin: 0; font-size: 1.1rem;">
+                        <strong>Photo Album has ZERO TOLERANCE for Child Sexual Abuse Material (CSAM) and child exploitation.</strong>
+                    </p>
+                    <p style="margin: 1rem 0 0 0;">
+                        Any user who uploads, shares, or attempts to access CSAM will be <strong>immediately and permanently banned</strong>, 
+                        and <strong>reported to law enforcement and NCMEC</strong>.
+                    </p>
+                </div>
+
+                <h3 style="margin-top: 2rem;"><i class="material-icons" style="vertical-align: middle;">info</i> What is CSAM?</h3>
+                <p>
+                    Child Sexual Abuse Material (CSAM), previously known as "child pornography," includes:
+                </p>
+                <ul style="line-height: 1.8;">
+                    <li>Visual depictions of minors engaged in sexually explicit conduct</li>
+                    <li>Realistic depictions (digitally created/altered) of minors in sexual situations</li>
+                    <li>Content depicting sexual abuse or exploitation of children</li>
+                    <li>Sexually suggestive images of children in provocative poses</li>
+                </ul>
+                <p><strong>Minor Definition:</strong> Anyone under 18 years of age</p>
+
+                <h3 style="margin-top: 2rem;"><i class="material-icons" style="vertical-align: middle;">visibility</i> Detection & Prevention</h3>
+                <p>We employ multiple detection mechanisms:</p>
+                <ul style="line-height: 1.8;">
+                    <li><strong>AI/ML Scanning:</strong> AI models scan uploaded images for potential CSAM indicators</li>
+                    <li><strong>Content Fingerprinting:</strong> Hash matching against known CSAM databases (e.g., PhotoDNA)</li>
+                    <li><strong>Behavioral Analysis:</strong> Unusual upload patterns flagged for review</li>
+                    <li><strong>Human Review:</strong> Flagged content reviewed by trained safety team</li>
+                </ul>
+
+                <h3 style="margin-top: 2rem;"><i class="material-icons" style="vertical-align: middle;">report</i> How to Report</h3>
+                
+                <div style="background: #fff3cd; padding: 1rem; border-left: 4px solid #ffc107; margin: 1rem 0;">
+                    <p style="margin: 0;"><strong>If you encounter suspected CSAM:</strong></p>
+                    <ol style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><strong>DO NOT</strong> interact with the content (don't download, share, or screenshot)</li>
+                        <li><strong>Report immediately</strong> via <a href="{% url 'album:contact' %}">Contact Form</a> with subject "CSAM Report"</li>
+                        <li>Include: User account, content description, timestamp (DO NOT include images)</li>
+                    </ol>
+                </div>
+
+                <p><strong>Our Response Timeline:</strong></p>
+                <ul style="line-height: 1.8;">
+                    <li><strong>Within 1 hour:</strong> Initial review (24/7 monitoring)</li>
+                    <li><strong>Immediate:</strong> Content removal upon confirmation</li>
+                    <li><strong>Within 24 hours:</strong> NCMEC report (legally required)</li>
+                    <li><strong>Immediate:</strong> Account termination (permanent)</li>
+                </ul>
+
+                <h4 style="margin-top: 1.5rem;">External Reporting</h4>
+                <p>You can also report directly to:</p>
+                <ul style="line-height: 1.8;">
+                    <li><strong>NCMEC CyberTipline:</strong> <a href="https://www.cybertipline.org" target="_blank" rel="noopener">cybertipline.org</a> or 1-800-THE-LOST</li>
+                    <li><strong>FBI:</strong> <a href="https://www.fbi.gov/tips" target="_blank" rel="noopener">fbi.gov/tips</a></li>
+                    <li><strong>Local Law Enforcement:</strong> Call 911 for immediate threats</li>
+                </ul>
+
+                <h3 style="margin-top: 2rem;"><i class="material-icons" style="vertical-align: middle;">security</i> Enforcement Actions</h3>
+                <p>Upon detection or report of CSAM:</p>
+                <ol style="line-height: 1.8;">
+                    <li><strong>Content Quarantine:</strong> Immediately removed from public view, isolated in secure storage</li>
+                    <li><strong>Account Suspension:</strong> Immediate suspension, all content made private</li>
+                    <li><strong>Evidence Preservation:</strong> Content and metadata preserved for law enforcement</li>
+                    <li><strong>NCMEC Report:</strong> Filed within 24 hours (legally required under 18 U.S.C. § 2258A)</li>
+                    <li><strong>Law Enforcement Notification:</strong> Local/federal authorities notified</li>
+                    <li><strong>Permanent Ban:</strong> Account permanently disabled, no appeal</li>
+                </ol>
+
+                <h3 style="margin-top: 2rem;"><i class="material-icons" style="vertical-align: middle;">family_restroom</i> Legitimate Family Photos</h3>
+                <div style="background: #d1ecf1; padding: 1rem; border-left: 4px solid #0c5460; margin: 1rem 0;">
+                    <p style="margin: 0;"><strong>We understand families share innocent photos of children:</strong></p>
+                    <p style="margin: 0.5rem 0 0 0;">
+                        ✅ Birthday parties, holidays, everyday moments<br>
+                        ✅ Children in swimsuits at beach/pool (non-sexual context)<br>
+                        ✅ Baby bathtimes, diaper changes (non-sexualized)
+                    </p>
+                    <p style="margin: 0.5rem 0 0 0;"><strong>These are protected and acceptable. Context matters!</strong></p>
+                </div>
+
+                <h3 style="margin-top: 2rem;"><i class="material-icons" style="vertical-align: middle;">gavel</i> Legal Obligations</h3>
+                <p>Under <strong>18 U.S.C. § 2258A</strong> (United States):</p>
+                <ul style="line-height: 1.8;">
+                    <li>Electronic service providers <strong>MUST</strong> report apparent CSAM to NCMEC</li>
+                    <li>Failure to report is a federal crime</li>
+                    <li>We comply fully with all reporting requirements</li>
+                    <li>Content preserved for 90 days minimum for law enforcement</li>
+                </ul>
+
+                <h3 style="margin-top: 2rem;"><i class="material-icons" style="vertical-align: middle;">contact_support</i> Contact for CSAM Reports</h3>
+                <div style="background: #f8f9fa; padding: 1rem; border: 2px solid #dc3545; margin: 1rem 0;">
+                    <p style="margin: 0;"><strong>URGENT CSAM REPORTS (24/7 Monitoring):</strong></p>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><a href="{% url 'album:contact' %}">Contact Form</a> with subject "CSAM Report"</li>
+                        <li><strong>Response Time:</strong> Within 1 hour, 24/7/365</li>
+                    </ul>
+                    <p style="margin: 1rem 0 0 0;"><strong>Direct Law Enforcement Reporting:</strong></p>
+                    <ul style="margin: 0.5rem 0 0 1.5rem;">
+                        <li>NCMEC CyberTipline: <a href="https://www.cybertipline.org" target="_blank">cybertipline.org</a></li>
+                        <li>FBI: <a href="https://tips.fbi.gov" target="_blank">tips.fbi.gov</a></li>
+                        <li>Local Police: 911 (USA) for immediate threats</li>
+                    </ul>
+                </div>
+
+                <h3 style="margin-top: 2rem;">📄 Full Policy Document</h3>
+                <p>
+                    The complete CSAM Policy includes detailed information on:
+                </p>
+                <ul style="line-height: 1.8; columns: 2; -webkit-columns: 2; -moz-columns: 2;">
+                    <li>Definitions & Prohibited Content</li>
+                    <li>Detection Mechanisms (AI, Hashing)</li>
+                    <li>Response Protocol (1-hour timeline)</li>
+                    <li>Law Enforcement Reporting</li>
+                    <li>Account Termination Process</li>
+                    <li>Legal Obligations (18 U.S.C. § 2258A)</li>
+                    <li>Evidence Preservation</li>
+                    <li>Privacy & Confidentiality</li>
+                    <li>False Positives & Appeals</li>
+                    <li>Prevention & Education Resources</li>
+                    <li>Employee Training Requirements</li>
+                    <li>Technology Partnerships (NCMEC, PhotoDNA)</li>
+                    <li>Transparency & Accountability</li>
+                    <li>Annual Reporting Commitment</li>
+                </ul>
+
+                <div style="text-align: center; margin: 2rem 0;">
+                    <a href="{{ STATIC_URL }}docs/CSAM_POLICY.md" download class="btn btn-primary">
+                        <i class="material-icons" style="vertical-align: middle;">download</i>
+                        Download Full CSAM Policy
+                    </a>
+                </div>
+
+                <div style="background: #d4edda; padding: 1rem; border-left: 4px solid #28a745; margin: 2rem 0;">
+                    <p style="margin: 0;">
+                        <strong>Photo Album is committed to protecting children and preventing exploitation.</strong> 
+                        We take these responsibilities seriously and will continue to invest in safety, technology, 
+                        and partnerships to keep children safe.
+                    </p>
+                    <p style="margin: 1rem 0 0 0;">
+                        <strong>If you see something, say something. Every report matters.</strong>
+                    </p>
+                </div>
+
+                <p style="color: #666; font-size: 0.9rem; margin-top: 2rem;">
+                    <strong>Related Policies:</strong> 
+                    <a href="{% url 'album:terms' %}">Terms of Conduct</a> | 
+                    <a href="{% url 'album:cookie_policy' %}">Cookie Policy</a>
+                </p>
+
+                <p style="color: #666; font-size: 0.9rem;">
+                    <strong>Last Updated:</strong> October 18, 2025 | <strong>Version:</strong> 1.0
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.policy-content h3 {
+    color: #333;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.policy-content h4 {
+    color: #555;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+}
+
+.policy-content ul, .policy-content ol {
+    margin-left: 1.5rem;
+}
+
+.policy-content a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.policy-content a:hover {
+    text-decoration: underline;
+}
+
+.policy-content .material-icons {
+    font-size: 1.2rem;
+    vertical-align: middle;
+    margin-right: 0.25rem;
+}
+</style>
+{% endblock %}

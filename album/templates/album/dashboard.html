@@ -1,0 +1,93 @@
+{% extends 'album/base.html' %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'album/css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div>
+        <!-- Welcome Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1>Welcome back, {{ user.username }}!</h1>
+                {% if user.is_site_admin %}
+                    <p class="text-muted">You have Site Admin privileges.</p>
+                {% elif user.is_album_owner %}
+                    <p class="text-muted">Album Owner - You can manage your albums and invite users.</p>
+                {% else %}
+                    <p class="text-muted">Viewer access.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="dashboard-search-section">
+            <div class="dashboard-search-header">
+                <h3 class="dashboard-search-title">
+                    <i class="material-icons dashboard-search-icon">search</i>
+                    Search Your Media
+                </h3>
+            </div>
+            
+            <p class="dashboard-search-description">Search across all your photos and videos using AI-powered search or traditional text search.</p>
+            
+            <!-- Quick Search Bar -->
+            <form method="get" action="{% url 'album:search_media' %}" class="dashboard-search-form">
+                <input type="text" name="search" class="dashboard-search-input" placeholder="Quick search (e.g., 'beach', 'family', 'sunset')..." required>
+                <input type="hidden" name="search_type" value="ai">
+                <button type="submit" class="btn btn-primary dashboard-search-button">
+                    <i class="material-icons">auto_fix_high</i> AI Search
+                </button>
+                <a href="{% url 'album:search_media' %}" class="btn btn-secondary dashboard-search-button">
+                    <i class="material-icons">tune</i> Advanced
+                </a>
+            </form>
+            <small class="dashboard-search-help">
+                Quick search uses AI to find photos by content, objects, and scenes
+            </small>
+        </div>
+
+        <!-- My Albums Section -->
+        <div class="card">
+            <div class="card-header">
+                <h3>My Albums</h3>
+            </div>
+            <div class="card-body">
+                {% if user_albums %}
+                    <div class="media-container">
+                        {% for album in user_albums %}
+                            <div class="media-card">
+                                <a href="{% url 'album:album_detail' album.pk %}">
+                                    {% if album.cover_image %}
+                                        <img src="{{ album.cover_image.url }}" alt="{{ album.title }}">
+                                    {% elif album.photos.first %}
+                                        <img src="{{ album.photos.first.thumbnail.url }}" alt="{{ album.title }}">
+                                    {% elif album.videos.first.thumbnail %}
+                                        <img src="{{ album.videos.first.thumbnail.url }}" alt="{{ album.title }}">
+                                    {% else %}
+                                        <div class="no-photo">
+                                            <span>No media</span>
+                                        </div>
+                                    {% endif %}
+                                </a>
+                                <div class="media-card-info">
+                                    <h5>{{ album.title }}</h5>
+                                    <p>{{ album.photos.count }} photos, {{ album.videos.count }} videos</p>
+                                    <div class="media-card-actions">
+                                        <a href="{% url 'album:minimal_upload' %}?album={{ album.pk }}" class="btn btn-primary btn-sm">Add Media</a>
+                                        <a href="{% url 'album:edit_album' album.pk %}" class="btn btn-secondary btn-sm">Edit Album</a>
+                                        <a href="{% url 'album:delete_album' album.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>You haven't created any albums yet. Use the navigation menu to create your first album.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

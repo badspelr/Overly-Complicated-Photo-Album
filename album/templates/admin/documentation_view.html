@@ -1,0 +1,263 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+<style>
+    .documentation-viewer {
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .doc-nav {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .doc-nav a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .doc-nav a:hover {
+        text-decoration: underline;
+    }
+    
+    .doc-container {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 20px;
+    }
+    
+    .doc-toc {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 20px;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+    }
+    
+    .doc-toc h3 {
+        margin: 0 0 15px 0;
+        font-size: 1.1em;
+        color: #333;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #667eea;
+    }
+    
+    .doc-toc ul {
+        list-style: none;
+        padding-left: 0;
+    }
+    
+    .doc-toc li {
+        margin: 8px 0;
+    }
+    
+    .doc-toc a {
+        color: #666;
+        text-decoration: none;
+        font-size: 0.9em;
+        transition: color 0.2s;
+    }
+    
+    .doc-toc a:hover {
+        color: #667eea;
+    }
+    
+    .doc-content {
+        background: white;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        line-height: 1.8;
+    }
+    
+    .doc-content h1 {
+        color: #333;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #667eea;
+    }
+    
+    .doc-content h2 {
+        color: #444;
+        font-size: 1.8em;
+        margin-top: 40px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .doc-content h3 {
+        color: #555;
+        font-size: 1.4em;
+        margin-top: 30px;
+        margin-bottom: 12px;
+    }
+    
+    .doc-content h4 {
+        color: #666;
+        font-size: 1.2em;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    
+    .doc-content p {
+        margin: 15px 0;
+        color: #444;
+    }
+    
+    .doc-content ul, .doc-content ol {
+        margin: 15px 0;
+        padding-left: 30px;
+    }
+    
+    .doc-content li {
+        margin: 8px 0;
+        color: #444;
+    }
+    
+    .doc-content code {
+        background: #f8f9fa;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+        font-size: 0.9em;
+        color: #e83e8c;
+    }
+    
+    .doc-content pre {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 20px;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .doc-content pre code {
+        background: transparent;
+        color: #f8f8f2;
+        padding: 0;
+        font-size: 0.95em;
+    }
+    
+    .doc-content blockquote {
+        border-left: 4px solid #667eea;
+        padding-left: 20px;
+        margin: 20px 0;
+        color: #666;
+        font-style: italic;
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-radius: 0 6px 6px 0;
+    }
+    
+    .doc-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .doc-content th {
+        background: #667eea;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    .doc-content td {
+        padding: 12px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .doc-content tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .doc-content a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .doc-content a:hover {
+        text-decoration: underline;
+    }
+    
+    .doc-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin: 20px 0;
+    }
+    
+    .doc-content hr {
+        border: none;
+        border-top: 2px solid #e9ecef;
+        margin: 40px 0;
+    }
+    
+    /* Status badges */
+    .doc-content p:has(> strong:first-child) {
+        padding: 10px 15px;
+        border-radius: 6px;
+        margin: 15px 0;
+    }
+    
+    /* Checkboxes in markdown */
+    .doc-content input[type="checkbox"] {
+        margin-right: 8px;
+    }
+    
+    @media (max-width: 768px) {
+        .doc-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .doc-toc {
+            position: static;
+            max-height: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="documentation-viewer">
+    <div class="doc-nav">
+        <a href="{% url 'album:documentation_index' %}">← Back to Documentation</a>
+        <span style="color: #ccc;">|</span>
+        <span style="color: #666;">{{ filename }}</span>
+    </div>
+    
+    <div class="doc-container">
+        {% if toc %}
+        <aside class="doc-toc">
+            <h3>📑 Contents</h3>
+            {{ toc|safe }}
+        </aside>
+        {% endif %}
+        
+        <main class="doc-content">
+            {{ content|safe }}
+        </main>
+    </div>
+</div>
+{% endblock %}

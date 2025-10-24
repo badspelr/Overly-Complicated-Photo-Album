@@ -1,0 +1,276 @@
+{% extends 'album/base.html' %}
+{% load static %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/minimal_upload.css' %}">
+{% endblock %}
+{% block content %}
+<div class="grid grid-1">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title"><i class="material-icons">cloud_upload</i> Upload Files or Directory</h2>
+      <p class="card-text mb-0">Upload photos or videos to your album. You can select individual files or an entire directory.</p>
+    </div>
+    <div class="card-body">
+      {% if upload_results %}
+        {% if upload_results.error %}
+          <div class="alert alert-danger">
+            <i class="material-icons">error</i>
+            <strong>Upload Failed:</strong> {{ upload_results.error }}
+            {% if upload_results.form_errors %}
+              <ul class="mt-2 mb-0">
+                {% for field, errors in upload_results.form_errors.items %}
+                  {% for error in errors %}
+                    <li>{{ field }}: {{ error }}</li>
+                  {% endfor %}
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        {% else %}
+          <!-- Upload Results Summary -->
+          <div class="upload-results-summary">
+            <div class="summary-header">
+              <h3 class="summary-title">
+                <i class="material-icons">assignment_turned_in</i>
+                Upload Complete
+              </h3>
+              <div class="summary-stats">
+                <div class="stat-item">
+                  <span class="stat-number">{{ upload_results.total_attempted }}</span>
+                  <span class="stat-label">Total Files</span>
+                </div>
+                <div class="stat-item success">
+                  <span class="stat-number">{{ upload_results.total_successful }}</span>
+                  <span class="stat-label">Successful</span>
+                </div>
+                {% if upload_results.total_skipped > 0 %}
+                  <div class="stat-item warning">
+                    <span class="stat-number">{{ upload_results.total_skipped }}</span>
+                    <span class="stat-label">Skipped (Duplicates)</span>
+                  </div>
+                {% endif %}
+                {% if upload_results.total_failed > 0 %}
+                  <div class="stat-item error">
+                    <span class="stat-number">{{ upload_results.total_failed }}</span>
+                    <span class="stat-label">Failed</span>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if upload_results.title or upload_results.description %}
+              <div class="upload-metadata">
+                <h4><i class="material-icons">info</i> Upload Details</h4>
+                {% if upload_results.title %}
+                  <p><strong>Title:</strong> {{ upload_results.title }}</p>
+                {% endif %}
+                {% if upload_results.description %}
+                  <p><strong>Description:</strong> {{ upload_results.description }}</p>
+                {% endif %}
+                <p><strong>Album:</strong> {{ upload_results.album.title }}</p>
+              </div>
+            {% endif %}
+
+            <!-- Successful Uploads -->
+            {% if upload_results.successful %}
+              <div class="results-section success-section">
+                <h4 class="section-title">
+                  <i class="material-icons">check_circle</i>
+                  Successfully Uploaded ({{ upload_results.successful|length }})
+                  <i class="material-icons expand-icon">expand_less</i>
+                </h4>
+                <div class="file-list">
+                  {% for file in upload_results.successful %}
+                    <div class="file-item success">
+                      <div class="file-icon">
+                        {% if file.type == 'photo' %}
+                          <i class="material-icons">photo</i>
+                        {% else %}
+                          <i class="material-icons">videocam</i>
+                        {% endif %}
+                      </div>
+                      <div class="file-details">
+                        <div class="file-name">{{ file.name }}</div>
+                        <div class="file-meta">
+                          <span class="file-type">{{ file.type|title }}</span>
+                          <span class="file-size">{{ file.size|filesizeformat }}</span>
+                        </div>
+                      </div>
+                      <div class="file-actions">
+                        <a href="{{ file.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                          <i class="material-icons">visibility</i> View
+                        </a>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            <!-- Skipped Duplicates -->
+            {% if upload_results.skipped %}
+              <div class="results-section warning-section">
+                <h4 class="section-title">
+                  <i class="material-icons">info</i>
+                  Skipped - Already Exists ({{ upload_results.skipped|length }})
+                  <i class="material-icons expand-icon">expand_less</i>
+                </h4>
+                <div class="file-list">
+                  {% for file in upload_results.skipped %}
+                    <div class="file-item warning">
+                      <div class="file-icon">
+                        {% if file.type == 'photo' %}
+                          <i class="material-icons">photo</i>
+                        {% else %}
+                          <i class="material-icons">videocam</i>
+                        {% endif %}
+                      </div>
+                      <div class="file-details">
+                        <div class="file-name">{{ file.name }}</div>
+                        <div class="file-meta">
+                          <span class="warning-reason">{{ file.reason }}</span>
+                        </div>
+                      </div>
+                      <div class="file-actions">
+                        <a href="{{ file.existing_url }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                          <i class="material-icons">visibility</i> View Existing
+                        </a>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            <!-- Failed Uploads -->
+            {% if upload_results.failed %}
+              <div class="results-section error-section">
+                <h4 class="section-title">
+                  <i class="material-icons">error</i>
+                  Failed to Upload ({{ upload_results.failed|length }})
+                  <i class="material-icons expand-icon">expand_less</i>
+                </h4>
+                <div class="file-list">
+                  {% for file in upload_results.failed %}
+                    <div class="file-item error">
+                      <div class="file-icon">
+                        <i class="material-icons">warning</i>
+                      </div>
+                      <div class="file-details">
+                        <div class="file-name">{{ file.name }}</div>
+                        <div class="file-meta">
+                          <span class="error-reason">{{ file.reason }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="results-actions">
+              <a href="{% url 'album:album_detail' upload_results.album.pk %}" class="btn btn-primary">
+                <i class="material-icons">photo_album</i> View Album
+              </a>
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" class="form-container">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="{{ form.album.id_for_label }}" class="form-label">
+            <i class="material-icons">photo_album</i>
+            Album
+          </label>
+          {{ form.album }}
+          {% if form.album.errors %}
+            <div class="text-danger">{{ form.album.errors }}</div>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.title.id_for_label }}" class="form-label">
+            <i class="material-icons">title</i>
+            Title
+          </label>
+          {{ form.title }}
+          {% if form.title.errors %}
+            <div class="text-danger">{{ form.title.errors }}</div>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.description.id_for_label }}" class="form-label">
+            <i class="material-icons">description</i>
+            Description
+          </label>
+          {{ form.description }}
+          {% if form.description.errors %}
+            <div class="text-danger">{{ form.description.errors }}</div>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label"><i class="material-icons">insert_drive_file</i> Upload individual files</label><br>
+          <div class="button-group">
+            <button type="button" class="btn btn-secondary">
+              <i class="material-icons">attach_file</i> Choose Files
+            </button>
+            <input type="file" name="files" multiple class="form-control" />
+            <input id="files-display" type="text" readonly tabindex="-1" placeholder="No files selected">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><i class="material-icons">folder</i> Upload a directory</label><br>
+          <div class="button-group">
+            <button type="button" class="btn btn-secondary">
+              <i class="material-icons">folder_open</i> Choose Directory
+            </button>
+            <input type="file" name="dirfiles" multiple webkitdirectory directory />
+            <input id="dirfiles-display" type="text" readonly tabindex="-1" placeholder="No directory selected">
+          </div>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary btn-lg" id="upload-submit-btn" onclick="return confirmUpload(event)">
+            <i class="material-icons">cloud_upload</i> Upload Files
+          </button>
+          <div id="file-count-display" class="file-count-info">
+            <small class="text-secondary">
+              <i class="material-icons">info</i>
+              <span id="file-count-text"></span>
+            </small>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Progress Overlay -->
+<div id="upload-progress-overlay" style="display: none;">
+  <div class="progress-content">
+    <div class="progress-icon">
+      <i class="material-icons spinning">cloud_upload</i>
+    </div>
+    <h3 id="progress-title">Uploading Files...</h3>
+    <p id="progress-message">Please wait while your files are being uploaded. This may take a few minutes for large uploads.</p>
+    <div class="progress-stats">
+      <div class="stat">
+        <i class="material-icons">insert_drive_file</i>
+        <span id="progress-file-count">0</span> files
+      </div>
+    </div>
+    <div class="spinner-container">
+      <div class="spinner"></div>
+    </div>
+    <p class="progress-note">
+      <i class="material-icons">info</i>
+      Do not close this window or navigate away
+    </p>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_scripts %}
+<script src="{% static 'album/js/minimal_upload.js' %}"></script>
+{% endblock %}

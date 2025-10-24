@@ -1,0 +1,124 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Mobile Download - {{ total_items }} Items{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'album/css/mobile_download.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="mobile-download-container">
+    <div class="download-header">
+        <h2><i class="fas fa-download"></i> Download Your Items</h2>
+        <p class="download-info">
+            <strong>{{ total_items }}</strong> item{{ total_items|pluralize }} ready for download. 
+            Tap each item below to download individually.
+        </p>
+        <div class="download-tip">
+            <i class="fas fa-info-circle"></i>
+            <span>On mobile devices, files will download to your device's Download folder or Photos app.</span>
+        </div>
+    </div>
+
+    {% if photos %}
+    <div class="media-section">
+        <h3><i class="fas fa-image"></i> Photos ({{ photos|length }})</h3>
+        <div class="mobile-download-grid">
+            {% for photo in photos %}
+            <div class="download-item">
+                <div class="download-thumbnail">
+                    <img src="{{ photo.image.url }}" alt="{{ photo.title }}" loading="lazy">
+                </div>
+                <div class="download-info">
+                    <h4>{{ photo.title }}</h4>
+                    <p class="download-meta">
+                        <span class="album-name">{{ photo.album.title }}</span>
+                        {% if photo.date_taken %}
+                        <span class="date-taken">{{ photo.date_taken|date:"M d, Y" }}</span>
+                        {% endif %}
+                    </p>
+                    <a href="{% url 'album:download_single_item' 'photo' photo.id %}" 
+                       class="download-btn">
+                        <i class="fas fa-download"></i> Download Photo
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if videos %}
+    <div class="media-section">
+        <h3><i class="fas fa-video"></i> Videos ({{ videos|length }})</h3>
+        <div class="mobile-download-grid">
+            {% for video in videos %}
+            <div class="download-item">
+                <div class="download-thumbnail video-thumbnail">
+                    <video poster="{% if video.thumbnail %}{{ video.thumbnail.url }}{% endif %}">
+                        <source src="{{ video.video.url }}" type="video/mp4">
+                    </video>
+                    <div class="video-overlay">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </div>
+                <div class="download-info">
+                    <h4>{{ video.title }}</h4>
+                    <p class="download-meta">
+                        <span class="album-name">{{ video.album.title }}</span>
+                        {% if video.date_taken %}
+                        <span class="date-taken">{{ video.date_taken|date:"M d, Y" }}</span>
+                        {% endif %}
+                    </p>
+                    <a href="{% url 'album:download_single_item' 'video' video.id %}" 
+                       class="download-btn">
+                        <i class="fas fa-download"></i> Download Video
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="download-actions">
+        <a href="{% url 'album:dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Track download attempts
+    const downloadLinks = document.querySelectorAll('.download-btn');
+    downloadLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            // Visual feedback
+            const icon = this.querySelector('i');
+            const originalClass = icon.className;
+            icon.className = 'fas fa-spinner fa-spin';
+            this.style.opacity = '0.6';
+            
+            setTimeout(() => {
+                icon.className = 'fas fa-check';
+                this.style.background = '#28a745';
+                this.innerHTML = '<i class="fas fa-check"></i> Downloaded';
+            }, 1000);
+            
+            setTimeout(() => {
+                icon.className = originalClass;
+                this.style.opacity = '1';
+                this.style.background = '';
+                this.innerHTML = originalClass.includes('image') ? 
+                    '<i class="fas fa-download"></i> Download Photo' : 
+                    '<i class="fas fa-download"></i> Download Video';
+            }, 3000);
+        });
+    });
+});
+</script>
+{% endblock %}

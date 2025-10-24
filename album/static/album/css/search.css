@@ -1,0 +1,80 @@
+/* Search page styles extracted from template */
+.search-form {
+  max-width: none;
+}
+
+.search-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group { margin-bottom: 1rem; }
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  background-color: var(--bg-paper);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-main);
+}
+
+.search-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--divider);
+}
+
+.pagination-container { margin-top: 2rem; display: flex; justify-content: center; }
+
+.pagination {
+  display: flex;
+  list-style: none;
+  margin: 0; padding: 0; gap: 0.25rem;
+}
+
+.page-item { margin: 0; }
+
+.page-link {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  color: var(--text-primary);
+  background-color: var(--bg-paper);
+  border: 1px solid var(--divider);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.page-link:hover { background-color: var(--primary-main); color: var(--bg-default); }
+.page-item.active .page-link { background-color: var(--primary-main); color: var(--bg-default); border-color: var(--primary-main); }
+.page-item.disabled .page-link { color: var(--text-secondary); pointer-events: none; background-color: var(--bg-default); }
+
+.no-results-icon {
+    font-size: 4rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .search-form-grid { grid-template-columns: 1fr; }
+  .search-actions { flex-direction: column; }
+  .pagination { flex-wrap: wrap; justify-content: center; }
+}

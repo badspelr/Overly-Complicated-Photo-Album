@@ -1,0 +1,11 @@
+/* Base styles */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.content-divider {
+    border-color: var(--divider);
+    margin: 1rem 0;
+}

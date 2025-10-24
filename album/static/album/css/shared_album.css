@@ -1,0 +1,19 @@
+/* Styles for shared_album.html extracted from inline <style> */
+
+/* Hide delete buttons and bulk actions for shared view */
+.media-checkbox,
+.bulk-action-container {
+    display: none !important;
+}
+
+/* Adjust media card hover effects for shared view */
+.media-card:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}

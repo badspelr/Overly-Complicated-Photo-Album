@@ -1,0 +1,68 @@
+/* Styles for offline.html extracted from inline <style> */
+.offline-icon {
+    font-size: 5rem;
+    color: #ff9800;
+    margin-bottom: 1rem;
+}
+
+.offline-message {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 1.5rem 0;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.offline-content {
+    margin-top: 2rem;
+    text-align: left;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.offline-features {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.offline-features li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.offline-features li:before {
+    content: "✓";
+    color: #4caf50;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+.retry-message {
+    color: var(--text-secondary);
+    margin: 1.5rem 0;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .offline-icon {
+        font-size: 4rem;
+    }
+    
+    .offline-content {
+        text-align: center;
+    }
+    
+    .offline-features li {
+        padding-left: 0;
+        text-align: center;
+    }
+    
+    .offline-features li:before {
+        display: none;
+    }
+}

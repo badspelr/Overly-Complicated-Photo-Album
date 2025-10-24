@@ -1,0 +1,163 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Terms of Conduct{% endblock %}
+
+{% block content %}
+<div class="grid grid-1">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="material-icons">gavel</i>
+                Terms of Conduct
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="policy-content" style="max-width: 900px; margin: 0 auto; line-height: 1.6;">
+                <p style="color: #666; margin-bottom: 2rem;">
+                    <strong>Effective Date:</strong> October 18, 2025<br>
+                    <strong>Last Updated:</strong> October 18, 2025<br>
+                    <strong>Version:</strong> 1.0
+                </p>
+
+                <div style="background: #f8f9fa; padding: 1rem; border-left: 4px solid #007bff; margin: 2rem 0;">
+                    <p style="margin: 0;">
+                        <strong>Note:</strong> By using Photo Album, you agree to these Terms of Conduct. 
+                        Please read them carefully. For the complete detailed version, 
+                        <a href="{{ STATIC_URL }}docs/TERMS_OF_CONDUCT.md" download>download the full document</a>.
+                    </p>
+                </div>
+
+                <h3 style="margin-top: 2rem;"><i class="material-icons" style="vertical-align: middle;">info</i> Summary</h3>
+                <p>
+                    These Terms of Conduct govern your use of our photo and video management service. 
+                    Key points include:
+                </p>
+
+                <h4 style="margin-top: 1.5rem;">✅ What You Can Do</h4>
+                <ul style="line-height: 1.8;">
+                    <li>Store and organize your personal photos and videos</li>
+                    <li>Share content with family and friends via invite links</li>
+                    <li>Use AI features to search and categorize your content</li>
+                    <li>Create custom albums and collections</li>
+                    <li>Download your own content anytime</li>
+                </ul>
+
+                <h4 style="margin-top: 1.5rem;">❌ What's Prohibited</h4>
+                <ul style="line-height: 1.8;">
+                    <li><strong>Illegal Content:</strong> Content violating laws, copyright, or intellectual property</li>
+                    <li><strong>CSAM:</strong> Child Sexual Abuse Material (see <a href="{% url 'album:csam_policy' %}">CSAM Policy</a>)</li>
+                    <li><strong>Harmful Content:</strong> Violence, hate speech, harassment, or content promoting self-harm</li>
+                    <li><strong>Spam & Abuse:</strong> Unsolicited content, automated bulk uploads, service interference</li>
+                </ul>
+
+                <h4 style="margin-top: 1.5rem;">🔒 Your Rights</h4>
+                <ul style="line-height: 1.8;">
+                    <li><strong>Content Ownership:</strong> You retain full ownership of your photos and videos</li>
+                    <li><strong>Privacy:</strong> Content is private by default, GDPR compliant</li>
+                    <li><strong>Data Access:</strong> View, correct, or delete your data at any time</li>
+                    <li><strong>Data Portability:</strong> Download your content anytime</li>
+                    <li><strong>Account Deletion:</strong> Delete your account and all data permanently</li>
+                </ul>
+
+                <h4 style="margin-top: 1.5rem;">⚖️ Enforcement</h4>
+                <p>Violations may result in:</p>
+                <ol style="line-height: 1.8;">
+                    <li>Warning (first-time minor violations)</li>
+                    <li>Content Removal (offending content deleted)</li>
+                    <li>Account Suspension (7-30 days)</li>
+                    <li>Account Termination (permanent ban)</li>
+                    <li>Law Enforcement Referral (for illegal content, especially CSAM)</li>
+                </ol>
+
+                <h4 style="margin-top: 1.5rem;">📞 Contact</h4>
+                <p>
+                    For questions about these Terms, please use our <a href="{% url 'album:contact' %}">Contact Form</a>.
+                </p>
+
+                <div style="background: #fff3cd; padding: 1rem; border-left: 4px solid #ffc107; margin: 2rem 0;">
+                    <p style="margin: 0;">
+                        <strong>Related Policies:</strong><br>
+                        • <a href="{% url 'album:csam_policy' %}">CSAM Policy</a> (Child Safety)<br>
+                        • <a href="{% url 'album:cookie_policy' %}">Cookie Policy</a><br>
+                        • <a href="{% url 'album:about' %}">About Us</a>
+                    </p>
+                </div>
+
+                <hr style="margin: 2rem 0;">
+
+                <h3 style="margin-top: 2rem;">📄 Full Document</h3>
+                <p>
+                    The complete Terms of Conduct document includes 18 detailed sections covering:
+                </p>
+                <ul style="line-height: 1.8; columns: 2; -webkit-columns: 2; -moz-columns: 2;">
+                    <li>Acceptance of Terms</li>
+                    <li>Eligibility (age requirements)</li>
+                    <li>Acceptable Use Policy</li>
+                    <li>Content Ownership & Licenses</li>
+                    <li>Privacy & Data Protection</li>
+                    <li>Content Moderation</li>
+                    <li>Service Availability</li>
+                    <li>Termination Rights</li>
+                    <li>Disclaimer of Warranties</li>
+                    <li>Limitation of Liability</li>
+                    <li>Indemnification</li>
+                    <li>Intellectual Property</li>
+                    <li>Governing Law</li>
+                    <li>Dispute Resolution</li>
+                    <li>Changes to Terms</li>
+                    <li>Contact Information</li>
+                    <li>Severability</li>
+                    <li>Entire Agreement</li>
+                </ul>
+
+                <div style="text-align: center; margin: 2rem 0;">
+                    <a href="{{ STATIC_URL }}docs/TERMS_OF_CONDUCT.md" download class="btn btn-primary">
+                        <i class="material-icons" style="vertical-align: middle;">download</i>
+                        Download Full Terms of Conduct
+                    </a>
+                </div>
+
+                <p style="color: #666; font-size: 0.9rem; margin-top: 2rem;">
+                    <strong>Last Updated:</strong> October 18, 2025 | <strong>Version:</strong> 1.0
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.policy-content h3 {
+    color: #333;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.policy-content h4 {
+    color: #555;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.2rem;
+}
+
+.policy-content ul, .policy-content ol {
+    margin-left: 1.5rem;
+}
+
+.policy-content a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.policy-content a:hover {
+    text-decoration: underline;
+}
+
+.policy-content .material-icons {
+    font-size: 1.2rem;
+    vertical-align: middle;
+    margin-right: 0.25rem;
+}
+</style>
+{% endblock %}

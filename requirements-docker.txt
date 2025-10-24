@@ -1,0 +1,19 @@
+# Lightweight Docker requirements - CPU only
+Django>=5.2,<5.3
+psycopg2-binary>=2.9,<3.0
+redis>=5.0,<6.0
+celery>=5.3,<6.0
+gunicorn>=22.0,<23.0
+whitenoise>=6.7,<7.0
+pillow>=10.4,<11.0
+python-magic>=0.4,<1.0
+moviepy>=1.0,<2.0
+django-imagekit>=5.0,<6.0
+
+# Lightweight AI packages (CPU only)
+torch>=2.4,<3.0 --index-url https://download.pytorch.org/whl/cpu
+sentence-transformers>=3.0,<4.0
+transformers>=4.44,<5.0
+
+# No CUDA packages - saves ~1.5GB
+# Uses CPU-only PyTorch instead

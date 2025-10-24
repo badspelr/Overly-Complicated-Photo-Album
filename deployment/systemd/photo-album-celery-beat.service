@@ -1,0 +1,38 @@
+[Unit]
+Description=Photo Album Celery Beat Scheduler
+After=network.target redis.service postgresql.service photo-album-celery-worker.service
+Wants=redis.service
+Requires=photo-album-celery-worker.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/photo_album
+Environment="PATH=/var/www/photo_album/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="DJANGO_SETTINGS_MODULE=photo_album.settings"
+
+# Main Celery beat command
+ExecStart=/var/www/photo_album/venv/bin/celery \
+    --app=photo_album \
+    beat \
+    --loglevel=info \
+    --scheduler=django_celery_beat.schedulers:DatabaseScheduler \
+    --pidfile=/var/run/celery/beat.pid \
+    --logfile=/var/log/celery/beat.log
+
+# Stop command
+ExecStop=/bin/kill -TERM $MAINPID
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=5
+
+# Security settings
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

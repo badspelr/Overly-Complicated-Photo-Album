@@ -1,0 +1,42 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit Album{% else %}Create Album{% endif %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/create_album.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>{% if is_edit %}Edit Album{% else %}Create Album{% endif %}</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div class="form-group">
+                {% if field.field.widget.input_type == 'checkbox' %}
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {{ field }}
+                    </label>
+                {% else %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                {% endif %}
+                {% if field.help_text %}
+                    <small class="form-help-text">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="form-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-submit">{% if is_edit %}Update Album{% else %}Create Album{% endif %}</button>
+            <a href="{% url 'album:dashboard' %}" class="btn btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

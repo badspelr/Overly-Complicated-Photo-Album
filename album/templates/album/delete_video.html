@@ -1,0 +1,12 @@
+{% extends 'album/base.html' %}
+{% block title %}Delete Video{% endblock %}
+{% block content %}
+    <h2>Delete Video</h2>
+    <p>Are you sure you want to delete the video "{{ video.title }}"?</p>
+    <p><strong>Warning:</strong> This will permanently delete the video file.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Delete Video</button>
+    </form>
+    <a href="{% url 'album:dashboard' %}">Cancel</a>
+{% endblock %}

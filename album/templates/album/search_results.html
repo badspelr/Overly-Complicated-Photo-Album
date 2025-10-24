@@ -1,0 +1,206 @@
+{% extends 'album/base.html' %}
+{% load album_tags %}
+{% load static %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/favorites.css' %}">
+<link rel="stylesheet" href="{% static 'album/css/search.css' %}">
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'album/js/favorites.js' %}"></script>
+<script src="{% static 'album/js/search.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-1">
+    <!-- Search Header -->
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">🔍 Search Results</h1>
+            {% if query %}
+                <p class="card-text">Results for "<strong>{{ query }}</strong>"</p>
+            {% else %}
+                <p class="card-text">All media</p>
+            {% endif %}
+        </div>
+
+        <!-- Search Form -->
+        <div class="card-body">
+            <form method="get" class="search-form">
+                <div class="search-form-grid">
+                    <!-- Search Query -->
+                    <div class="form-group">
+                        <label for="q" class="form-label">Search</label>
+                        <input type="text" id="q" name="q" value="{{ query }}" placeholder="Search titles, descriptions, albums..." class="form-control">
+                    </div>
+
+                    <!-- Search Type -->
+                    <div class="form-group">
+                        <label class="form-label">Search Method</label>
+                        <div class="form-check-inline">
+                            <input class="form-check-input" type="radio" name="search_type" id="text_search" value="text" {% if search_type == 'text' %}checked{% endif %}>
+                            <label class="form-check-label" for="text_search">Text</label>
+                        </div>
+                        <div class="form-check-inline">
+                            <input class="form-check-input" type="radio" name="search_type" id="ai_search" value="ai" {% if search_type == 'ai' %}checked{% endif %}>
+                            <label class="form-check-label" for="ai_search">AI (Semantic)</label>
+                        </div>
+                    </div>
+
+                    <!-- Media Type -->
+                    <div class="form-group">
+                        <label for="media_type" class="form-label">Type</label>
+                        <select id="media_type" name="media_type" class="form-control">
+                            {% for value, label in media_type_options %}
+                                <option value="{{ value }}" {% if media_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Album Filter -->
+                    <div class="form-group">
+                        <label for="album" class="form-label">Album</label>
+                        <select id="album" name="album" class="form-control">
+                            <option value="">All Albums</option>
+                            {% for album in albums %}
+                                <option value="{{ album.id }}" {% if selected_album == album.id|stringformat:"s" %}selected{% endif %}>{{ album.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="form-group">
+                        <label for="category" class="form-label">Category</label>
+                        <select id="category" name="category" class="form-control">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Date From -->
+                    <div class="form-group">
+                        <label for="date_from" class="form-label">From Date</label>
+                        <input type="date" id="date_from" name="date_from" value="{{ date_from }}" class="form-control">
+                    </div>
+
+                    <!-- Date To -->
+                    <div class="form-group">
+                        <label for="date_to" class="form-label">To Date</label>
+                        <input type="date" id="date_to" name="date_to" value="{{ date_to }}" class="form-control">
+                    </div>
+
+                    <!-- Sort -->
+                    <div class="form-group">
+                        <label for="sort" class="form-label">Sort By</label>
+                        <select id="sort" name="sort" class="form-control">
+                            {% for value, label in sort_options %}
+                                <option value="{{ value }}" {% if sort_by == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Sort Direction -->
+                    <div class="form-group">
+                        <label for="direction" class="form-label">Order</label>
+                        <select id="direction" name="direction" class="form-control">
+                            <option value="desc" {% if sort_direction == 'desc' %}selected{% endif %}>Newest First</option>
+                            <option value="asc" {% if sort_direction == 'asc' %}selected{% endif %}>Oldest First</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="search-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="material-icons">search</i> Search
+                    </button>
+                    <a href="{% url 'album:search_media' %}" class="btn btn-secondary">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results -->
+    {% if media %}
+        <div class="card">
+            <div class="card-header">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="card-title"><i class="material-icons">photo_library</i> Media Results</h3>
+                        <p class="card-text mb-0">
+                            Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="media-container" id="media-container">
+                    {% include 'album/media_list_partial.html' with media=media %}
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="pagination-container">
+                    <nav aria-label="Search results pagination">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;</span>
+                                </li>
+                            {% endif %}
+
+                            {% get_pagination_range page_obj as page_range %}
+                            {% for page_num in page_range %}
+                                {% if page_num == '...' %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item {% if page_obj.number == page_num %}active{% endif %}">
+                                        <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_num }}">{{ page_num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <!-- No Results -->
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="material-icons no-results-icon">search_off</i>
+                <h3>No results found</h3>
+                <p class="text-secondary">Try adjusting your search criteria or filters.</p>
+                <a href="{% url 'album:search_media' %}" class="btn btn-primary">Clear Filters & Try Again</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

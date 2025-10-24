@@ -1,0 +1,31 @@
+{% extends 'album/base.html' %}
+{% block title %}Delete {{ object_type }}{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h2>Delete {{ object_type }}</h2>
+        </div>
+        <div class="card-body">
+            <p>Are you sure you want to delete the {{ object_type|lower }} "{{ object_name }}"?</p>
+
+            {% if warning_message %}
+                <div class="alert alert-warning">
+                    {{ warning_message }}
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <span class="material-icons">delete</span>
+                    Yes, Delete
+                </button>
+                <a href="{{ request.META.HTTP_REFERER|default:'album:dashboard' }}" class="btn btn-secondary">
+                    <span class="material-icons">cancel</span>
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

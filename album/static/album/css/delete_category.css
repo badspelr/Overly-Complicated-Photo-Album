@@ -1,0 +1,30 @@
+.card-title .material-icons,
+.alert .material-icons,
+.category-info h4 .material-icons,
+.btn .material-icons {
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+
+.card-title .material-icons {
+    color: var(--error);
+}
+
+.category-info {
+    background: var(--surface);
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.category-info h4 {
+    margin: 0 0 0.5rem 0;
+}
+
+.category-info p {
+    margin: 0.25rem 0;
+}
+
+.delete-form {
+    margin-top: 2rem;
+}

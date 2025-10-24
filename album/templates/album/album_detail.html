@@ -1,0 +1,472 @@
+{% extends 'album/base.html' %}
+{% load static %}
+{% load album_tags %}
+{% load cache_bust %}
+{% block title %}{{ album.title }}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'album/css/album_detail.css' %}">
+    <link rel="stylesheet" href="{% static 'album/css/favorites.css' %}">
+    <link rel="stylesheet" href="{% static 'album/css/slideshow.css' %}">
+    <script src="{% static 'album/js/lazy-loading.js' %}"></script>
+    <script src="{% static 'album/js/favorites.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-1">
+        <!-- Album Header -->
+        <div class="card">
+            <div class="card-body">
+                <div class="album-header flex items-center justify-between mb-4">
+                    <div class="album-header-info">
+                        <h1>{{ album.title }}</h1>
+                        <p class="text-secondary mb-2">{{ album.description }}</p>
+                        <div class="album-meta flex gap-4 text-secondary">
+                            <span><i class="material-icons">person</i> by {{ album.owner.username }}</span>
+                            <span><i class="material-icons">calendar_today</i> Created {{ album.created_at|date:"M j, Y" }}</span>
+                            {% if album.is_public %}
+                                <span class="text-secondary"><i class="material-icons">public</i> Public Album</span>
+                            {% else %}
+                                <span class="text-secondary"><i class="material-icons">lock</i> Private Album</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if user.is_superuser or album.owner == user %}
+                        <div class="album-header-actions flex gap-2">
+                            <a href="{% url 'album:create_share_link' album.pk %}" class="btn btn-primary btn-sm">
+                                <i class="material-icons">share</i> Share Album
+                            </a>
+                            <a href="{% url 'album:manage_share_links' album.pk %}" class="btn btn-secondary btn-sm">
+                                <i class="material-icons">link</i> Manage Links
+                            </a>
+                            <a href="{% url 'album:create_category' %}" class="btn btn-secondary btn-sm">
+                                <i class="material-icons">add</i> Create Category
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if search_query %}
+        <!-- Search Results Info -->
+        <div class="card">
+            <div class="card-body">
+                <div class="search-results-info">
+                    {% if search_type == 'ai' %}
+                        <div class="alert alert-info mb-0">
+                            <i class="material-icons">smart_toy</i>
+                            <strong>AI Search Results:</strong> Found content matching "{{ search_query }}" in this album
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="material-icons">search</i>
+                            <strong>Text Search Results:</strong> Found content matching "{{ search_query }}" in this album
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Media Content -->
+        {% if media %}
+            <div class="card">
+                <div class="card-header">
+                    <div class="media-header-content">
+                        <div class="media-title-section">
+                            <h3 class="card-title"><i class="material-icons">photo_library</i> Media Collection</h3>
+                            <p class="card-text mb-0">
+                                Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} media
+                            </p>
+                        </div>
+                        <!-- Filter Toggle Button -->
+                        <div class="filter-section">
+                            <button type="button" class="btn btn-primary btn-sm" id="slideshow-btn" title="Start Slideshow (Photos Only)">
+                                <i class="material-icons">slideshow</i> Slideshow
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm" id="search-modal-toggle">
+                                <i class="material-icons">search</i> Search
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm mobile-filter-toggle" id="mobile-filter-toggle">
+                                <i class="material-icons">filter_list</i> Filter & Sort
+                            </button>
+                            {% if search_query %}
+                                <a href="{% url 'album:album_detail' album.pk %}" class="btn btn-outline-secondary btn-sm" title="Clear Search">
+                                    <i class="material-icons">clear</i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="bulk-action-form" 
+                          data-bulk-delete-url="{% url 'album:bulk_delete' %}" 
+                          data-bulk-download-url="{% url 'album:bulk_download' %}">
+                        {% csrf_token %}
+                        {% check_delete_permission user album 'album' as can_delete_album %}
+                        
+                        <!-- Bulk Action Controls -->
+                        <div class="bulk-actions mb-3">
+                            <div class="bulk-action-buttons" id="bulk-action-buttons-top">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled id="download-dropdown-btn">
+                                        <i class="material-icons">download</i> Download Selected
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <button class="dropdown-item" type="submit" name="action" value="download" formaction="{% url 'album:bulk_download' %}?format=zip">
+                                            <i class="material-icons">folder_zip</i> Download as ZIP
+                                        </button>
+                                        <button class="dropdown-item download-individual-btn" type="button" data-download-url="{% url 'album:download_single_item' 'photo' 0 %}">
+                                            <i class="material-icons">file_download</i> Download Individually
+                                        </button>
+                                    </div>
+                                </div>
+                                {% if can_delete_album %}
+                                    <button type="submit" name="action" value="delete" class="btn btn-danger" disabled>
+                                        Delete Selected
+                                    </button>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Bulk Edit Controls -->
+                            <div class="bulk-edit-controls">
+                                <div class="input-group">
+                                    <label for="bulk-category-select" style="min-width: 100px; font-weight: 500; color: var(--text);">
+                                        <i class="material-icons" style="font-size: 18px; vertical-align: middle;">category</i>
+                                        Category:
+                                    </label>
+                                    <select name="category_id" class="form-control" id="bulk-category-select" disabled>
+                                        <option value="">-- Select Category --</option>
+                                        {% for category in media_categories %}
+                                            <option value="{{ category.id }}">{{ category.name }}</option>
+                                        {% endfor %}
+                                        <option value="None">Remove from Category</option>
+                                    </select>
+                                    <button type="submit" name="action" value="update_category" class="btn btn-secondary" id="bulk-update-category-btn" disabled>
+                                        <i class="material-icons" style="font-size: 18px; vertical-align: middle;">check</i>
+                                        Apply
+                                    </button>
+                                </div>
+                                <div class="input-group">
+                                    <label for="bulk-tags-input" style="min-width: 100px; font-weight: 500; color: var(--text);">
+                                        <i class="material-icons" style="font-size: 18px; vertical-align: middle;">label</i>
+                                        Tags:
+                                    </label>
+                                    <input type="text" name="tags" class="form-control" id="bulk-tags-input" placeholder="Add tags, comma-separated" disabled>
+                                    <button type="submit" name="action" value="add_tags" class="btn btn-secondary" id="bulk-add-tags-btn" disabled>
+                                        <i class="material-icons" style="font-size: 18px; vertical-align: middle;">check</i>
+                                        Apply
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Mobile Download Tip -->
+                            <div class="mobile-download-tip mt-2 hidden">
+                                <small class="text-warning">
+                                    <i class="material-icons">info</i>
+                                    On mobile, only single file downloads are supported. Select one item at a time.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="media-container" id="media-container" data-album-id="{{ album.pk }}">
+                            {% include 'album/media_list_partial.html' with media=media %}
+                        </div>
+                        <!-- Sticky Bottom Bulk Action Bar -->
+                        <div class="bulk-action-sticky-bottom" id="bulk-action-buttons-bottom">
+                            <div class="sticky-bulk-header">
+                                <span class="selection-count" id="selection-count-bottom">0 items selected</span>
+                                <button type="button" class="btn btn-text btn-sm" id="clear-selection-bottom">
+                                    <i class="material-icons">close</i> Clear
+                                </button>
+                            </div>
+                            <div class="sticky-bulk-actions">
+                                <!-- Row 1: Category + Delete -->
+                                <div class="sticky-row">
+                                    <div class="sticky-input-group">
+                                        <label for="bulk-category-select-bottom">
+                                            <i class="material-icons">category</i>
+                                        </label>
+                                        <select name="category_id" class="form-control" id="bulk-category-select-bottom" disabled>
+                                            <option value="">Category</option>
+                                            {% for category in media_categories %}
+                                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                            {% endfor %}
+                                            <option value="None">Remove Category</option>
+                                        </select>
+                                        <button type="submit" name="action" value="update_category" class="btn btn-secondary btn-sm" id="bulk-update-category-btn-bottom" disabled>
+                                            Apply
+                                        </button>
+                                    </div>
+                                    {% if can_delete_album %}
+                                        <button type="submit" name="action" value="delete" class="btn btn-danger" disabled>
+                                            <i class="material-icons">delete</i> Delete
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                <!-- Row 2: Tags + Download -->
+                                <div class="sticky-row">
+                                    <div class="sticky-input-group">
+                                        <label for="bulk-tags-input-bottom">
+                                            <i class="material-icons">label</i>
+                                        </label>
+                                        <input type="text" name="tags" class="form-control" id="bulk-tags-input-bottom" placeholder="Tags (comma-separated)" disabled>
+                                        <button type="submit" name="action" value="add_tags" class="btn btn-secondary btn-sm" id="bulk-add-tags-btn-bottom" disabled>
+                                            Apply
+                                        </button>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled id="download-dropdown-btn-bottom">
+                                            <i class="material-icons">download</i> Download
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <button class="dropdown-item" type="submit" name="action" value="download" formaction="{% url 'album:bulk_download' %}?format=zip">
+                                                <i class="material-icons">folder_zip</i> Download as ZIP
+                                            </button>
+                                            <button class="dropdown-item download-individual-btn" type="button" data-download-url="{% url 'album:download_single_item' 'photo' 0 %}">
+                                                <i class="material-icons">file_download</i> Download Individually
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="loading-indicator">
+                        <div class="loading"></div>
+                        <p>Loading more media...</p>
+                    </div>
+                    <div id="sentinel"></div>
+                </div>
+                {% if page_obj.has_other_pages %}
+                <div class="card-footer">
+                    <nav aria-label="Media pagination">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&media_type={{ media_type }}&sort={{ sort }}&page_size={{ page_size }}{% if search_query %}&search={{ search_query }}&search_type={{ search_type }}{% endif %}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;</span>
+                                </li>
+                            {% endif %}
+
+                            {% load album_tags %}
+                            {% get_pagination_range page_obj as page_range %}
+                            {% for i in page_range %}
+                                {% if i == '...' %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% elif page_obj.number == i %}
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}&media_type={{ media_type }}&sort={{ sort }}&page_size={{ page_size }}{% if search_query %}&search={{ search_query }}&search_type={{ search_type }}{% endif %}">{{ i }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&media_type={{ media_type }}&sort={{ sort }}&page_size={{ page_size }}{% if search_query %}&search={{ search_query }}&search_type={{ search_type }}{% endif %}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-body">
+                    <p class="text-center text-secondary">No media found in this album.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Mobile Filter Modal -->
+    <div class="mobile-filter-modal" id="mobile-filter-modal">
+        <div class="mobile-filter-overlay" id="mobile-filter-overlay"></div>
+        <div class="mobile-filter-content">
+            <div class="mobile-filter-header">
+                <h4>Filter & Sort Options</h4>
+                <button type="button" class="mobile-filter-close" id="mobile-filter-close">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            <form method="get" class="mobile-filter-form" id="mobile-filter-form">
+                <div class="filter-group">
+                    <label for="mobile-category">Category:</label>
+                    <select name="category" id="mobile-category" class="form-control">
+                        <option value="all" {% if category_filter == 'all' or not category_filter %}selected{% endif %}>All Categories</option>
+                        <option value="uncategorized" {% if category_filter == 'uncategorized' %}selected{% endif %}>Uncategorized</option>
+                        {% for category in media_categories %}
+                            <option value="{{ category.name }}" {% if category_filter == category.name %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="mobile-media_type">Show:</label>
+                    <select name="media_type" id="mobile-media_type" class="form-control">
+                        {% for value, label in media_type_options %}
+                            <option value="{{ value }}" {% if media_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="mobile-sort">Sort by:</label>
+                    <select name="sort" id="mobile-sort" class="form-control">
+                        {% for value, label in sort_options %}
+                            <option value="{{ value }}" {% if sort == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="mobile-page_size">Items per page:</label>
+                    <select name="page_size" id="mobile-page_size" class="form-control">
+                        {% for value in page_size_options %}
+                            <option value="{{ value }}" {% if page_size == value %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mobile-filter-actions">
+                    <button type="button" class="btn btn-secondary" id="mobile-filter-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div class="mobile-filter-modal" id="search-modal">
+        <div class="mobile-filter-overlay" id="search-modal-overlay"></div>
+        <div class="mobile-filter-content">
+            <div class="mobile-filter-header">
+                <h4>Search Photos & Videos</h4>
+                <button type="button" class="mobile-filter-close" id="search-modal-close">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            <form method="get" class="mobile-filter-form" id="search-form">
+                <!-- Preserve current filters -->
+                {% if category_filter and category_filter != 'all' %}
+                    <input type="hidden" name="category" value="{{ category_filter }}">
+                {% endif %}
+                {% if media_type != 'all' %}
+                    <input type="hidden" name="media_type" value="{{ media_type }}">
+                {% endif %}
+                {% if sort != 'newest' %}
+                    <input type="hidden" name="sort" value="{{ sort }}">
+                {% endif %}
+                
+                <div class="filter-group">
+                    <label for="search-input">Search Query:</label>
+                    <input type="text" name="search" id="search-input" value="{{ search_query }}" 
+                           placeholder="Search photos and videos (e.g., 'water', 'beach', 'sunset')..." 
+                           class="form-control">
+                    <small class="form-text text-muted">
+                        Search through photo descriptions, tags, and file names in this album
+                    </small>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="search-type-select">Search Mode:</label>
+                    <select name="search_type" id="search-type-select" class="form-control">
+                        <option value="text" {% if search_type == 'text' or not search_type %}selected{% endif %}>
+                            Text Search - Search titles, descriptions, and tags
+                        </option>
+                        <option value="ai" {% if search_type == 'ai' %}selected{% endif %}>
+                            AI Search - Smart visual content search
+                        </option>
+                    </select>
+                    <small class="form-text text-muted">
+                        <strong>Text Search:</strong> Searches titles, descriptions, and tags<br>
+                        <strong>AI Search:</strong> Analyzes image content for smarter results
+                    </small>
+                </div>
+                
+                <div class="mobile-filter-actions">
+                    <button type="button" class="btn btn-secondary" id="search-modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="material-icons">search</i> Search
+                    </button>
+                    {% if search_query %}
+                        <a href="{% url 'album:album_detail' album.pk %}{% if category_filter and category_filter != 'all' %}?category={{ category_filter }}{% endif %}{% if media_type != 'all' %}{% if category_filter and category_filter != 'all' %}&{% else %}?{% endif %}media_type={{ media_type }}{% endif %}{% if sort != 'newest' %}{% if category_filter and category_filter != 'all' or media_type != 'all' %}&{% else %}?{% endif %}sort={{ sort }}{% endif %}" 
+                           class="btn btn-outline-secondary">
+                            <i class="material-icons">clear</i> Clear Search
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Slideshow Modal -->
+    <div id="slideshow-modal" class="slideshow-modal" style="display: none;">
+        <div class="slideshow-container">
+            <img id="slideshow-image" src="" alt="Slideshow" />
+            <div class="slideshow-caption" id="slideshow-caption"></div>
+            
+            <!-- Slideshow Controls -->
+            <div class="slideshow-controls">
+                <button id="slideshow-prev" class="slideshow-btn" title="Previous (Left Arrow)">
+                    <i class="material-icons">chevron_left</i>
+                </button>
+                <button id="slideshow-play-pause" class="slideshow-btn" title="Play/Pause (Space)">
+                    <i class="material-icons">pause</i>
+                </button>
+                <button id="slideshow-next" class="slideshow-btn" title="Next (Right Arrow)">
+                    <i class="material-icons">chevron_right</i>
+                </button>
+                <button id="slideshow-fullscreen" class="slideshow-btn" title="Fullscreen (F)">
+                    <i class="material-icons">fullscreen</i>
+                </button>
+                <select id="slideshow-speed" class="slideshow-speed" title="Speed">
+                    <option value="2000">2s</option>
+                    <option value="3000">3s</option>
+                    <option value="5000" selected>5s</option>
+                    <option value="10000">10s</option>
+                </select>
+                <button id="slideshow-close" class="slideshow-btn" title="Close (Esc)">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="slideshow-progress">
+                <div id="slideshow-progress-bar" class="slideshow-progress-bar"></div>
+            </div>
+            
+            <!-- Photo Counter -->
+            <div class="slideshow-counter" id="slideshow-counter">1 / 1</div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'album/js/album_detail.js' %}?v={% timestamp %}"></script>
+<script src="{% static 'album/js/slideshow.js' %}?v={% timestamp %}"></script>
+<script src="{% static 'album/js/infinite-scroll.js' %}?v={% timestamp %}"></script>
+<script>
+    // Pass current filters to slideshow
+    window.slideshowFilters = {
+        albumId: {{ album.pk }},
+        category: '{{ category_filter|default:"all" }}',
+        mediaType: 'photos'  // Slideshow is photos only
+    };
+</script>
+{% endblock %}

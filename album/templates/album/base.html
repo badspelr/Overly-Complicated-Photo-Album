@@ -1,0 +1,224 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#90caf9">
+    <meta name="description" content="A modern photo and video album sharing application">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Photo Album">
+    <meta name="msapplication-TileColor" content="#90caf9">
+    <meta name="msapplication-config" content="/static/album/browserconfig.xml">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/album/manifest.json">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/album/icons/icon-192x192.png">
+    
+    <!-- Favicon -->
+        <link rel="icon" type="image/png" href="{% static 'favicon.png' %}">
+    
+    <title>{% block title %}{{ site_settings.title|default:"Photo Album" }}{% endblock %}</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'album/css/_variables.css' %}">
+    <link rel="stylesheet" href="{% static 'album/css/_forms.css' %}">
+    <link rel="stylesheet" href="{% static 'album/css/_buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'album/css/mobile.css' %}">
+    <link rel="stylesheet" href="{% static 'album/css/media.css' %}">
+    <link rel="stylesheet" href="{% static 'album/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'album/css/base.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <div class="app-layout">
+        <header class="app-bar">
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle mobile menu">
+                <i class="material-icons">menu</i>
+            </button>
+            <div class="app-bar-title">
+                {% block header %}{{ site_settings.title|default:"Photo Album" }}{% endblock %}
+            </div>
+            {% if user.is_authenticated %}
+                <div class="user-info">
+                    <span>Welcome, {{ user.username }}</span>
+                    <form method="post" action="{% url 'logout' %}" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-error btn-sm">Logout</button>
+                    </form>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+            {% endif %}
+        </header>
+
+        <div class="drawer-overlay" id="drawer-overlay"></div>
+        <aside class="drawer" id="mobile-drawer">
+            <div class="drawer-paper">
+                <div class="toolbar-spacer"></div>
+                <div class="drawer-container">
+                    <nav class="nav-list">
+                        <a href="{% url 'album:dashboard' %}" title="Dashboard (Alt+D)" data-shortcut="d">
+                            <i class="material-icons nav-icon">dashboard</i>
+                            Dashboard
+                        </a>
+                        <a href="{% url 'album:album_list' %}" title="My Albums (Alt+A)" data-shortcut="a">
+                            <i class="material-icons nav-icon">photo_album</i>
+                            My Albums
+                        </a>
+                        <a href="{% url 'album:create_album' %}">
+                            <i class="material-icons nav-icon">add</i>
+                            Create Album
+                        </a>
+                        <a href="{% url 'album:favorites' %}" title="My Favorites (Alt+F)" data-shortcut="f">
+                            <i class="material-icons nav-icon">favorite</i>
+                            My Favorites
+                        </a>
+                        {% if not album %}
+                        <a href="{% url 'album:minimal_upload' %}" title="Upload (Alt+U)" data-shortcut="u">
+                            <i class="material-icons nav-icon">cloud_upload</i>
+                            Upload
+                        </a>
+                        <a href="{% url 'album:search_media' %}" title="Search Media (Alt+S)" data-shortcut="s">
+                            <i class="material-icons nav-icon">search</i>
+                            Search Media
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'album:profile_edit' %}">
+                            <i class="material-icons nav-icon">person</i>
+                            Profile
+                        </a>
+                        <a href="{% url 'album:user_manual' %}">
+                            <i class="material-icons nav-icon">help_outline</i>
+                            User Manual
+                        </a>
+                        {% if user.is_authenticated %}
+                            {% if user.is_site_admin %}
+                        <a href="{% url 'album:manage_users' %}">
+                            <i class="material-icons nav-icon">group</i>
+                            Manage Users
+                        </a>
+                        <a href="{% url 'album:category_list' %}">
+                            <i class="material-icons nav-icon">category</i>
+                            Manage Categories
+                        </a>
+                        <a href="{% url 'admin:index' %}">
+                            <i class="material-icons nav-icon">admin_panel_settings</i>
+                            Django Admin
+                        </a>
+                        <a href="{% url 'album:invite_user' %}">
+                            <i class="material-icons nav-icon">person_add</i>
+                            Create User
+                        </a>
+                        <a href="{% url 'album:ai_settings' %}">
+                            <i class="material-icons nav-icon">settings</i>
+                            AI Settings
+                        </a>
+                        <a href="{% url 'album:process_photos_ai' %}">
+                            <i class="material-icons nav-icon">auto_fix_high</i>
+                            Process Photos AI
+                        </a>
+                        <a href="{% url 'album:process_videos_ai' %}">
+                            <i class="material-icons nav-icon">smart_display</i>
+                            Process Videos AI
+                        </a>
+                            {% elif user.is_album_owner %}
+                        <a href="{% url 'album:category_list' %}">
+                            <i class="material-icons nav-icon">category</i>
+                            Manage Categories
+                        </a>
+                        <a href="{% url 'album:invite_user' %}">
+                            <i class="material-icons nav-icon">person_add</i>
+                            Invite User
+                        </a>
+                        <a href="{% url 'album:process_photos_ai' %}">
+                            <i class="material-icons nav-icon">auto_fix_high</i>
+                            Process Photos AI
+                        </a>
+                        <a href="{% url 'album:process_videos_ai' %}">
+                            <i class="material-icons nav-icon">smart_display</i>
+                            Process Videos AI
+                        </a>
+                            {% endif %}
+                        {% endif %}
+                    </nav>
+                    {% if album %}
+                    <hr class="content-divider">
+                    <nav class="nav-list">
+                        <a href="{% url 'album:minimal_upload' %}?album={{ album.pk }}">
+                            <i class="material-icons nav-icon">cloud_upload</i>
+                            Add Media
+                        </a>
+                        <a href="{% url 'album:edit_album' album.pk %}">
+                            <i class="material-icons nav-icon">edit</i>
+                            Edit Album
+                        </a>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'info' }}">
+                            <button type="button" class="alert-close" aria-label="Close message">&times;</button>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+            
+            <!-- Footer - Show on all pages except album detail -->
+            {% if not request.resolver_match.url_name == 'album_detail' %}
+            <footer class="app-footer">
+                <div class="footer-content">
+                    <div class="footer-links">
+                        <a href="{% url 'album:about' %}">
+                            <i class="material-icons">info</i>
+                            About
+                        </a>
+                        <a href="{% url 'album:contact' %}">
+                            <i class="material-icons">email</i>
+                            Contact
+                        </a>
+                        <a href="{% url 'album:user_manual' %}">
+                            <i class="material-icons">help</i>
+                            Help
+                        </a>
+                        <a href="{% url 'album:cookie_policy' %}">
+                            <i class="material-icons">cookie</i>
+                            Cookies
+                        </a>
+                    </div>
+                    <div class="footer-text">
+                        <p>&copy; {% now "Y" %} Photo Album. All rights reserved.</p>
+                    </div>
+                </div>
+            </footer>
+            {% endif %}
+                </main>
+    </div>
+
+    <!-- Cookie Consent Banner -->
+    {% include 'album/cookie_banner.html' %}
+
+    <script src="{% static 'album/js/base.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
+    
+    <!-- PWA JavaScript -->
+    <script src="{% static 'album/js/pwa.js' %}"></script>
+</body>
+</html>

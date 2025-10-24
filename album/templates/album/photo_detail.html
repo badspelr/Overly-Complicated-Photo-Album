@@ -1,0 +1,117 @@
+{% extends 'album/base.html' %}
+{% load static %}
+{% load album_tags %}
+
+{% block title %}{{ photo.title }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/album_detail.css' %}">
+<link rel="stylesheet" href="{% static 'album/css/favorites.css' %}">
+<script src="{% static 'album/js/favorites.js' %}"></script>
+<script src="{% static 'album/js/lazy-loading.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    {% with request.GET.return_url as ru %}
+        <a href="{% if ru %}{{ ru }}{% else %}{% url 'album:album_detail' photo.album.pk %}{% endif %}" class="btn btn-secondary">← Back to Album</a>
+    {% endwith %}
+</div>
+<div class="media-detail-layout">
+    <div class="media-viewer">
+        {% if previous_photo %}
+            <a href="{% url 'album:photo_detail' previous_photo.pk %}?return_url={{ request.GET.return_url|urlencode }}{% if sort %}&sort={{ sort }}{% endif %}" class="nav-arrow nav-prev">&larr;</a>
+        {% endif %}
+        <img src="{{ photo.medium.url }}"
+             srcset="{{ photo.medium.url }} 800w, {{ photo.large.url }} 1200w, {{ photo.image.url }} {{ photo.width }}w"
+             sizes="(max-width: 800px) 100vw, 800px"
+             alt="{{ photo.title }}" id="main-photo">
+        {% if next_photo %}
+            <a href="{% url 'album:photo_detail' next_photo.pk %}?return_url={{ request.GET.return_url|urlencode }}{% if sort %}&sort={{ sort }}{% endif %}" class="nav-arrow nav-next">&rarr;</a>
+        {% endif %}
+    </div>
+
+    <div class="media-info-card">
+        <div class="media-detail-title-row">
+            <h1 class="media-detail-title">{{ photo.title }}</h1>
+            {% is_favorited user photo as favorited %}
+            <button class="favorite-btn {% if favorited %}favorited{% endif %}" data-photo-id="{{ photo.id }}" title="{% if favorited %}Remove from favorites{% else %}Add to favorites{% endif %}">
+                <i class="material-icons">{% if favorited %}favorite{% else %}favorite_border{% endif %}</i>
+            </button>
+        </div>
+        <p class="description">{{ photo.description }}</p>
+        
+        {# AI-Generated Information Section #}
+        {% if photo.ai_processed and photo.ai_description %}
+        <div class="ai-info-section">
+            <h3 class="ai-section-title">
+                <i class="material-icons ai-icon">smart_toy</i>
+                AI Analysis
+            </h3>
+            <div class="ai-description">
+                <p>{{ photo.ai_description }}</p>
+            </div>
+            {% if photo.ai_tags %}
+            <div class="ai-tags">
+                <strong>AI Tags:</strong>
+                <div class="tags-container">
+                    {% for tag in photo.ai_tags %}
+                        <span class="ai-tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% if photo.ai_confidence_score > 0 %}
+            <div class="ai-confidence">
+                <small>Confidence: {{ photo.ai_confidence_score|as_percentage }}%</small>
+            </div>
+            {% endif %}
+        </div>
+        {% elif photo.processing_status == 'processing' %}
+        <div class="ai-info-section processing">
+            <p><i class="material-icons rotating">autorenew</i> AI analysis in progress...</p>
+        </div>
+        {% elif photo.processing_status == 'failed' %}
+        <div class="ai-info-section error">
+            <p><i class="material-icons">error_outline</i> AI analysis failed</p>
+        </div>
+        {% endif %}
+        
+        <ul class="metadata-list">
+            <li><strong>Uploaded:</strong> {{ photo.uploaded_at|date:"M j, Y" }}</li>
+            {% if photo.category %}
+                <li><strong>Category:</strong> {{ photo.category.name }}</li>
+            {% endif %}
+            {% if photo.date_taken %}
+                <li><strong>Date Taken:</strong> {{ photo.date_taken|date:"M j, Y" }}</li>
+            {% endif %}
+            {% if photo.camera_make or photo.camera_model %}
+                <li><strong>Camera:</strong> {{ photo.camera_make }} {{ photo.camera_model }}</li>
+            {% endif %}
+            {% if photo.width and photo.height %}
+                <li><strong>Dimensions:</strong> {{ photo.width }} x {{ photo.height }}</li>
+            {% endif %}
+            {% if photo.latitude and photo.longitude %}
+                <li><strong>Location:</strong> {{ photo.latitude|floatformat:4 }}, {{ photo.longitude|floatformat:4 }}</li>
+            {% endif %}
+        </ul>
+        <a href="{{ photo.image.url }}" download class="btn-download">Download Photo</a>
+
+        {# Show edit/delete buttons only to album owner or superuser #}
+        {% if user.is_superuser or photo.album.owner == user %}
+            <a href="{% url 'album:photo_edit' photo.pk %}" class="btn btn-warning mt-2">Edit Metadata</a>
+            <a href="{% url 'album:delete_photo' photo.pk %}" class="btn btn-danger mt-2" onclick="return confirm('Are you sure you want to delete this photo?')">Delete Photo</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="fullscreen-overlay" id="fullscreen-overlay">
+    <img id="fullscreen-image" src="" alt="">
+    <button class="close-btn" id="close-fullscreen">&times;</button>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'album/js/photo_detail.js' %}"></script>
+{% endblock %}

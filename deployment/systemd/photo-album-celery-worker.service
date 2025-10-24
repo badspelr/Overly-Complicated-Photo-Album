@@ -1,0 +1,41 @@
+[Unit]
+Description=Photo Album Celery Worker
+After=network.target redis.service postgresql.service
+Wants=redis.service
+
+[Service]
+Type=forking
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/photo_album
+Environment="PATH=/var/www/photo_album/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="DJANGO_SETTINGS_MODULE=photo_album.settings"
+
+# Main Celery worker command
+ExecStart=/var/www/photo_album/venv/bin/celery \
+    --app=photo_album \
+    worker \
+    --loglevel=info \
+    --concurrency=2 \
+    --max-tasks-per-child=50 \
+    --time-limit=300 \
+    --soft-time-limit=240 \
+    --pidfile=/var/run/celery/worker.pid \
+    --logfile=/var/log/celery/worker.log \
+    --detach
+
+# Stop command
+ExecStop=/bin/kill -TERM $MAINPID
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=5
+
+# Security settings
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

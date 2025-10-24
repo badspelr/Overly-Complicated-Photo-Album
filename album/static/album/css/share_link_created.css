@@ -1,0 +1,64 @@
+/* Styles for share_link_created.html extracted from inline <style> */
+.share-success {
+    max-width: 600px;
+}
+.share-url-container {
+    margin-bottom: 2rem;
+}
+.share-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+.share-url-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+.share-url-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    background-color: var(--bg-paper);
+    color: var(--text-primary);
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+.share-info {
+    background-color: var(--bg-paper);
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--divider);
+}
+.info-item:last-child {
+    border-bottom: none;
+}
+.share-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+.copy-btn.copied {
+    background-color: #4caf50;
+    color: white;
+}
+@media (max-width: 768px) {
+    .share-url-input-group {
+        flex-direction: column;
+    }
+    .share-actions {
+        flex-direction: column;
+    }
+    .info-item {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}

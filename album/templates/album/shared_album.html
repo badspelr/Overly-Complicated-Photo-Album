@@ -1,0 +1,64 @@
+{% extends 'album/base.html' %}
+{% load album_tags %}
+{% load static %}
+
+{% block title %}{{ album.title }} - Shared Album{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/shared_album.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-1">
+    <!-- Album Header -->
+    <div class="card">
+        <div class="card-body">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1>{{ album.title }}</h1>
+                    <p class="text-secondary mb-2">{{ album.description }}</p>
+                    <div class="flex gap-4 text-secondary">
+                        <span><i class="material-icons">person</i> by {{ album.owner.username }}</span>
+                        <span><i class="material-icons">calendar_today</i> Created {{ album.created_at|date:"M j, Y" }}</span>
+                        {% if album.is_public %}
+                            <span class="text-secondary"><i class="material-icons">public</i> Public Album</span>
+                        {% else %}
+                            <span class="text-secondary"><i class="material-icons">link</i> Shared via Link</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Content -->
+    {% if media %}
+        <div class="card">
+            <div class="card-header">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="card-title"><i class="material-icons">photo_library</i> Media Collection</h3>
+                        <p class="card-text mb-0">
+                            Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} media
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="media-container" id="media-container">
+                    {% include 'album/media_list_partial.html' with media=media %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="material-icons empty-state-icon">photo_library</i>
+                <h3>No media in this album yet</h3>
+                <p class="text-secondary">This album doesn't contain any photos or videos.</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

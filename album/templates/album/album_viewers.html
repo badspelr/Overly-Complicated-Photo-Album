@@ -1,0 +1,48 @@
+{% extends 'album/base.html' %}
+{% load static %}
+{% block title %}Album Viewers{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'album/css/album_viewers.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-1">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">👁️ Viewers of "{{ album.title }}"</h3>
+                <p class="card-text">Users who can view this album</p>
+            </div>
+            <div class="card-body">
+                {% if viewers %}
+                    <div class="viewer-list">
+                        {% for viewer in viewers %}
+                            <div class="viewer-item">
+                                <div class="viewer-info">
+                                    <strong>{{ viewer.username }}</strong>
+                                    {% if viewer.get_full_name %}
+                                        <span class="text-secondary">({{ viewer.get_full_name }})</span>
+                                    {% endif %}
+                                    <br>
+                                    <small class="text-secondary">{{ viewer.email }}</small>
+                                </div>
+                                <div class="viewer-actions">
+                                    <a href="{% url 'album:remove_viewer' album.pk viewer.pk %}" 
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('Remove {{ viewer.username }} from this album?')">Remove</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-secondary">No viewers assigned to this album yet.</p>
+                {% endif %}
+                
+                <div class="mt-4">
+                    <a href="{% url 'album:invite_user' %}" class="btn btn-primary">Invite New Viewer</a>
+                    <a href="{% url 'album:album_detail' album.pk %}" class="btn btn-secondary">Back to Album</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

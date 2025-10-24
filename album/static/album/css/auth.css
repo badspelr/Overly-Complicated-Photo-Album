@@ -1,0 +1,112 @@
+/* Auth and registration shared styles */
+.form-card {
+  max-width: 450px;
+  margin: 3rem auto;
+  background-color: var(--bg-paper);
+  padding: 2.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--divider);
+}
+.form-card h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+.form-group {
+  margin-bottom: 1.5rem;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.form-group .form-control {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: var(--bg-default);
+  color: var(--text-primary);
+}
+.btn-submit {
+  display: block;
+  width: 100%;
+  background-color: var(--primary-main);
+  color: var(--bg-default);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+}
+.btn-submit:hover {
+  background-color: #a6d4fa;
+}
+
+/* Message card styles (reset done/complete) */
+.message-card {
+  max-width: 500px;
+  margin: 3rem auto;
+  background-color: var(--bg-paper);
+  padding: 2.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--divider);
+  text-align: center;
+}
+.message-card h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+.message-card p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.message-card a {
+  color: var(--primary-main);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Notes and warnings */
+.auth-note {
+  text-align: center;
+  color: var(--text-secondary);
+}
+.auth-note.auth-warning {
+  color: var(--secondary-main);
+}
+
+/* Mobile-only adjustments */
+@media (max-width: 600px) {
+  .form-card {
+    max-width: 100%;
+    width: 100%;
+    margin: 1rem auto;
+    padding: 1rem;
+    border-radius: 0;
+  }
+  .form-card h1 {
+    font-size: 1.5rem;
+  }
+  .form-group .form-control {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+    min-height: 48px; /* Comfortable tap target */
+  }
+  .btn-submit {
+    font-size: 16px; /* Match input to avoid zoom */
+    min-height: 48px; /* Comfortable tap target */
+  }
+}

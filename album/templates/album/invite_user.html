@@ -1,0 +1,110 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Invite User{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'album/css/profile_edit.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>{% if can_create_users %}Invite or Create User{% else %}Invite User{% endif %}</h1>
+    <p class="form-description">{% if can_create_users %}Send an invitation or create a new user to share your albums{% else %}Send an invitation to share your albums with existing users{% endif %}</p>
+
+    <form method="post" autocomplete="off">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% if form.email.help_text %}
+                <small>{{ form.email.help_text }}</small>
+            {% endif %}
+            {% for error in form.email.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.albums.id_for_label }}">{{ form.albums.label }}</label>
+            <div class="checkbox-group">
+                {{ form.albums }}
+                <small class="text-secondary">Select one or more albums to share with this user</small>
+            </div>
+            {% for error in form.albums.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        {% if can_create_users %}
+        <hr>
+        <p class="text-secondary">If the user does not exist, you can create a new user by filling out the fields below.</p>
+
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            {% if form.username.help_text %}
+                <small>{{ form.username.help_text }}</small>
+            {% endif %}
+            {% for error in form.username.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+            {{ form.password }}
+            {% if form.password.help_text %}
+                <small>{{ form.password.help_text }}</small>
+            {% endif %}
+            {% for error in form.password.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.groups.id_for_label }}">{{ form.groups.label }}</label>
+            <div class="checkbox-group">
+                {{ form.groups }}
+                {% if form.groups.help_text %}
+                    <small>{{ form.groups.help_text }}</small>
+                {% endif %}
+            </div>
+            {% for error in form.groups.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group checkbox-group">
+            <label class="form-check-label">
+                {{ form.is_active }}
+                {{ form.is_active.label }}
+            </label>
+            {% for error in form.is_active.errors %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+            <small class="text-secondary">Check to make the user account active immediately</small>
+        </div>
+        {% endif %}
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-submit">{% if can_create_users %}Send Invitation or Create User{% else %}Send Invitation{% endif %}</button>
+            <a href="{% url 'album:dashboard' %}" class="btn btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Add checkbox-group class for browsers that don't support :has()
+document.addEventListener('DOMContentLoaded', function() {
+    const formGroups = document.querySelectorAll('.form-group');
+    formGroups.forEach(function(group) {
+        const checkbox = group.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+            group.classList.add('checkbox-group');
+        }
+    });
+});
+</script>
+{% endblock %}

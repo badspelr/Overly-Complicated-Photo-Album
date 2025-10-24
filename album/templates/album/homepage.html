@@ -1,0 +1,41 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}{{ settings.title }}{% endblock %}
+{% block header %}{{ settings.title }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/homepage.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="hero-section">
+        <h1 class="hero-title">Welcome to {{ settings.title }}</h1>
+        <p class="hero-description">{{ settings.description }}</p>
+        <div class="action-buttons">
+            {% if user.is_authenticated %}
+                <a href="{% url 'album:dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+                <a href="{% url 'album:register' %}" class="btn btn-secondary">Sign Up</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if public_albums %}
+        <h2 class="section-title">Public Albums</h2>
+        <div class="album-grid">
+            {% for album in public_albums %}
+            <a href="{% url 'album:album_detail' album.pk %}" class="album-card">
+                <img class="album-card-cover" src="{{ album.cover_photo.thumbnail.url|default:'https://via.placeholder.com/300x160.png?text=No+Cover' }}" alt="{{ album.title }} cover">
+                <div class="album-card-content">
+                    <h3 class="album-card-title">{{ album.title }}</h3>
+                    <p class="album-card-meta">by {{ album.owner.username }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

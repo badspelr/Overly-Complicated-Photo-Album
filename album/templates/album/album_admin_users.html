@@ -1,0 +1,89 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Manage My Users{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/manage_users.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-1">
+        <div class="card">
+            <div class="card-header">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="card-title">My Users</h3>
+                        <p class="card-text">Manage users who have access to your albums</p>
+                    </div>
+                    <a href="{% url 'album:invite_user' %}" class="btn btn-primary">
+                        Invite User
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Groups</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.get_full_name|default:"-" }}</td>
+                                    <td>
+                                        {% for group in user.groups.all %}
+                                            <span class="badge badge-info">{{ group.name }}</span>
+                                        {% empty %}
+                                            <span class="text-muted">No groups</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge badge-success">Active</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Inactive</span>
+                                        {% endif %}
+                                        {% if user.is_superuser %}
+                                            <span class="badge badge-primary">Admin</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="flex gap-1">
+                                            {% if user.can_be_managed %}
+                                            <a href="{% url 'album:edit_user' user.pk %}" class="btn btn-sm btn-secondary">
+                                                <i class="material-icons">edit</i>
+                                                Edit
+                                            </a>
+                                            {% if not user.is_superuser and user != request.user %}
+                                            <a href="{% url 'album:delete_user' user.pk %}" class="btn btn-sm btn-danger">
+                                                <i class="material-icons">delete</i>
+                                                Delete
+                                            </a>
+                                            {% endif %}
+                                            {% else %}
+                                            <span class="text-muted">No access</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'album:dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

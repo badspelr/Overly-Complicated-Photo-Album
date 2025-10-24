@@ -1,0 +1,363 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}AI Processing Settings{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/_forms.css' %}">
+<link rel="stylesheet" href="{% static 'album/css/_buttons.css' %}">
+<style>
+/* AI Settings Page Styles */
+.content-wrapper {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    color: var(--text-primary);
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.page-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.938rem;
+    margin: 0;
+}
+
+.settings-card {
+    background: var(--bg-paper);
+    border-radius: 8px;
+    padding: 2rem;
+    border: 1px solid var(--divider);
+    margin-bottom: 1.5rem;
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+}
+
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    color: var(--text-primary);
+    font-size: 1.125rem;
+    font-weight: 500;
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--divider);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(144, 202, 249, 0.05);
+    border: 1px solid rgba(144, 202, 249, 0.2);
+    border-radius: 6px;
+}
+
+.form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+    margin: 0;
+}
+
+.form-check-label {
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 0.938rem;
+    margin: 0;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-default);
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-family: 'Roboto', sans-serif;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-main);
+    box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.2);
+}
+
+.form-help {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.alert-info {
+    background: rgba(144, 202, 249, 0.1);
+    border: 1px solid rgba(144, 202, 249, 0.3);
+    color: var(--primary-main);
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--divider);
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 0.938rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--primary-main);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #5a9fd4;
+}
+
+.btn-secondary {
+    background: var(--bg-default);
+    color: var(--text-primary);
+    border: 1px solid var(--divider);
+}
+
+.btn-secondary:hover {
+    background: rgba(144, 202, 249, 0.1);
+}
+
+.info-box {
+    background: rgba(144, 202, 249, 0.05);
+    border: 1px solid rgba(144, 202, 249, 0.2);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-box h4 {
+    color: var(--primary-main);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0 0 0.5rem 0;
+}
+
+.info-box p {
+    color: var(--text-secondary);
+    font-size: 0.813rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.info-box ul {
+    color: var(--text-secondary);
+    font-size: 0.813rem;
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.5rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: 1rem;
+    }
+    
+    .settings-card {
+        padding: 1.5rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-robot"></i>
+            AI Processing Settings
+        </h1>
+        <p class="page-subtitle">Configure automatic AI processing for photos and videos</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+                <div class="alert-content">
+                    {{ message }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="info-box">
+        <h4><i class="fas fa-info-circle"></i> About AI Processing</h4>
+        <p>These settings control how the system automatically processes photos and videos with AI to generate descriptions, tags, and extract metadata.</p>
+        <ul>
+            <li><strong>Auto-process on upload:</strong> Process media immediately when uploaded</li>
+            <li><strong>Scheduled processing:</strong> Process unprocessed media at a specific time each day</li>
+            <li><strong>Batch processing:</strong> Configure batch size and timeout for optimal performance</li>
+        </ul>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="settings-card">
+            <div class="settings-section">
+                <h3 class="section-title">Automatic Processing</h3>
+                
+                <div class="form-group">
+                    <div class="form-check">
+                        {{ form.auto_process_on_upload }}
+                        <label class="form-check-label" for="{{ form.auto_process_on_upload.id_for_label }}">
+                            <strong>Auto-process on upload</strong><br>
+                            <span class="form-help">{{ form.auto_process_on_upload.help_text }}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="section-title">Scheduled Processing</h3>
+                
+                <div class="form-group">
+                    <div class="form-check">
+                        {{ form.scheduled_processing }}
+                        <label class="form-check-label" for="{{ form.scheduled_processing.id_for_label }}">
+                            <strong>Enable scheduled processing</strong><br>
+                            <span class="form-help">{{ form.scheduled_processing.help_text }}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.schedule_hour.id_for_label }}">Hour (0-23)</label>
+                        {{ form.schedule_hour }}
+                        <div class="form-help">{{ form.schedule_hour.help_text }}</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.schedule_minute.id_for_label }}">Minute (0-59)</label>
+                        {{ form.schedule_minute }}
+                        <div class="form-help">{{ form.schedule_minute.help_text }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="section-title">Performance Settings</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.batch_size.id_for_label }}">Batch Size</label>
+                        {{ form.batch_size }}
+                        <div class="form-help">{{ form.batch_size.help_text }}</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.processing_timeout.id_for_label }}">Timeout (seconds)</label>
+                        {{ form.processing_timeout }}
+                        <div class="form-help">{{ form.processing_timeout.help_text }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+                <a href="{% url 'album:process_photos_ai' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <div class="settings-card">
+        <h3 class="section-title">Current Settings Summary</h3>
+        <div style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6;">
+            <p><strong>Auto-process on upload:</strong> {% if settings.auto_process_on_upload %}Enabled{% else %}Disabled{% endif %}</p>
+            <p><strong>Scheduled processing:</strong> {% if settings.scheduled_processing %}Enabled ({{ settings.schedule_hour|stringformat:"02d" }}:{{ settings.schedule_minute|stringformat:"02d" }}){% else %}Disabled{% endif %}</p>
+            <p><strong>Batch size:</strong> {{ settings.batch_size }}</p>
+            <p><strong>Processing timeout:</strong> {{ settings.processing_timeout }} seconds</p>
+            <p><strong>Last modified:</strong> {{ settings.last_modified|date:"F d, Y g:i A" }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

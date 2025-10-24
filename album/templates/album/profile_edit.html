@@ -1,0 +1,58 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'album/css/profile_edit.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>Edit Profile</h1>
+    <form method="post" autocomplete="off">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text and field.name != 'groups' %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-submit">Save Changes</button>
+            <a href="{% url 'album:password_change_app' %}" class="btn btn-secondary">Change Password</a>
+            <a href="{% url 'album:dashboard' %}" class="btn btn-cancel">Cancel</a>
+        </div>
+        
+        <div class="danger-zone">
+            <h3>Danger Zone</h3>
+            <p>Once you delete your account, there is no going back. Please be certain.</p>
+            <a href="{% url 'album:delete_account' %}" class="btn btn-danger">
+                <i class="material-icons">delete_forever</i>
+                Delete Account
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Add checkbox-group class for browsers that don't support :has()
+document.addEventListener('DOMContentLoaded', function() {
+    const formGroups = document.querySelectorAll('.form-group');
+    formGroups.forEach(function(group) {
+        const checkbox = group.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+            group.classList.add('checkbox-group');
+        }
+    });
+});
+</script>
+{% endblock %}

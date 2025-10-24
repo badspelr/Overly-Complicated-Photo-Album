@@ -1,0 +1,36 @@
+# Lightweight Production Dockerfile
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install only essential system packages
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    libpq-dev \
+    gcc \
+    libmagic1 \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy lightweight requirements
+COPY requirements-docker.txt /app/
+RUN pip install --no-cache-dir -r requirements-docker.txt
+
+# Copy application code
+COPY . /app/
+
+# Create non-root user
+RUN adduser --disabled-password --gecos '' app && \
+    chown -R app:app /app
+USER app
+
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/', timeout=10)"
+
+# Start application
+EXPOSE 8000
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120", "photo_album.wsgi:application"]

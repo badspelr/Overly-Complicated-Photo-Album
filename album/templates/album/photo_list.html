@@ -1,0 +1,111 @@
+{% extends 'album/base.html' %}
+{% load album_tags %}
+{% load static %}
+{% block title %}Photos{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/favorites.css' %}">
+<script src="{% static 'album/js/lazy-loading.js' %}"></script>
+<script src="{% static 'album/js/favorites.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-1">
+        <!-- Header Section -->
+        <div class="card">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1>📸 All Photos</h1>
+                        <p class="text-secondary">Browse all your photo collection</p>
+                    </div>
+                    <a href="{% url 'album:minimal_upload' %}" class="btn btn-primary">
+                        ➕ Upload Photos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photos Grid -->
+        {% if photos %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="media-container">
+                        {% for photo in photos %}
+                            {% check_delete_permission user photo 'photo' as can_delete_photo %}
+                            <div class="media-item">
+                                <img data-src="{{ photo.thumbnail.url }}" alt="{{ photo.title }}" class="media-image">
+                                {% is_favorited user photo as favorited %}
+                                <button class="favorite-btn {% if favorited %}favorited{% endif %}" data-photo-id="{{ photo.id }}" title="{% if favorited %}Remove from favorites{% else %}Add to favorites{% endif %}">
+                                    <i class="material-icons">{% if favorited %}favorite{% else %}favorite_border{% endif %}</i>
+                                </button>
+                                <div class="media-info">
+                                    <a href="{% url 'album:photo_detail' photo.pk %}" class="media-title">{{ photo.title }}</a>
+                                    {% if photo.description %}
+                                        <p class="media-meta">{{ photo.description|truncatechars:100 }}</p>
+                                    {% endif %}
+                                    <div class="flex gap-2 mt-2">
+                                        <a href="{% url 'album:photo_detail' photo.pk %}" class="btn btn-sm btn-primary">👁️ View Details</a>
+                                        {% if can_delete_photo %}
+                                            <a href="{% url 'album:delete_photo' photo.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>📭 No Photos Yet</h3>
+                    <p class="mb-4">You haven't uploaded any photos yet. Start building your collection!</p>
+                    <a href="{% url 'album:minimal_upload' %}" class="btn btn-primary">
+                        📤 Upload Your First Photos
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="pagination">
+                        <span class="page-links">
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1" class="btn btn-secondary">&laquo; First</a>
+                                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">‹ Previous</a>
+                            {% endif %}
+
+                            <span class="page-current">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                            </span>
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">Next ›</a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-secondary">Last &raquo;</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Navigation -->
+        <div class="card">
+            <div class="card-body">
+                <div class="flex gap-4">
+                    <a href="{% url 'album:dashboard' %}" class="btn btn-secondary">
+                        ← Back to Dashboard
+                    </a>
+                    <a href="{% url 'album:video_list' %}" class="btn btn-secondary">
+                        🎥 View Videos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

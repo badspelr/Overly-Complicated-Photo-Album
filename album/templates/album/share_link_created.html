@@ -1,0 +1,61 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Share Link Created - {{ album.title }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/share_link_created.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-1">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">✅ Share Link Created!</h1>
+            <p class="card-text">Your album "{{ album.title }}" is now shareable</p>
+        </div>
+
+        <div class="card-body">
+            <div class="share-success">
+                <div class="share-url-container">
+                    <label class="share-label">Share this link:</label>
+                    <div class="share-url-input-group">
+                        <input type="text" id="shareUrl" value="{{ share_url }}" readonly class="share-url-input">
+                        <button type="button" class="btn btn-primary copy-btn">Copy</button>
+                    </div>
+                </div>
+
+                <div class="share-info">
+                    <div class="info-item">
+                        <strong>Album:</strong> {{ album.title }}
+                    </div>
+                    <div class="info-item">
+                        <strong>Created:</strong> {{ share_link.created_at|date:"M j, Y g:i A" }}
+                    </div>
+                    {% if share_link.expires_at %}
+                    <div class="info-item">
+                        <strong>Expires:</strong> {{ share_link.expires_at|date:"M j, Y g:i A" }}
+                    </div>
+                    {% else %}
+                    <div class="info-item">
+                        <strong>Expires:</strong> Never
+                    </div>
+                    {% endif %}
+                    <div class="info-item">
+                        <strong>Views:</strong> {{ share_link.view_count }}
+                    </div>
+                </div>
+
+                <div class="share-actions">
+                    <a href="{% url 'album:manage_share_links' album.pk %}" class="btn btn-secondary">Manage Links</a>
+                    <a href="{% url 'album:album_detail' album.pk %}" class="btn btn-primary">Back to Album</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'album/js/share_link_created.js' %}"></script>
+{% endblock %}

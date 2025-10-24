@@ -1,0 +1,99 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}User Manual{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'album/css/user_manual.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="manual-container">
+            <h1 class="card-title manual-title">User Manual</h1>
+
+            <div class="manual-section">
+                <h2>Introduction</h2>
+                <p>Welcome to the Photo Album application! This manual will guide you through the main features and functionalities of the site.</p>
+            </div>
+
+            <div class="manual-section">
+                <h2>Managing Albums</h2>
+                <p>You can create, edit, and delete albums to organize your photos and videos.</p>
+                <ul>
+                    <li><strong>Creating Albums:</strong> Navigate to "Create Album" from the main menu. Provide a title, description, and choose whether the album is public or private.</li>
+                    <li><strong>Uploading Media:</strong> You can upload photos and videos to any of your albums. Use the "Upload" page for bulk uploads or add media directly to a specific album.</li>
+                    <li><strong>Sharing Albums:</strong> You can create shareable links for your private albums to share them with specific people without making them public.</li>
+                </ul>
+            </div>
+
+            <div class="manual-section">
+                <h2>Custom Albums (Virtual Collections)</h2>
+                <p>Custom Albums work like playlists for your photos and videos - they let you create virtual collections from media across different regular albums.</p>
+                
+                <h3>Understanding the Difference</h3>
+                <ul>
+                    <li><strong>Regular Albums:</strong> Like physical photo albums - each photo belongs to one album</li>
+                    <li><strong>Custom Albums:</strong> Like playlists - photos can appear in multiple custom albums</li>
+                </ul>
+
+                <h3>Creating and Using Custom Albums</h3>
+                <ol>
+                    <li>Create a custom album from your dashboard</li>
+                    <li>Edit any photo or video</li>
+                    <li>Select one or more custom albums from the dropdown</li>
+                    <li>Save - the photo now appears in those custom albums</li>
+                </ol>
+
+                <h3>Example Use Cases</h3>
+                <ul>
+                    <li><strong>"Best of 2024":</strong> Collect favorite photos from multiple albums</li>
+                    <li><strong>"Family Memories":</strong> Gather family photos from vacations, holidays, and birthdays</li>
+                    <li><strong>"Nature Photography":</strong> Build a collection of nature shots from various trips</li>
+                </ul>
+
+                <p><em>Note: Photos stay in their original albums. Deleting from a custom album doesn't delete the original photo.</em></p>
+            </div>
+
+            <div class="manual-section">
+                <h2>Keyboard Shortcuts</h2>
+                <p>To help you navigate and use the application more efficiently, a number of keyboard shortcuts are available.</p>
+                
+                <h3>Global Navigation</h3>
+                <p>These shortcuts work on any page.</p>
+                <ul>
+                    <li><kbd>Alt</kbd> + <kbd>D</kbd> : Go to Dashboard</li>
+                    <li><kbd>Alt</kbd> + <kbd>A</kbd> : Go to My Albums</li>
+                    <li><kbd>Alt</kbd> + <kbd>U</kbd> : Go to Upload</li>
+                    <li><kbd>Alt</kbd> + <kbd>S</kbd> : Go to Search</li>
+                    <li><kbd>Alt</kbd> + <kbd>F</kbd> : Go to Favorites</li>
+                </ul>
+
+                <h3>Contextual Shortcuts</h3>
+                <p>These shortcuts are available on specific pages.</p>
+                <ul>
+                    <li><strong>Album Detail Page:</strong>
+                        <ul>
+                            <li><kbd>Ctrl</kbd> + <kbd>A</kbd> : Select or deselect all photos.</li>
+                            <li><kbd>Delete</kbd> : Trigger the "Delete Selected" action for the selected photos.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Photo Detail Page:</strong>
+                        <ul>
+                            <li><kbd>←</kbd> (Left Arrow) : Navigate to the previous photo.</li>
+                            <li><kbd>→</kbd> (Right Arrow) : Navigate to the next photo.</li>
+                            <li><kbd>F</kbd> : Toggle the photo as a favorite.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Search Page:</strong>
+                        <ul>
+                            <li><kbd>/</kbd> : Focus the main search bar.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

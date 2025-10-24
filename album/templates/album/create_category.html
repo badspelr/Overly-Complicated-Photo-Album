@@ -1,0 +1,91 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit Category{% else %}Create Category{% endif %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/create_category.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-1">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="material-icons">category</i> {% if is_edit %}Edit Category{% else %}Create New Category{% endif %}</h2>
+                <p class="card-text mb-0">{% if is_edit %}Update your category details{% else %}Organize your albums with custom categories{% endif %}</p>
+            </div>
+            <div class="card-body">
+                <form method="post" class="form-container">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                            <i class="material-icons">label</i>
+                            Category Name
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                        {% endif %}
+                        <small class="text-secondary">Choose a descriptive name for your category</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            <i class="material-icons">description</i>
+                            Description
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                        <small class="text-secondary">Optional description to help identify the category</small>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="flex gap-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="material-icons">{% if is_edit %}save{% else %}add{% endif %}</i>
+                                {% if is_edit %}Save Changes{% else %}Create{% endif %}
+                            </button>
+                            <a href="{% url 'album:dashboard' %}" class="btn btn-secondary">
+                                <i class="material-icons">cancel</i>
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if not is_edit %}
+        <!-- Tips Section -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="material-icons">lightbulb</i> Category Tips</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-2">
+                    <div>
+                        <h4><i class="material-icons">folder</i> Organization Ideas</h4>
+                        <ul class="text-secondary">
+                            <li>Events (Weddings, Parties)</li>
+                            <li>Locations (Vacations, Trips)</li>
+                            <li>People (Family, Friends)</li>
+                            <li>Themes (Nature, Urban)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4><i class="material-icons">star</i> Best Practices</h4>
+                        <ul class="text-secondary">
+                            <li>Use consistent naming</li>
+                            <li>Keep descriptions helpful</li>
+                            <li>Don't create too many categories</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

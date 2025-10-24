@@ -1,0 +1,86 @@
+/* CSS Variables for login page */
+
+
+.form-card {
+    max-width: 450px;
+    margin: 3rem auto;
+    background-color: var(--bg-paper);
+    padding: 2.5rem;
+    border-radius: 8px;
+    border: 2px solid var(--divider);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.form-card h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    text-align: center;
+}
+.form-card .form-subheading {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+.form-group {
+    margin-bottom: 1.5rem;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.form-group input, .form-group textarea, .form-group select {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 2px solid var(--divider);
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: var(--bg-paper);
+    color: var(--text-primary);
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--primary-main);
+    box-shadow: 0 0 0 3px rgba(144, 202, 249, 0.2);
+}
+.btn-submit {
+    display: block;
+    width: 100%;
+    background-color: var(--primary-main);
+    color: var(--bg-default);
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+}
+.btn-submit:hover {
+    background-color: #a6d4fa;
+}
+.form-footer-link {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+.form-footer-link a {
+    color: var(--primary-main);
+    text-decoration: none;
+}
+.form-footer-link a:hover {
+    text-decoration: underline;
+}
+.alert-danger {
+    background-color: #2c1d1f;
+    border: 1px solid var(--secondary-main);
+    color: var(--secondary-main);
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+}

@@ -1,0 +1,211 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+<style>
+    .documentation-index {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .doc-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .doc-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 2.5em;
+        font-weight: 600;
+    }
+    
+    .doc-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1.1em;
+    }
+    
+    .doc-section {
+        background: white;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border-left: 4px solid #667eea;
+    }
+    
+    .doc-section h2 {
+        margin: 0 0 20px 0;
+        color: #333;
+        font-size: 1.5em;
+        font-weight: 600;
+    }
+    
+    .doc-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+    }
+    
+    .doc-list li {
+        margin: 0;
+    }
+    
+    .doc-link {
+        display: block;
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.2s ease;
+        border: 1px solid #e9ecef;
+    }
+    
+    .doc-link:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        text-decoration: none;
+    }
+    
+    .doc-link::before {
+        content: "📄 ";
+        margin-right: 8px;
+    }
+    
+    .search-box {
+        margin-bottom: 30px;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .search-box input {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 16px;
+        border: 2px solid #e9ecef;
+        border-radius: 6px;
+        transition: border-color 0.2s;
+    }
+    
+    .search-box input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .stat-number {
+        font-size: 2em;
+        font-weight: 700;
+        color: #667eea;
+        display: block;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="documentation-index">
+    <div class="doc-header">
+        <h1>📚 Documentation Center</h1>
+        <p>Complete guides and documentation for the Photo Album application</p>
+    </div>
+    
+    <div class="search-box">
+        <input type="text" id="doc-search" placeholder="🔍 Search documentation..." onkeyup="filterDocs()">
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-number">{{ docs_structure|length }}</span>
+            <div class="stat-label">Categories</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number" id="total-docs">0</span>
+            <div class="stat-label">Documents</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">✅</span>
+            <div class="stat-label">Always Up-to-date</div>
+        </div>
+    </div>
+    
+    {% for category, docs in docs_structure.items %}
+    <div class="doc-section" data-category="{{ category }}">
+        <h2>{{ category }}</h2>
+        <ul class="doc-list">
+            {% for doc in docs %}
+            <li>
+                <a href="{% url 'album:documentation_view' doc.file %}" class="doc-link" data-title="{{ doc.title|lower }}">
+                    {{ doc.title }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+// Count total docs
+document.addEventListener('DOMContentLoaded', function() {
+    const totalDocs = document.querySelectorAll('.doc-link').length;
+    document.getElementById('total-docs').textContent = totalDocs;
+});
+
+// Search/filter functionality
+function filterDocs() {
+    const searchTerm = document.getElementById('doc-search').value.toLowerCase();
+    const sections = document.querySelectorAll('.doc-section');
+    
+    sections.forEach(section => {
+        const links = section.querySelectorAll('.doc-link');
+        let hasVisibleDocs = false;
+        
+        links.forEach(link => {
+            const title = link.getAttribute('data-title');
+            if (title.includes(searchTerm)) {
+                link.parentElement.style.display = 'block';
+                hasVisibleDocs = true;
+            } else {
+                link.parentElement.style.display = 'none';
+            }
+        });
+        
+        // Hide section if no docs match
+        section.style.display = hasVisibleDocs ? 'block' : 'none';
+    });
+}
+</script>
+{% endblock %}

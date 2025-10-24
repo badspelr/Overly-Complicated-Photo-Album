@@ -1,0 +1,57 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}My Favorites{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/main.css' %}">
+<link rel="stylesheet" href="{% static 'album/css/favorites.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-1">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="material-icons">favorite</i>
+                My Favorites
+            </h2>
+            <p class="card-text mb-0">
+                {% if favorites_count %}
+                    You have {{ favorites_count }} favorite photo{{ favorites_count|pluralize }}
+                {% else %}
+                    You haven't favorited any photos yet
+                {% endif %}
+            </p>
+        </div>
+        <div class="card-body">
+            {% if photos %}
+                <div class="media-container">
+                    {% for photo in photos %}
+                    <div class="media-card">
+                        <a href="{% url 'album:photo_detail' photo.pk %}" class="media-link">
+                            <img src="{{ photo.thumbnail.url }}" alt="{{ photo.title }}" class="media-thumbnail">
+                        </a>
+                        <button class="favorite-btn favorited" data-photo-id="{{ photo.id }}" title="Remove from favorites">
+                            <i class="material-icons">favorite</i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state-favorites">
+                    <i class="material-icons">favorite_border</i>
+                    <p class="text-secondary">Start favoriting photos to see them here!</p>
+                    <a href="{% url 'album:search_media' %}" class="btn btn-primary">
+                        <i class="material-icons">search</i> Browse Photos
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'album/js/favorites.js' %}"></script>
+{% endblock %}

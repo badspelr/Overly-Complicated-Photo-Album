@@ -1,0 +1,375 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Cookie Policy{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Cookie Policy Page Styles */
+.policy-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.policy-header {
+    text-align: center;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.policy-header h1 {
+    color: var(--text-primary);
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.policy-header p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.policy-content {
+    background: var(--bg-paper);
+    border-radius: 8px;
+    padding: 2.5rem;
+    border: 1px solid var(--divider);
+    line-height: 1.8;
+}
+
+.policy-section {
+    margin-bottom: 3rem;
+}
+
+.policy-section:last-child {
+    margin-bottom: 0;
+}
+
+.policy-section h2 {
+    color: var(--primary-main);
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+}
+
+.policy-section h3 {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 1.5rem 0 0.75rem 0;
+}
+
+.policy-section p {
+    color: var(--text-secondary);
+    margin: 0 0 1rem 0;
+}
+
+.policy-section ul,
+.policy-section ol {
+    color: var(--text-secondary);
+    margin: 0 0 1rem 0;
+    padding-left: 2rem;
+}
+
+.policy-section li {
+    margin-bottom: 0.5rem;
+}
+
+.cookie-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background: var(--bg-default);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cookie-table th {
+    background: rgba(144, 202, 249, 0.1);
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 2px solid var(--divider);
+}
+
+.cookie-table td {
+    color: var(--text-secondary);
+    padding: 1rem;
+    border-bottom: 1px solid var(--divider);
+}
+
+.cookie-table tr:last-child td {
+    border-bottom: none;
+}
+
+.cookie-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-essential {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.badge-functional {
+    background: rgba(33, 150, 243, 0.2);
+    color: #2196f3;
+}
+
+.badge-analytics {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+}
+
+.info-box {
+    background: rgba(144, 202, 249, 0.08);
+    border-left: 4px solid var(--primary-main);
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 4px;
+}
+
+.info-box strong {
+    color: var(--primary-main);
+}
+
+.settings-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--primary-main);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+}
+
+.settings-link:hover {
+    background: #5a9fd4;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .policy-wrapper {
+        padding: 1rem;
+    }
+    
+    .policy-content {
+        padding: 1.5rem;
+    }
+    
+    .cookie-table {
+        font-size: 0.875rem;
+    }
+    
+    .cookie-table th,
+    .cookie-table td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="policy-wrapper">
+    <div class="policy-header">
+        <h1><i class="fas fa-cookie-bite"></i> Cookie Policy</h1>
+        <p>Last Updated: October 18, 2025</p>
+    </div>
+
+    <div class="policy-content">
+        <section class="policy-section">
+            <h2>What Are Cookies?</h2>
+            <p>
+                Cookies are small text files that are placed on your device when you visit our website. 
+                They help us provide you with a better experience by remembering your preferences and 
+                understanding how you use our site.
+            </p>
+        </section>
+
+        <section class="policy-section">
+            <h2>How We Use Cookies</h2>
+            <p>We use cookies for the following purposes:</p>
+            <ul>
+                <li><strong>Essential Functionality:</strong> To enable core features like user authentication and security</li>
+                <li><strong>User Experience:</strong> To remember your preferences and settings</li>
+                <li><strong>Security:</strong> To protect against cross-site request forgery and other attacks</li>
+                <li><strong>Performance:</strong> To understand how you use our site and improve our services</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>Types of Cookies We Use</h2>
+
+            <h3>Essential Cookies (Required)</h3>
+            <p>
+                These cookies are necessary for the website to function properly. They enable core functionality 
+                such as security, network management, and accessibility. You cannot opt out of these cookies.
+            </p>
+
+            <table class="cookie-table">
+                <thead>
+                    <tr>
+                        <th>Cookie Name</th>
+                        <th>Purpose</th>
+                        <th>Duration</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>sessionid</code></td>
+                        <td>Maintains your logged-in session and user authentication state</td>
+                        <td>2 weeks or until logout</td>
+                        <td><span class="cookie-type-badge badge-essential">Essential</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>csrftoken</code></td>
+                        <td>Protects against Cross-Site Request Forgery (CSRF) attacks</td>
+                        <td>1 year</td>
+                        <td><span class="cookie-type-badge badge-essential">Essential</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>cookie_consent</code></td>
+                        <td>Stores your cookie consent preferences</td>
+                        <td>1 year</td>
+                        <td><span class="cookie-type-badge badge-essential">Essential</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>messages</code></td>
+                        <td>Displays one-time notification messages after actions</td>
+                        <td>Session (browser close)</td>
+                        <td><span class="cookie-type-badge badge-essential">Essential</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Functional Cookies (Optional)</h3>
+            <p>
+                These cookies allow us to remember choices you make (such as your username or language preference) 
+                and provide enhanced, more personalized features.
+            </p>
+
+            <table class="cookie-table">
+                <thead>
+                    <tr>
+                        <th>Cookie Name</th>
+                        <th>Purpose</th>
+                        <th>Duration</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>user_preferences</code></td>
+                        <td>Stores your UI preferences (theme, view mode, etc.)</td>
+                        <td>1 year</td>
+                        <td><span class="cookie-type-badge badge-functional">Functional</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>slideshow_speed</code></td>
+                        <td>Remembers your preferred slideshow speed setting</td>
+                        <td>6 months</td>
+                        <td><span class="cookie-type-badge badge-functional">Functional</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <strong><i class="fas fa-info-circle"></i> Note:</strong> We do not currently use analytics or marketing cookies. 
+                If this changes in the future, we will update this policy and request your consent.
+            </div>
+        </section>
+
+        <section class="policy-section">
+            <h2>Managing Cookies</h2>
+            
+            <h3>Your Cookie Preferences</h3>
+            <p>
+                You can manage your cookie preferences at any time by clicking the button below:
+            </p>
+            <a href="javascript:void(0);" class="settings-link" onclick="showCookieSettings()">
+                <i class="fas fa-cog"></i> Manage Cookie Preferences
+            </a>
+
+            <h3>Browser Settings</h3>
+            <p>
+                Most web browsers allow you to control cookies through their settings. However, if you limit 
+                the ability of websites to set cookies, you may worsen your overall user experience, as some 
+                functionality may no longer work.
+            </p>
+            <p>Here's how to manage cookies in popular browsers:</p>
+            <ul>
+                <li><strong>Chrome:</strong> Settings → Privacy and Security → Cookies and other site data</li>
+                <li><strong>Firefox:</strong> Options → Privacy & Security → Cookies and Site Data</li>
+                <li><strong>Safari:</strong> Preferences → Privacy → Cookies and website data</li>
+                <li><strong>Edge:</strong> Settings → Cookies and site permissions → Cookies and site data</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>Third-Party Cookies</h2>
+            <p>
+                We do not currently allow third-party cookies on our site. All cookies are set by our domain only. 
+                If we integrate third-party services in the future that use cookies, we will update this policy 
+                and obtain your consent before enabling them.
+            </p>
+        </section>
+
+        <section class="policy-section">
+            <h2>Your Rights</h2>
+            <p>Under GDPR and other privacy regulations, you have the right to:</p>
+            <ul>
+                <li><strong>Access:</strong> Request information about cookies we store</li>
+                <li><strong>Withdraw Consent:</strong> Change your cookie preferences at any time</li>
+                <li><strong>Object:</strong> Object to certain types of cookie usage</li>
+                <li><strong>Delete:</strong> Request deletion of your cookie data</li>
+            </ul>
+        </section>
+
+        <section class="policy-section">
+            <h2>Updates to This Policy</h2>
+            <p>
+                We may update this Cookie Policy from time to time to reflect changes in our practices or for 
+                other operational, legal, or regulatory reasons. We encourage you to review this policy 
+                periodically for any updates.
+            </p>
+            <p>
+                The "Last Updated" date at the top of this page indicates when this policy was last revised.
+            </p>
+        </section>
+
+        <section class="policy-section">
+            <h2>Contact Us</h2>
+            <p>
+                If you have any questions about our use of cookies or this Cookie Policy, please contact us:
+            </p>
+            <ul>
+                <li><strong>Email:</strong> Via our <a href="{% url 'album:contact' %}" style="color: var(--primary-main);">Contact Form</a></li>
+                <li><strong>Page:</strong> <a href="{% url 'album:about' %}" style="color: var(--primary-main);">About Us</a></li>
+            </ul>
+        </section>
+
+        <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--divider); text-align: center;">
+            <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                <a href="{% url 'album:homepage' %}" style="color: var(--primary-main); text-decoration: none; margin: 0 1rem;">Home</a>
+                <a href="{% url 'album:about' %}" style="color: var(--primary-main); text-decoration: none; margin: 0 1rem;">About</a>
+                <a href="{% url 'album:contact' %}" style="color: var(--primary-main); text-decoration: none; margin: 0 1rem;">Contact</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+{% load static %}
+<script src="{% static 'album/js/cookie-consent.js' %}"></script>
+{% endblock %}
