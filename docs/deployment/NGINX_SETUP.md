@@ -2,6 +2,8 @@
 
 This guide covers setting up Nginx as a reverse proxy for the Django Photo Album application in production.
 
+> 🌍 **Setting up multiple domains?** See [Virtual Domains Setup Guide](VIRTUAL_DOMAINS_SETUP.md) for detailed instructions on configuring multiple websites or subdomains on one server.
+
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Option 1: Nginx with Docker Compose](#option-1-nginx-with-docker-compose)
@@ -15,6 +17,8 @@ This guide covers setting up Nginx as a reverse proxy for the Django Photo Album
 - Docker and Docker Compose installed
 - Domain name pointed to your server (for SSL)
 - Photo Album application running (see [DOCKER.md](DOCKER.md))
+
+> 📝 **Note:** This guide assumes a single domain setup. For multiple domains/subdomains on the same server, see the [Virtual Domains Setup Guide](VIRTUAL_DOMAINS_SETUP.md).
 
 ## Option 1: Nginx with Docker Compose
 
@@ -129,6 +133,8 @@ docker-compose -f docker-compose.prod.yml exec nginx nginx -t
 ## Option 2: System Nginx as Reverse Proxy
 
 Use this option if you want Nginx installed directly on your host system.
+
+> 💡 **Tip:** If you're setting up multiple websites on the same server (e.g., photos.example.com + blog.example.com), see the [Virtual Domains Setup Guide](VIRTUAL_DOMAINS_SETUP.md) for detailed instructions on configuring virtual hosts.
 
 ### 1. Install Nginx
 
@@ -582,11 +588,25 @@ See [nginx/nginx.conf.example](../../nginx/nginx.conf.example) for a complete, p
 - [Certbot Documentation](https://certbot.eff.org/)
 - [Django Deployment Checklist](https://docs.djangoproject.com/en/stable/howto/deployment/checklist/)
 - [Nginx Reverse Proxy Guide](https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/)
+- **[Virtual Domains Setup Guide](VIRTUAL_DOMAINS_SETUP.md)** - Multiple domains/subdomains on one server
+
+## Virtual Domains / Multiple Sites
+
+If you need to run multiple websites on the same server (e.g., `photos.example.com`, `blog.example.com`, `www.example.com`), see our comprehensive **[Virtual Domains Setup Guide](VIRTUAL_DOMAINS_SETUP.md)**.
+
+This guide covers:
+- Setting up multiple domains on one server
+- Subdomain configuration (photos.example.com)
+- DNS configuration for virtual hosts
+- Nginx virtual host setup
+- SSL certificates for multiple domains
+- Complete step-by-step examples
 
 ## Next Steps
 
 After setting up Nginx:
 1. Configure SSL/TLS certificates
-2. Set up monitoring (see [MONITORING.md](MONITORING.md))
-3. Configure backups (see [BACKUP_STRATEGY.md](BACKUP_STRATEGY.md))
-4. Review security settings (see [SECURITY_HARDENING.md](SECURITY_HARDENING.md))
+2. **Set up virtual domains** (if hosting multiple sites) - see [VIRTUAL_DOMAINS_SETUP.md](VIRTUAL_DOMAINS_SETUP.md)
+3. Set up monitoring (see [MONITORING.md](MONITORING.md))
+4. Configure backups (see [BACKUP_STRATEGY.md](BACKUP_STRATEGY.md))
+5. Review security settings (see [SECURITY_HARDENING.md](SECURITY_HARDENING.md))
