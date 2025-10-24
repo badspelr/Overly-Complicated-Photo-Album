@@ -87,6 +87,26 @@ Visit `http://localhost:8000` and start uploading photos!
 
 **✨ AI features work automatically** - Celery worker handles background processing for face detection, smart search, and more.
 
+---
+
+## ⚠️ CRITICAL: Production Deployment
+
+**Before deploying to production, you MUST configure these security settings:**
+
+```bash
+# In your .env file:
+DEBUG=False                    # ✅ REQUIRED
+SECURE_SSL_REDIRECT=True       # ✅ REQUIRED
+SESSION_COOKIE_SECURE=True     # ✅ REQUIRED
+CSRF_COOKIE_SECURE=True        # ✅ REQUIRED
+```
+
+**Without these settings, your deployment is NOT secure.**
+
+📋 **See:** [Production Security Checklist](docs/deployment/PRODUCTION_SECURITY_CHECKLIST.md) for complete deployment guide.
+
+---
+
 ### 🐳 Docker Compose Files
 
 Different compose files for different use cases:
