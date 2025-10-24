@@ -188,6 +188,28 @@ For production deployment:
 3. Configure [Celery Workers](docs/admin-guides/CELERY_SETUP.md) for background processing
 4. Set up proper [AI Settings](docs/admin-guides/ADMIN_GUIDE_AI_SETTINGS.md)
 
+## 🔒 Security
+
+**⚠️ Important Security Notes:**
+
+- **No Default Admin Account** - You must create your own admin user:
+  ```bash
+  docker-compose exec web python manage.py createsuperuser
+  ```
+- **Change SECRET_KEY** - Generate a unique secret key for production (never use the example)
+- **Update .env** - Configure all environment variables in `.env` from `.env.example`
+- **CORS Settings** - Configure `CORS_ALLOWED_ORIGINS` with your actual domains
+- **Database Password** - Use a strong, unique password for `DB_PASSWORD`
+- **HTTPS Required** - Always use SSL/TLS in production (see [Nginx Setup](docs/deployment/NGINX_SETUP.md))
+
+**After deployment, immediately:**
+1. Create your admin account with a strong password
+2. Verify `DEBUG=False` in production
+3. Check that `ALLOWED_HOSTS` includes your domain
+4. Test that HTTPS redirects work correctly
+
+See [Security Hardening Guide](docs/admin-guides/SECURITY_HARDENING.md) for more details.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please:
