@@ -341,3 +341,86 @@ Then decide: Keep building or start using?
 **With Full Roadmap:** Industry-leading (A+)
 
 **Bottom line:** You can ship today or build more. Either way, this is impressive work. 🎉
+
+---
+
+## 📦 Future Enhancement Ideas
+
+### Modular Requirements (Optional Features)
+
+**Idea**: Break up `requirements.txt` into feature-based requirement files to allow optional installations.
+
+**Problem**: 
+- Current `requirements.txt` includes all dependencies (AI, GPU, facial recognition, etc.)
+- Some admins may want a lightweight installation without AI/GPU features
+- Large dependency set increases deployment complexity and image size
+
+**Proposed Structure**:
+```
+requirements/
+├── base.txt              # Core Django dependencies (required)
+├── ai.txt                # AI features (transformers, sentence-transformers)
+├── gpu.txt               # GPU acceleration (torch with CUDA)
+├── face-recognition.txt  # Face detection libraries
+├── video.txt             # Video processing (opencv, moviepy)
+├── production.txt        # Production tools (gunicorn, sentry)
+└── dev.txt              # Development tools (pytest, black, ruff)
+```
+
+**Benefits**:
+- ✅ Smaller Docker images for simple deployments
+- ✅ Faster builds without GPU dependencies
+- ✅ Lower resource requirements for CPU-only deployments
+- ✅ Clearer dependency organization
+- ✅ Easier to troubleshoot version conflicts
+- ✅ Users can pick features they need
+
+**Installation Examples**:
+```bash
+# Minimal installation (just photo storage)
+pip install -r requirements/base.txt
+
+# With AI but no GPU
+pip install -r requirements/base.txt -r requirements/ai.txt
+
+# Full installation with GPU
+pip install -r requirements/base.txt \
+            -r requirements/ai.txt \
+            -r requirements/gpu.txt \
+            -r requirements/face-recognition.txt
+
+# Production deployment
+pip install -r requirements/base.txt -r requirements/production.txt
+```
+
+**Docker Compose Options**:
+```yaml
+# docker-compose.minimal.yml - No AI features
+# docker-compose.light.yml   - CPU-only AI
+# docker-compose.yml         - Full GPU support (current)
+```
+
+**Settings Configuration**:
+```python
+# settings.py - Feature flags
+FEATURES = {
+    'AI_PROCESSING': os.getenv('ENABLE_AI', 'false') == 'true',
+    'GPU_ACCELERATION': os.getenv('ENABLE_GPU', 'false') == 'true',
+    'FACE_RECOGNITION': os.getenv('ENABLE_FACE_DETECTION', 'false') == 'true',
+    'VIDEO_PROCESSING': os.getenv('ENABLE_VIDEO', 'true') == 'true',
+}
+```
+
+**Implementation Effort**: 1-2 days
+- Split requirements.txt into modules
+- Update Dockerfiles to support different profiles
+- Add feature flags in settings
+- Update documentation
+- Test each installation profile
+
+**Priority**: LOW (Nice to have, not critical)
+**Value**: HIGH for users who want lightweight deployments
+
+---
+
+**Note**: This is tracked as a future enhancement. The current monolithic `requirements.txt` works fine for most use cases.
