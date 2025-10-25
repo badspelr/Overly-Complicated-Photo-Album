@@ -713,7 +713,7 @@ curl http://localhost:8000
 ```
 
 **Solutions:**
-- Restart Docker: `docker-compose -f docker-compose.prod.yml restart`
+- Restart Docker: `docker compose -f docker-compose.prod.yml restart`
 - Check .env file has correct settings
 - Verify ALLOWED_HOSTS includes your domain
 
@@ -772,7 +772,7 @@ CSRF_TRUSTED_ORIGINS=https://photos.example.com
 
 **Solution:**
 - Update .env with correct domain
-- Restart: `docker-compose -f docker-compose.prod.yml restart`
+- Restart: `docker compose -f docker-compose.prod.yml restart`
 
 ## Additional Resources
 
@@ -795,7 +795,7 @@ After setup:
    - See [BACKUP_STRATEGY.md](BACKUP_STRATEGY.md)
 
 4. **Monitor logs**
-   - `docker-compose logs -f`
+   - `docker compose logs -f`
 
 5. **Update regularly**
    - `git pull && docker-compose up -d --build`

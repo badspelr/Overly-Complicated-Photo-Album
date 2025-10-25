@@ -41,7 +41,7 @@ docker-compose -f docker-compose.light.yml exec web python manage.py createsuper
 - ✅ Matches production environment exactly
 - ✅ One command starts everything
 - ✅ No manual PostgreSQL/Redis setup
-- ✅ Easy cleanup with `docker-compose down`
+- ✅ Easy cleanup with `docker compose down`
 
 See [`docs/deployment/DOCKER.md`](../deployment/DOCKER.md) for complete Docker guide.
 

@@ -171,6 +171,6 @@ docker-compose up -d
 - ✅ **Removed**: Host virtual environment (what developers manually manage)
 - ✅ **Kept**: Docker build-stage venv (multi-stage build best practice)
 - ✅ **Result**: Developers don't manage venvs, Docker handles everything
-- ✅ **Benefit**: One command (`docker-compose up`) instead of multiple setup steps
+- ✅ **Benefit**: One command (`docker compose up`) instead of multiple setup steps
 
 **The goal was to eliminate manual venv management for developers - accomplished!**

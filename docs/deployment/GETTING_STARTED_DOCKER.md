@@ -325,15 +325,15 @@ sudo systemctl stop redis
 
 ## Quick Reference
 
-**Start**: `docker-compose up -d`  
-**Stop**: `docker-compose down`  
-**Logs**: `docker-compose logs -f`  
-**Status**: `docker-compose ps`  
-**Shell**: `docker-compose exec web bash`  
-**Django**: `docker-compose exec web python manage.py <command>`
+**Start**: `docker compose up -d`  
+**Stop**: `docker compose down`  
+**Logs**: `docker compose logs -f`  
+**Status**: `docker compose ps`  
+**Shell**: `docker compose exec web bash`  
+**Django**: `docker compose exec web python manage.py <command>`
 
 **Full docs**: See `docs/deployment/DOCKER_SETUP.md`
 
 ---
 
-**Need help?** Check logs first: `docker-compose logs -f`
+**Need help?** Check logs first: `docker compose logs -f`

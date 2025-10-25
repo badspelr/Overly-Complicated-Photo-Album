@@ -114,17 +114,17 @@ Different compose files for different use cases:
 - **`docker-compose.yml`** - Development (default)
   - Code mounted as volumes for live editing
   - No rebuild needed when you change Python files
-  - Use: `docker-compose up -d`
+  - Use: `docker compose up -d`
 
 - **`docker-compose.prod.yml`** - Production
   - Code baked into image (more secure)
   - Requires rebuild for code changes
-  - Use: `docker-compose -f docker-compose.prod.yml up -d`
+  - Use: `docker compose -f docker-compose.prod.yml up -d`
 
 - **`docker-compose.light.yml`** - Lightweight/CPU-only
   - No GPU dependencies
   - Smaller image size
-  - Use: `docker-compose -f docker-compose.light.yml up -d`
+  - Use: `docker compose -f docker-compose.light.yml up -d`
 
 - **`docker-compose.nginx.yml`** - Production with Nginx
   - Includes Nginx reverse proxy

@@ -243,7 +243,7 @@ openapi-generator-cli generate \
 ## Troubleshooting
 
 ### Can't see any endpoints
-- Make sure the Docker container is running: `docker-compose ps`
+- Make sure the Docker container is running: `docker compose ps`
 - Check for errors: `docker logs photo_album_web`
 
 ### Authentication not working

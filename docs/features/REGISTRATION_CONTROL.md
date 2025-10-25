@@ -257,6 +257,6 @@ If you encounter issues:
 1. Check admin logs for errors
 2. Verify Site Settings object exists
 3. Clear browser cache
-4. Check Django logs: `docker-compose logs web`
+4. Check Django logs: `docker compose logs web`
 
 For questions or bug reports, see the main documentation.

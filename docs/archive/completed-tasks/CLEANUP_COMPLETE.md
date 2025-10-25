@@ -145,7 +145,7 @@ docker-compose -f docker-compose.light.yml up -d --build
 ## ❓ FAQ
 
 ### Q: Do I need to activate a virtual environment?
-**A:** No! When using Docker, just run `docker-compose up -d`
+**A:** No! When using Docker, just run `docker compose up -d`
 
 ### Q: What about `pip install`?
 **A:** Dependencies are installed inside the Docker image. Add to `requirements.txt` and rebuild:

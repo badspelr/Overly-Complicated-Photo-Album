@@ -375,15 +375,15 @@ Your Photo Album is now fully set up and secured.
 
 | Task | Command |
 |------|---------|
-| Start services | `docker-compose up -d` |
-| Stop services | `docker-compose down` |
-| View logs | `docker-compose logs -f web` |
-| Run migrations | `docker-compose exec web python manage.py migrate` |
-| Create user | `docker-compose exec web python manage.py createsuperuser` |
-| Restart web | `docker-compose restart web` |
-| Restart Celery | `docker-compose restart celery-worker celery-beat` |
-| Shell access | `docker-compose exec web bash` |
-| Django shell | `docker-compose exec web python manage.py shell` |
+| Start services | `docker compose up -d` |
+| Stop services | `docker compose down` |
+| View logs | `docker compose logs -f web` |
+| Run migrations | `docker compose exec web python manage.py migrate` |
+| Create user | `docker compose exec web python manage.py createsuperuser` |
+| Restart web | `docker compose restart web` |
+| Restart Celery | `docker compose restart celery-worker celery-beat` |
+| Shell access | `docker compose exec web bash` |
+| Django shell | `docker compose exec web python manage.py shell` |
 
 ---
 

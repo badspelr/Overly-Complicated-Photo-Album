@@ -207,7 +207,7 @@ send_mail(
 
 ### Still printing to console
 - Make sure `DEBUG=False` in `.env`
-- Restart Docker: `docker-compose restart web`
+- Restart Docker: `docker compose restart web`
 - Verify .env is in the right location (same dir as docker-compose.yml)
 
 ## Development vs Production

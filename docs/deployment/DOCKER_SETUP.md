@@ -374,6 +374,6 @@ Logs are written to `./logs/` directory. Configure log rotation on your host sys
 ## Support
 
 For issues or questions:
-- Check logs: `docker-compose logs -f`
+- Check logs: `docker compose logs -f`
 - Review environment variables in `.env`
-- Ensure all services are healthy: `docker-compose ps`
+- Ensure all services are healthy: `docker compose ps`

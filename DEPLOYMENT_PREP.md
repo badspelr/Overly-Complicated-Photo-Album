@@ -121,7 +121,7 @@ Anyone can now:
 1. Clone the repository from GitHub
 2. Copy `.env.example` to `.env`
 3. Edit `.env` with their settings
-4. Run `docker-compose up -d`
+4. Run `docker compose up -d`
 5. Access at `http://localhost:8000`
 
 No complicated setup, no virtual environments, just Docker and go!

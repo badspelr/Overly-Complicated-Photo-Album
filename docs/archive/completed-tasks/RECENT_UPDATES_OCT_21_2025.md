@@ -295,7 +295,7 @@ In `docker-compose.yml`, remove or comment out these lines:
 
 1. **Remove Development Volumes:**
    - Comment out code volume mounts in docker-compose.yml
-   - Rebuild Docker image with `docker-compose build web`
+   - Rebuild Docker image with `docker compose build web`
    - Code will be baked into image (no live reloading)
 
 2. **Set Album Admin Limit:**

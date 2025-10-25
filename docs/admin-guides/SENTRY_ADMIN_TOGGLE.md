@@ -286,6 +286,6 @@ Monthly (30 days):
 ---
 
 **Questions or Issues?**
-- Check logs: `docker-compose logs web`
+- Check logs: `docker compose logs web`
 - Sentry Dashboard: https://sentry.io
 - Django Admin: http://localhost:8000/admin/

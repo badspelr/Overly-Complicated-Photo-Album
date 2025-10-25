@@ -86,10 +86,10 @@ The application now runs as **5 containerized services**:
 
 ### Developer Friendly
 
-- ✅ Simple commands (`docker-compose up -d`)
+- ✅ Simple commands (`docker compose up -d`)
 - ✅ Hot-reload possible with bind mounts
-- ✅ Easy log access (`docker-compose logs -f`)
-- ✅ Django management commands via `docker-compose exec`
+- ✅ Easy log access (`docker compose logs -f`)
+- ✅ Django management commands via `docker compose exec`
 - ✅ Database shell access
 - ✅ Celery inspection tools
 
@@ -213,16 +213,16 @@ docker-compose restart web celery-worker celery-beat
 
 Before removing the virtual environment:
 
-- [ ] All 5 containers running and healthy (`docker-compose ps`)
+- [ ] All 5 containers running and healthy (`docker compose ps`)
 - [ ] Web interface accessible (http://localhost:8000)
 - [ ] Can log in to admin panel
 - [ ] Upload and process a photo
 - [ ] Check Celery worker logs show processing
 - [ ] Search functionality works
-- [ ] Scheduled tasks configured (`docker-compose exec celery-beat celery -A photo_album inspect scheduled`)
+- [ ] Scheduled tasks configured (`docker compose exec celery-beat celery -A photo_album inspect scheduled`)
 - [ ] Logs being written to `./logs/`
 - [ ] Database backup/restore works
-- [ ] Application restart works (`docker-compose restart`)
+- [ ] Application restart works (`docker compose restart`)
 
 ---
 
@@ -296,8 +296,8 @@ Before removing the virtual environment:
 
 For issues:
 
-1. Check logs: `docker-compose logs -f`
-2. Verify health: `docker-compose ps`
+1. Check logs: `docker compose logs -f`
+2. Verify health: `docker compose ps`
 3. See troubleshooting section in `docs/deployment/DOCKER_SETUP.md`
 4. Review `.env` configuration
 

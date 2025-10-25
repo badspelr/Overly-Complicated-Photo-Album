@@ -359,7 +359,7 @@ See [TODO_REVIEW.md](TODO_REVIEW.md) for complete roadmap.
 2. Back up database and media files
 3. Update code: `git pull origin main`
 4. Run migrations: `python manage.py migrate`
-5. Restart services: `docker-compose restart`
+5. Restart services: `docker compose restart`
 6. Test thoroughly
 
 ### Q: What if I skip a version?
