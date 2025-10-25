@@ -1,4 +1,5 @@
-version: '3.8'
+# Docker Compose configuration for CPU-only deployment (no GPU required)
+# This is the lightweight version that works on servers without NVIDIA GPU
 
 services:
   db:
@@ -41,7 +42,7 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - ALLOWED_HOSTS=localhost,127.0.0.1
+      # ALLOWED_HOSTS is set in .env file
       - NVIDIA_VISIBLE_DEVICES=all  # Make GPU visible to container (auto-detects and falls back to CPU)
     depends_on:
       db:
