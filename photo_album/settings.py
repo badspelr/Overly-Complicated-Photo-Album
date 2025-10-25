@@ -428,16 +428,15 @@ SPECTACULAR_SETTINGS = {
         'name': 'MIT License',
     },
     
-    # Tagging
+    # Tagging - Only define tags that are actually used
     'TAGS': [
-        {'name': 'Albums', 'description': 'Album management operations'},
-        {'name': 'Photos', 'description': 'Photo management and AI features'},
-        {'name': 'Videos', 'description': 'Video management and AI features'},
-        {'name': 'Search', 'description': 'AI-powered search operations'},
-        {'name': 'Categories', 'description': 'Category management'},
-        {'name': 'Tags', 'description': 'Tag management'},
-        {'name': 'Sharing', 'description': 'Album sharing and permissions'},
+        {'name': 'Authentication', 'description': 'User registration, login, and profile management'},
+        {'name': 'Media', 'description': 'Media upload and bulk operations'},
     ],
+    
+    # Tag sorting
+    'TAGS_SORTER': 'alpha',
+    'OPERATIONS_SORTER': 'alpha',
 }
 
 # CORS settings

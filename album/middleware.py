@@ -54,7 +54,7 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
                 "font-src 'self' https://fonts.gstatic.com; "
                 "img-src 'self' data: https://cdn.jsdelivr.net; "
-                "connect-src 'self';"
+                "connect-src 'self' https://cdn.jsdelivr.net;"
             )
         
         return response
