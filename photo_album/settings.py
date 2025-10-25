@@ -56,7 +56,8 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 
 # CSRF Trusted Origins - Required for production with reverse proxy
 # Example: CSRF_TRUSTED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='').split(',') if config('CSRF_TRUSTED_ORIGINS', default='') else []
+_csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='')
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in _csrf_origins.split(',') if origin.strip()] if _csrf_origins else []
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
 
