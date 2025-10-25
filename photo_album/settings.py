@@ -161,6 +161,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'drf_spectacular',
     'pgvector',
     'imagekit',
     'corsheaders',
@@ -388,6 +390,53 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    # Use drf-spectacular for OpenAPI schema generation
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# DRF Spectacular (OpenAPI/Swagger) Settings
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Photo Album API',
+    'DESCRIPTION': 'AI-powered photo and video management system with advanced search capabilities',
+    'VERSION': '1.3.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': r'/api/',
+    
+    # API Documentation UI Settings
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'filter': True,
+    },
+    
+    # Authentication
+    'SERVE_AUTHENTICATION': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    
+    # Contact & License
+    'CONTACT': {
+        'name': 'Photo Album Support',
+        'email': 'support@photoalbum.example.com',
+    },
+    'LICENSE': {
+        'name': 'MIT License',
+    },
+    
+    # Tagging
+    'TAGS': [
+        {'name': 'Albums', 'description': 'Album management operations'},
+        {'name': 'Photos', 'description': 'Photo management and AI features'},
+        {'name': 'Videos', 'description': 'Video management and AI features'},
+        {'name': 'Search', 'description': 'AI-powered search operations'},
+        {'name': 'Categories', 'description': 'Category management'},
+        {'name': 'Tags', 'description': 'Tag management'},
+        {'name': 'Sharing', 'description': 'Album sharing and permissions'},
     ],
 }
 

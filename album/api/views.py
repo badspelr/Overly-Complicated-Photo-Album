@@ -11,6 +11,8 @@ from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 from ..models import Album, Photo, Video, Category, SiteSettings
 from .serializers import (
     AlbumSerializer, AlbumListSerializer, PhotoSerializer, VideoSerializer,
@@ -43,6 +45,13 @@ class RegistrationView(APIView):
     """
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        operation_id='user_registration',
+        summary='Register a new user',
+        description='Create a new user account',
+        responses={201: UserSerializer, 400: OpenApiTypes.OBJECT},
+        tags=['Authentication']
+    )
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -74,6 +83,13 @@ class LoginView(APIView):
     """
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        operation_id='user_login',
+        summary='Login a user',
+        description='Authenticate with username and password',
+        responses={200: UserSerializer, 400: OpenApiTypes.OBJECT},
+        tags=['Authentication']
+    )
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -90,6 +106,13 @@ class CurrentUserView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id='get_current_user',
+        summary='Get current user',
+        description='Get currently authenticated user profile',
+        responses={200: UserSerializer, 401: OpenApiTypes.OBJECT},
+        tags=['Authentication']
+    )
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
@@ -98,6 +121,13 @@ class MediaUploadView(APIView):
     """API view for handling media uploads."""
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        operation_id='media_upload',
+        summary='Upload photo or video',
+        description='Upload media file to an album',
+        responses={201: PhotoSerializer, 400: OpenApiTypes.OBJECT, 403: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT},
+        tags=['Media']
+    )
     def post(self, request, *args, **kwargs):
         file = request.FILES.get('file')
         album_id = request.data.get('album_id')
