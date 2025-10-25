@@ -1,0 +1,326 @@
+# Photo Album TODO List
+
+================================================================================
+RECOMMENDATIONS FROM ASSESSMENT (October 24, 2025)
+Overall Grade: A- (89/100) - Professional-grade, production-ready application
+================================================================================
+
+## HIGH PRIORITY (Critical for scaling & production)
+
+### 1. Add Monitoring & Observability [CRITICAL]
+   - [x] Set up Sentry for error tracking and alerting (COMPLETED October 25, 2025)
+     - Added Sentry SDK with Django, Celery, and Redis integrations
+     - Created admin panel toggle for easy on/off control
+     - Adjustable sample rates for traces (10%) and profiles (10%)
+     - Live status indicators with color coding
+     - Comprehensive documentation (SENTRY_SETUP.md, SENTRY_ADMIN_TOGGLE.md)
+     - Privacy protections: PII scrubbing, password filtering
+     - No container restart needed for settings changes
+   - [ ] Add Prometheus metrics endpoint
+   - [ ] Create Grafana dashboards for:
+     - Request rate, response time, error rate
+     - Celery task queue length and processing time
+     - AI model inference time
+     - Database query performance
+     - Redis cache hit/miss ratio
+   - [ ] Configure alerts for critical issues
+   - [ ] Add APM (Application Performance Monitoring)
+   **Estimated effort:** 1 week (Sentry: DONE, remaining: 5 days)
+   **Why:** Essential for debugging production issues and preventing downtime
+
+### 2. Increase Test Coverage (37% → 60%+) [HIGH]
+   - [ ] Add integration tests for complex workflows:
+     - Photo upload → AI processing → search
+     - Album creation → sharing → permissions
+     - User registration → login → profile update
+   - [ ] Add Celery task tests with mocked AI models
+   - [ ] Test file upload edge cases (corrupted files, huge files, wrong types)
+   - [ ] Add performance/load tests for critical endpoints
+   - [ ] Test permission boundaries (unauthorized access attempts)
+   - [ ] Test concurrent operations (race conditions)
+   **Estimated effort:** 2 weeks
+   **Why:** Prevent regressions and catch bugs before production
+
+### 3. Frontend Strategy Decision [IMPORTANT]
+   - [ ] **Option A:** Fully commit to React SPA
+     - Complete React migration
+     - Move all templates to React components
+     - Use Django as pure API backend
+     - Add React Router, state management (Redux/Zustand)
+   - [ ] **Option B:** Embrace server-side rendering
+     - Remove React entirely
+     - Keep Django templates
+     - Add Alpine.js or HTMX for interactivity
+     - Progressive enhancement approach
+   - [ ] **Option C:** Hybrid (current state)
+     - Keep as-is but document the decision
+     - Use React for specific features only
+   - [ ] Update documentation with chosen approach
+   **Estimated effort:** 1-2 weeks (depending on choice)
+   **Why:** Current mixed approach feels incomplete
+
+### 4. Add OpenAPI/Swagger Documentation [MEDIUM-HIGH]
+   - [ ] Install drf-spectacular
+   - [ ] Add schema generation to settings
+   - [ ] Configure schema view endpoints
+   - [ ] Add docstrings to all API views
+   - [ ] Test interactive API documentation
+   - [ ] Add authentication examples
+   - [ ] Link from main documentation
+   **Estimated effort:** 2-3 days
+   **Why:** Better developer experience for API consumers
+
+## MEDIUM PRIORITY (Nice to have, improves quality)
+
+### 5. Database Optimization [MEDIUM]
+   - [ ] Squash old migrations (8 migrations → 1 or 2)
+   - [ ] Add migration documentation
+   - [ ] Test rollback procedures
+   - [ ] Add database backup/restore scripts
+   - [ ] Document migration strategy
+   - [ ] Add migration testing to CI/CD
+   **Estimated effort:** 3-4 days
+   **Why:** Cleaner codebase, faster fresh installations
+
+### 6. Enhanced Analytics Dashboard [MEDIUM]
+   - [ ] Admin dashboard with key metrics:
+     - Total users, photos, videos, albums
+     - Storage usage by user
+     - Most active users
+     - Popular search terms
+     - AI processing stats
+     - Error rates
+   - [ ] Export analytics data (CSV, JSON)
+   - [ ] Visualizations with Chart.js or similar
+   **Estimated effort:** 1 week
+   **Why:** Better insights for administrators
+
+### 7. Internationalization (i18n) [MEDIUM]
+   - [ ] Add django.middleware.locale.LocaleMiddleware
+   - [ ] Mark all strings for translation with {% trans %}
+   - [ ] Create message files for target languages:
+     - Spanish (es)
+     - French (fr)
+     - German (de)
+     - Japanese (ja)
+   - [ ] Add language selector in UI
+   - [ ] Test RTL languages (Arabic, Hebrew)
+   - [ ] Document translation contribution process
+   **Estimated effort:** 1-2 weeks
+   **Why:** Global audience support
+
+### 8. Enhanced Security Features [MEDIUM]
+   - [ ] Add two-factor authentication (2FA)
+   - [ ] Implement password breach checking (HaveIBeenPwned API)
+   - [ ] Add session management (view active sessions, logout all)
+   - [ ] Implement login attempt monitoring and lockout
+   - [ ] Add security audit log viewer in admin
+   - [ ] Create security incident response playbook
+   **Estimated effort:** 1 week
+   **Why:** Enterprise-grade security
+
+### 9. CDN Integration for Media Files [MEDIUM]
+   - [ ] Add support for AWS S3 / CloudFlare R2
+   - [ ] Configure django-storages
+   - [ ] Add media file migration script (local → cloud)
+   - [ ] Update documentation for cloud storage setup
+   - [ ] Add CDN URL configuration
+   - [ ] Test with multiple storage backends
+   **Estimated effort:** 3-4 days
+   **Why:** Better performance, scalability, cost efficiency
+
+### 10. Social Features Enhancement [MEDIUM]
+   - [ ] Add photo/video commenting (already has model, enhance UI)
+   - [ ] Add @mention support in comments
+   - [ ] Add notification system for:
+     - New comments on your photos
+     - Someone shared album with you
+     - Someone liked your photo
+   - [ ] Add activity feed
+   - [ ] Add user profiles with public galleries
+   **Estimated effort:** 1 week
+   **Why:** Increased user engagement
+
+## LOW PRIORITY (Future enhancements)
+
+### 11. Mobile Applications [LOW]
+   - [ ] Progressive Web App (PWA) manifest
+   - [ ] Service worker for offline support
+   - [ ] Push notifications
+   - [ ] Camera integration via web APIs
+   - [ ] OR: Native mobile apps (React Native / Flutter)
+   **Estimated effort:** 2-4 weeks
+   **Why:** Better mobile experience
+
+### 12. Advanced AI Features [LOW]
+   - [ ] Face recognition and face clustering
+   - [ ] Object detection with bounding boxes
+   - [ ] Scene classification improvements
+   - [ ] Auto-tagging suggestions
+   - [ ] Similar photo detection (duplicate finder)
+   - [ ] Photo quality scoring
+   **Estimated effort:** 2-3 weeks
+   **Why:** Competitive advantage, user delight
+
+### 13. Built-in Photo Editor [LOW]
+   - [ ] Crop, rotate, flip
+   - [ ] Filters and adjustments (brightness, contrast, saturation)
+   - [ ] Text overlay
+   - [ ] Resize and compress
+   - [ ] Save as new version (keep original)
+   - [ ] Integration: Fabric.js or Tui Image Editor
+   **Estimated effort:** 2 weeks
+   **Why:** Reduced dependency on external tools
+
+### 14. Payment System (if planning SaaS) [LOW]
+   - [ ] Integration with Stripe or PayPal
+   - [ ] Subscription plans:
+     - Free tier (limited storage)
+     - Pro tier (more storage, advanced AI)
+     - Enterprise tier (custom limits, priority support)
+   - [ ] Usage tracking and billing
+   - [ ] Invoice generation
+   - [ ] Cancellation and refund workflow
+   **Estimated effort:** 2-3 weeks
+   **Why:** Monetization if going commercial
+
+### 15. Collaborative Albums [LOW]
+   - [ ] Allow multiple owners per album
+   - [ ] Contributor roles (can add photos but not delete)
+   - [ ] Album chat or comments
+   - [ ] Version history for albums
+   - [ ] Conflict resolution for simultaneous edits
+   **Estimated effort:** 1-2 weeks
+   **Why:** Team/family use cases
+
+### 16. Advanced Search Features [LOW]
+   - [ ] Search by date range
+   - [ ] Search by location (if EXIF has GPS)
+   - [ ] Search by camera/device
+   - [ ] Search by file size/resolution
+   - [ ] Saved search queries
+   - [ ] Search result sorting options
+   **Estimated effort:** 1 week
+   **Why:** Power user features
+
+### 17. Backup & Export Features [LOW]
+   - [ ] One-click album export (ZIP download)
+   - [ ] Scheduled backups to external storage
+   - [ ] Import from other services (Google Photos, Flickr)
+   - [ ] GDPR data export (JSON format)
+   - [ ] Backup verification tools
+   **Estimated effort:** 1 week
+   **Why:** Data portability, compliance
+
+### 18. Performance Optimizations [LOW]
+   - [ ] Add database read replicas for scaling
+   - [ ] Implement query result caching (beyond Redis)
+   - [ ] Add lazy loading for images
+   - [ ] Optimize thumbnail generation (WebP format)
+   - [ ] Add pagination cursor strategy for large datasets
+   - [ ] Database query optimization review
+   **Estimated effort:** 1 week
+   **Why:** Handle 10,000+ concurrent users
+
+================================================================================
+QUICK WIN RECOMMENDATIONS (Do These First)
+================================================================================
+1. ✅ Add Sentry (2 hours) - COMPLETED with admin toggle feature!
+2. Add OpenAPI docs (1 day) - Better API documentation  
+3. Decide on React vs Templates (1 day planning) - Remove confusion
+4. Deploy to real domain (1 day) - Validate production setup
+
+================================================================================
+ASSESSMENT SUMMARY
+================================================================================
+✅ Architecture: 95/100 - Outstanding service layer, clean code
+✅ AI Integration: 100/100 - State-of-the-art, production-ready
+✅ Documentation: 98/100 - Exceptional (69 markdown files)
+✅ DevOps: 95/100 - Professional Docker/Celery/Redis setup
+✅ Security: 85/100 - Strong, proper practices
+⚠️ Testing: 75/100 - Good coverage (37%), could be 60%+
+⚠️ Frontend: 70/100 - Works but mixed approach (React + Templates)
+
+OVERALL: A- (89/100) - Production-ready, professional-grade application
+This is top 5% quality for portfolio projects.
+================================================================================
+
+## HIGH PRIORITY
+- Create Android app as frontend for photo album (native app with Django REST API backend for mobile photo browsing, AI search, camera integration, and offline access)
+
+## Low Priority
+
+SECURITY FIX COMPLETED: Fixed major security vulnerability where users could assign themselves admin privileges
+- Created separate forms: CustomUserChangeForm (basic profile) vs AdminUserChangeForm (with groups)  
+- UserUpdateView now only allows basic profile editing (no group management)
+- UserEditView uses appropriate form based on admin level
+- Fixed users without group assignments - all non-superusers now have Viewer group
+
+PERMISSION SYSTEM REDESIGN COMPLETED: Fixed album admin privilege escalation
+- PROBLEM: Global "Album Admin" group gave users admin rights to ALL albums (User B could admin User A's albums)
+- SOLUTION: Eliminated global Album Admin group, now using per-album ownership model
+- Album owners are automatically admins of ONLY their own albums
+- Removed AlbumAdminUsersView and album_admin_users URL
+- Updated middleware to use is_album_owner instead of is_album_admin
+- Updated all permission checks to use album.owner or is_album_admin(user, album)
+- Removed all users from Album Admin group - now using owner field for permissions
+
+ACCOUNT DELETION FEATURE COMPLETED: Users can now delete their accounts and all data
+- Added AccountDeleteView with proper permission checks (users can only delete own account)
+- Created delete_account.html template with data summary and warnings
+- Shows count of albums, photos, videos, tags, and custom albums that will be deleted
+- Requires explicit confirmation checkbox and double confirmation dialog
+- CASCADE deletion automatically removes all user's data: albums, photos, videos, tags, custom albums, share links, favorites
+- Added "Danger Zone" section to profile page with delete account link
+- GDPR compliant - complete data removal upon account deletion
+
+## Completed
+- ✅ **Slideshow fix** - Fixed slideshow to load ALL photos from album instead of just 20 visible on current page; created FlexiblePageNumberPagination class allowing page_size query parameter up to 10,000 items; updated slideshow.js to fetch photos via API (/api/albums/{id}/media/?media_type=photos&page_size=1000) instead of DOM scraping; added fallback to page loading if API fails; slideshow remains photos-only (no videos)
+- ✅ **Album form checkbox styling** - Fixed "Is Public" checkbox alignment on album create/edit pages; checkbox now appears to the right of label text with proper spacing; added verbose_name='Is Public' to model field for proper capitalization
+- ✅ **Smart delete navigation** - After deleting a photo/video, users are now redirected to the next item in the album instead of the dashboard; improves workflow for cleaning up albums; falls back to previous item or album page if no next item exists
+- ✅ **Django Admin Performance Fix** - Fixed album admin loading all photos/videos causing performance issues; Removed PhotoInline and VideoInline (caused N+1 query problem); Added smart navigation with "Manage Photos" and "Manage Videos" buttons that link to filtered lists; Added thumbnail previews in photo/video lists; Added image/video preview in edit forms; Added pagination (50 per page); Result: Album with 100+ photos now loads instantly instead of 30+ seconds or timeout
+- ✅ **Removed Python virtual environment from Docker workflow** - Eliminated redundant venv in Docker containers; Docker provides complete isolation (separate filesystem, Python installation, dependencies); Created cleanup script (scripts/remove_venv.sh) to automate removal; Updated README.md and INSTALL.md to emphasize Docker-first approach with "No virtual environment needed!" messaging; Kept .gitignore entries for developers using local development; Docker philosophy: one container = one isolated environment, no venv required
+- ✅ **Production deployment documentation and automation** - Created PRODUCTION_QUICK_START.md (5-minute deployment guide), deploy_to_production.sh (automated build/push/package script), check_production_ready.sh (pre-deployment validation), deploy.sh (production server deployment), DEPLOYMENT_CHEAT_SHEET.md (one-page quick reference); Updated DOCKER.md section 8 with "From Development to Production" guide explaining why production is easier than development (comparison table, registry workflow, production considerations, update procedures); Provides complete automation from development to production deployment
+- ✅ **Celery production validation checklist** - Created comprehensive CELERY_PRODUCTION_VALIDATION.md with 8 validation tests, monitoring procedures, troubleshooting guide, and sign-off checklist to verify Celery workers ready for production deployment
+- ✅ **Terms of Conduct and CSAM Policy** - Created TERMS_OF_CONDUCT.md (18 sections: acceptable use, content ownership, privacy/GDPR, moderation, termination) and CSAM_POLICY.md (zero tolerance, detection mechanisms, 1-hour response, NCMEC reporting, law enforcement cooperation); both production-ready with customization notes
+- ✅ **Documentation consolidation** - Merged related docs: DOCKER_GUIDE.md + DOCKER_RESOURCE_GUIDE.md → DOCKER.md (comprehensive 600+ line guide); CELERY_SETUP.md + CELERY_QUICKREF.md → CELERY.md (complete Celery guide); All technical notes → IMPLEMENTATION_NOTES.md (consolidated change history); Updated documentation indexes and quick reference; Total reduction: 20 files → 13 files (35% reduction)
+- ✅ **Documentation reorganization** - Moved all documentation from root to organized `docs/` directory structure with categories: getting-started, user-guides, admin-guides, deployment, technical; created comprehensive docs/README.md index with navigation; created professional README.md for root; reduced root clutter from 17 MD files to just README.md and CHANGELOG.md
+- ✅ **Review all documentation and update as needed** - Updated CHANGELOG.md with v1.2.0 release notes (AI Settings, Cookie Consent, Comprehensive User Manual, About/Contact pages); Enhanced OVERVIEW.md with new Administrative Features section, GDPR compliance, and Documentation & Help section; Added note to USER_MANUAL.md directing users to HTML version at /user-manual/
+- ✅ **Comprehensive User Manual** - Expanded in-app user manual from 99 lines to 991 lines with 15 detailed sections: Getting Started, Account Management, Albums, Photos/Videos, Categories/Tags, Search, AI Features, Sharing, Custom Albums, Favorites, Bulk Actions, Keyboard Shortcuts, Admin Features, Mobile Tips, Troubleshooting; includes quick navigation menu, visual styling, and step-by-step guides
+- ✅ **Cookie Consent System** - Implemented GDPR-compliant cookie consent with banner (localStorage-based for reliability), detailed policy page at /cookie-policy/ with cookie tables, Accept All and Essential Only options, footer link on all pages; fixed persistence bug by switching from document.cookie to localStorage
+- ✅ **AI Settings Admin Interface** - Created web-based AI configuration at /ai-settings/ for admin users; form-based management of auto-processing, scheduled processing, batch sizes, timeouts; real-time settings updates without code deployment; hardware optimization options
+- ✅ **About and Contact Pages** - Added /about/ page with feature list and mission statement, /contact/ form with pre-filled user data and email notifications to admins, footer navigation links on all pages
+- ✅ **Implemented automatic AI processing with Celery** - Added background task queue for AI photo/video analysis; processing happens automatically on upload (configurable); scheduled batch processing at 2 AM daily for 500 photos; added processing_status field to track progress; integrated with existing process_photos_ai/process_videos_ai commands; configurable via settings (auto-process on upload, scheduled processing, batch size, timeout); ready for production deployment with Celery worker and Beat scheduler
+- ✅ Added sticky bottom bulk action bar - slides up from bottom when photos selected, always accessible without scrolling; includes Download, Delete, Category selector, and Tags input; shows selection count and clear button; mobile responsive with full-width stacked layout
+- ✅ Improved bulk action controls styling - organized category and tag inputs with labels, icons, and consistent styling; added bordered container, better spacing, mobile-responsive layout that stacks vertically on small screens
+- ✅ Fixed photo/video detail navigation with invalid filter values - added validation to skip 'all' values and handle non-numeric IDs gracefully when parsing category/album filters from return URLs
+- ✅ Added photo slideshow feature with category filtering - full-screen slideshow with play/pause, navigation, speed control (2s/3s/5s/10s), progress bar, keyboard shortcuts (Space=pause, Arrows=nav, F=fullscreen, Esc=exit), automatically filters to show only photos (not videos) from current view/category
+- ✅ Added Custom Albums documentation to USER_MANUAL.md and user_manual.html - explained virtual collections feature, how to create/use custom albums, difference from regular albums, and example use cases
+- ✅ Added ability to edit date taken/recorded metadata - PhotoForm and VideoForm now include date_taken/date_recorded fields with datetime-local input widgets, plus camera metadata (make, model) and location (latitude, longitude) for photos
+- ✅ Fixed MOV video upload rejection due to MIME type detection issues
+- ✅ Fixed 541 broken photo/video references causing album crashes  
+- ✅ Restored AI photo analysis features with local BLIP models for GPU-accelerated image captioning
+- ✅ Fixed search functionality on album pages (array-based tag search and permission issues)
+- ✅ Enhanced Django admin panel with comprehensive model registration
+- ✅ Cleaned up code syntax errors and unused imports with pyflakes/autoflake
+- ✅ Verified album sharing and invitation system works with search permissions
+- ✅ Fixed FileNotFoundError in search page by removing 5 orphaned photo records with missing files
+- ✅ Added missing web interface for photo AI processing (http://127.0.0.1:8001/process-photos-ai/) - now photos and videos both have web UI
+- ✅ Fixed superuser search permissions - superusers can now search any album (was missing from permission checks)
+- ✅ Fixed AI photo processing page showing 96 "pending" photos that were actually orphaned database records with missing files - added orphaned record detection and cleanup functionality
+- ✅ Fixed AI video processing page with same improvements as photos: orphaned record detection/cleanup, modern dark theme design, processing progress modal with user feedback
+- ✅ Fixed inconsistent permissions for AI processing pages - both photos and videos now require album admin or superuser access (was: videos=superuser only, photos=any user)
+- ✅ Updated all documentation to reflect new AI processing features: USER_MANUAL.md AI section rewritten, AI_COMMANDS_REFERENCE.md updated with local BLIP info and web interfaces, MANAGEMENT_COMMANDS.md enhanced, OVERVIEW.md feature highlights updated, INSTALL.md AI setup instructions revised
+- ✅ Fixed inconsistent AI search behavior across pages - albums page now searches both album metadata AND media content using AI descriptions/tags, matching the individual album page search functionality
+- ✅ Fixed checkboxes on profile and edit users page - improved alignment, spacing, and visual consistency with proper CSS styling instead of inline styles
+- ✅ Fixed pagination after search navigation - photo/video detail views now maintain search context for left/right navigation arrows, showing next/previous items from search results instead of full album
+- ✅ Added About and Contact pages with footer navigation - created /about/ page with features list and mission statement, /contact/ page with email form, footer appears on all pages except album detail, responsive design with dark theme
+- ✅ Fixed photo edit permission error - album owners can now edit photos in their albums (was only allowing superusers due to broken permission check)
+- ✅ Fixed empty category dropdown - now shows all user-accessible categories instead of only assigned ones, allowing bulk category assignment
+- ✅ Fixed invisible dropdown options in dark theme - select option elements now have explicit background/text colors for visibility
+- ✅ Added "Invite User" link for album owners - cleaned up obsolete navigation code, album owners now see proper invite link in sidebar
+- ✅ Fixed album owner permissions across the system - updated invite_user, dashboard display, AI processing, and user deletion to properly recognize is_album_owner instead of obsolete is_album_admin
+- ✅ Sorting features fully implemented - album pages have 6 sort options (date taken/added newest/oldest, title A-Z/Z-A), global search has 7 sort fields (date, title, width, height, duration, file size) with independent direction control, all sorting works with filters and pagination
+- ✅ Complete AI processing admin interface - created /ai-settings/ page for configuring auto-processing, scheduled processing, batch size, and timeouts; added navigation links for site admins; AIProcessingSettings singleton model with form-based management; manual trigger buttons already existed at /process-photos-ai/ and /process-videos-ai/
+- ✅ Comprehensive user manual - created detailed 15-section user manual (1000+ lines) covering all features: getting started, account management, albums, photos/videos, categories/tags, search, AI features, sharing, custom albums, favorites, bulk actions, keyboard shortcuts, admin features, mobile features, and troubleshooting; includes quick navigation, visual styling, step-by-step guides, and real-world examples
+- ✅ Cookie compliance (GDPR) - implemented cookie consent banner with Accept/Essential Only options; created comprehensive cookie policy page at /cookie-policy/ with detailed cookie table (types, purposes, durations); added cookie link to footer; banner auto-shows on first visit and respects user preferences; stores consent in cookie for 1 year; mobile responsive design; complies with GDPR requirements for transparency and user control
