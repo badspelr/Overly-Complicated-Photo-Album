@@ -5,6 +5,9 @@ gunicorn==23.0.0
 whitenoise
 asgiref==3.9.1
 
+# Error Tracking & Monitoring
+sentry-sdk[django]==2.18.0
+
 # Django Extensions
 django-cors-headers==4.6.0
 django-filter==24.3

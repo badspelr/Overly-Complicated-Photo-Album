@@ -10,7 +10,7 @@ from .models import SiteSettings, Category, Album, Photo, Video, Tag, AlbumShare
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description', 'allow_registration')
+    list_display = ('title', 'description', 'allow_registration', 'sentry_status')
     fieldsets = (
         ('Basic Settings', {
             'fields': ('title', 'description')
@@ -19,7 +19,76 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'fields': ('allow_registration',),
             'description': 'Control whether new users can register for accounts.'
         }),
+        ('🔔 Sentry Error Tracking', {
+            'fields': ('sentry_enabled', 'sentry_traces_sample_rate', 'sentry_profiles_sample_rate'),
+            'description': (
+                '<strong>Monitor errors and performance in production.</strong><br>'
+                '✅ Enable Sentry to receive real-time error alerts<br>'
+                '📊 Sample rates control data collection (0.1 = 10%)<br>'
+                '⚠️ Requires SENTRY_DSN environment variable and DEBUG=False<br>'
+                '📖 See: <a href="/static/docs/deployment/SENTRY_SETUP.md" target="_blank">Sentry Setup Guide</a>'
+            ),
+            'classes': ('collapse',)  # Make it collapsible
+        }),
     )
+    
+    def changelist_view(self, request, extra_context=None):
+        """Redirect to the single instance edit page instead of showing a list."""
+        from django.shortcuts import redirect
+        from django.urls import reverse
+        
+        # Get or create the singleton instance
+        settings = SiteSettings.get_settings()
+        
+        # Redirect to the change page for this instance
+        return redirect(reverse('admin:album_sitesettings_change', args=[settings.pk]))
+    
+    def sentry_status(self, obj):
+        """Display Sentry status with colored indicator."""
+        from django.conf import settings
+        if obj.sentry_enabled:
+            if not settings.SENTRY_DSN:
+                return format_html(
+                    '<span style="color: orange;">⚠️ Enabled (DSN missing)</span>'
+                )
+            elif settings.DEBUG:
+                return format_html(
+                    '<span style="color: orange;">⚠️ Enabled (DEBUG=True)</span>'
+                )
+            else:
+                return format_html(
+                    '<span style="color: green;">✅ Active</span>'
+                )
+        return format_html('<span style="color: gray;">❌ Disabled</span>')
+    sentry_status.short_description = 'Sentry Status'
+    
+    def save_model(self, request, obj, form, change):
+        """Display message after saving with Sentry status."""
+        super().save_model(request, obj, form, change)
+        from django.contrib import messages
+        from django.conf import settings
+        
+        if obj.sentry_enabled:
+            if not settings.SENTRY_DSN:
+                messages.warning(
+                    request,
+                    'Sentry is enabled but SENTRY_DSN is not configured. '
+                    'Add SENTRY_DSN to your .env file to activate error tracking.'
+                )
+            elif settings.DEBUG:
+                messages.info(
+                    request,
+                    'Sentry is enabled but will only activate in production (DEBUG=False).'
+                )
+            else:
+                messages.success(
+                    request,
+                    f'✅ Sentry is now active! '
+                    f'Tracking {int(obj.sentry_traces_sample_rate * 100)}% of requests. '
+                    f'Environment: {settings.SENTRY_ENVIRONMENT}'
+                )
+        else:
+            messages.info(request, 'Sentry error tracking is disabled.')
     
     def has_add_permission(self, request):
         """Only allow one SiteSettings instance."""

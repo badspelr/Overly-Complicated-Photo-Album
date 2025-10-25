@@ -44,6 +44,20 @@ class SiteSettings(models.Model):
         default=True, 
         help_text='Allow new users to register. Uncheck to disable public registration.'
     )
+    
+    # Sentry Error Tracking Settings
+    sentry_enabled = models.BooleanField(
+        default=False,
+        help_text='Enable Sentry error tracking. Requires SENTRY_DSN to be configured in environment variables.'
+    )
+    sentry_traces_sample_rate = models.FloatField(
+        default=0.1,
+        help_text='Sample rate for performance monitoring (0.0 to 1.0). 0.1 = 10% of requests.'
+    )
+    sentry_profiles_sample_rate = models.FloatField(
+        default=0.1,
+        help_text='Sample rate for profiling (0.0 to 1.0). 0.1 = 10% of requests.'
+    )
 
     class Meta:
         verbose_name = 'Site Settings'
@@ -57,6 +71,62 @@ class SiteSettings(models.Model):
         """Get or create the singleton settings instance."""
         settings, created = cls.objects.get_or_create(pk=1)
         return settings
+    
+    def save(self, *args, **kwargs):
+        """Override save to enforce singleton pattern and reinitialize Sentry."""
+        # Enforce singleton pattern - always use ID 1
+        self.pk = 1
+        self.id = 1
+        super().save(*args, **kwargs)
+        # Reinitialize Sentry with new settings
+        self._reinitialize_sentry()
+    
+    def delete(self, *args, **kwargs):
+        """Prevent deletion of the singleton settings instance."""
+        pass  # Do nothing - prevent deletion
+    
+    def _reinitialize_sentry(self):
+        """Reinitialize Sentry with current settings."""
+        try:
+            import sentry_sdk
+            from django.conf import settings as django_settings
+            
+            if self.sentry_enabled and django_settings.SENTRY_DSN and not django_settings.DEBUG:
+                # Re-initialize Sentry with updated settings
+                from sentry_sdk.integrations.django import DjangoIntegration
+                from sentry_sdk.integrations.celery import CeleryIntegration
+                from sentry_sdk.integrations.redis import RedisIntegration
+                
+                sentry_sdk.init(
+                    dsn=django_settings.SENTRY_DSN,
+                    environment=django_settings.SENTRY_ENVIRONMENT,
+                    integrations=[
+                        DjangoIntegration(),
+                        CeleryIntegration(),
+                        RedisIntegration(),
+                    ],
+                    traces_sample_rate=float(self.sentry_traces_sample_rate),
+                    profiles_sample_rate=float(self.sentry_profiles_sample_rate),
+                    send_default_pii=False,
+                    before_send=lambda event, hint: self._scrub_sensitive_data(event, hint),
+                )
+            else:
+                # Disable Sentry if not enabled
+                sentry_sdk.init()
+        except ImportError:
+            pass  # Sentry SDK not installed
+    
+    @staticmethod
+    def _scrub_sensitive_data(event, hint):
+        """Remove sensitive data from Sentry events."""
+        if 'request' in event:
+            if 'data' in event['request']:
+                data = event['request']['data']
+                if isinstance(data, dict):
+                    for key in ['password', 'token', 'secret', 'api_key']:
+                        if key in data:
+                            data[key] = '[REDACTED]'
+        return event
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True, help_text='Category name.')

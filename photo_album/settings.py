@@ -16,6 +16,16 @@ from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# =============================================================================
+# SENTRY ERROR TRACKING
+# =============================================================================
+# Sentry configuration - will be initialized after database is ready
+# The actual initialization happens in album/apps.py to access database settings
+SENTRY_DSN = config('SENTRY_DSN', default='')
+SENTRY_ENVIRONMENT = config('SENTRY_ENVIRONMENT', default='development')
+SENTRY_TRACES_SAMPLE_RATE = config('SENTRY_TRACES_SAMPLE_RATE', default=0.1, cast=float)
+SENTRY_PROFILES_SAMPLE_RATE = config('SENTRY_PROFILES_SAMPLE_RATE', default=0.1, cast=float)
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
