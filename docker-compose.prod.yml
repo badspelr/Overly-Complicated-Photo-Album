@@ -7,6 +7,20 @@
 # - Health checks enabled
 # - Security-hardened configuration
 # - CPU-only by default (lightweight deployment)
+# - Uses host directories for media/static/logs (easier backups and access)
+#
+# GPU Support (Optional):
+# If you have an NVIDIA GPU, add the GPU overlay:
+#   docker compose -f docker-compose.prod.yml -f docker-compose.gpu.yml up -d
+# ==============================================================================================================================================
+# Production Docker Compose Configuration
+# =============================================================================
+# This file is optimized for production deployment
+# - No code volume mounts (code is baked into the image)
+# - Proper restart policies
+# - Health checks enabled
+# - Security-hardened configuration
+# - CPU-only by default (lightweight deployment)
 #
 # GPU Support (Optional):
 # If you have an NVIDIA GPU, add the GPU override:
@@ -76,9 +90,9 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     volumes:
       # Only data volumes in production - NO code mounting
-      - media_data:/app/media
-      - static_data:/app/staticfiles
-      - logs_data:/app/logs
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
+      - ./logs:/app/logs
     ports:
       - "${WEB_PORT:-8000}:8000"
     depends_on:
@@ -119,8 +133,8 @@ services:
       - CELERY_WORKER_CONCURRENCY=${CELERY_WORKER_CONCURRENCY:-4}
     volumes:
       # Only data volumes in production
-      - media_data:/app/media
-      - logs_data:/app/logs
+      - ./media:/app/media
+      - ./logs:/app/logs
     depends_on:
       db:
         condition: service_healthy
@@ -160,7 +174,7 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     volumes:
       # Only logs in production
-      - logs_data:/app/logs
+      - ./logs:/app/logs
     depends_on:
       db:
         condition: service_healthy
@@ -182,12 +196,8 @@ volumes:
     driver: local
   redis_data:
     driver: local
-  media_data:
-    driver: local
-  static_data:
-    driver: local
-  logs_data:
-    driver: local
+  # Media, static, and logs use host directories for easier access and backups
+  # Configured as bind mounts in service definitions above
 
 networks:
   photo_album_network:
