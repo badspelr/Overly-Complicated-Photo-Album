@@ -445,41 +445,43 @@
             </div>
         {% endif %}
 
-        <form method="post">
-            {% csrf_token %}
-            
-            <div class="form-section">
-                <label for="album" class="form-label">Album (Optional)</label>
-                <select name="album" id="album" class="form-control">
-                    <option value="">Process all albums</option>
-                    {% for album in albums %}
-                        <option value="{{ album.title }}">{{ album.title }} ({{ album.photos.count }} photos)</option>
-                    {% endfor %}
-                </select>
-                <div class="form-help">Leave empty to process photos from all albums</div>
-            </div>
-
-            <div class="form-section">
-                <label for="limit" class="form-label">Limit (Optional)</label>
-                <input type="number" name="limit" id="limit" class="form-control" min="1" max="1000" placeholder="e.g., 50">
-                <div class="form-help">Maximum number of photos to process (useful for testing)</div>
-            </div>
-
-            <div class="form-section">
-                <div class="checkbox-group">
-                    <input type="checkbox" name="force" id="force">
-                    <label for="force" class="form-label">Force reprocess already analyzed photos</label>
+        <div class="process-form">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <label for="album" class="form-label">Album (Optional)</label>
+                    <select name="album" id="album" class="form-control">
+                        <option value="">Process all albums</option>
+                        {% for album in albums %}
+                            <option value="{{ album.title }}">{{ album.title }} ({{ album.photos.count }} photos)</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-help">Leave empty to process photos from all albums</div>
                 </div>
-                <div class="form-help">Check this to regenerate AI descriptions for photos that have already been processed</div>
-            </div>
 
-            <div class="btn-group">
-                <button type="submit" class="btn btn-primary" {% if not ai_available %}disabled{% endif %}>
-                    <i class="material-icons">smart_toy</i>
-                    Start AI Processing
-                </button>
-            </div>
-        </form>
+                <div class="form-section">
+                    <label for="limit" class="form-label">Limit (Optional)</label>
+                    <input type="number" name="limit" id="limit" class="form-control" min="1" max="1000" placeholder="e.g., 50">
+                    <div class="form-help">Maximum number of photos to process (useful for testing)</div>
+                </div>
+
+                <div class="form-section">
+                    <div class="checkbox-group">
+                        <input type="checkbox" name="force" id="force">
+                        <label for="force" class="form-label">Force reprocess already analyzed photos</label>
+                    </div>
+                    <div class="form-help">Check this to regenerate AI descriptions for photos that have already been processed</div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary" {% if not ai_available %}disabled{% endif %}>
+                        <i class="material-icons">smart_toy</i>
+                        Start AI Processing
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Information -->
