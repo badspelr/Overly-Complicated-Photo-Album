@@ -10,7 +10,7 @@ from django.core.management import call_command
 logger = logging.getLogger(__name__)
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+@shared_task(bind=True, max_retries=3, default_retry_delay=60, time_limit=300, soft_time_limit=240)
 def process_photo_ai(self, photo_id):
     """
     Process a single photo with AI analysis.
@@ -82,7 +82,7 @@ def process_photo_ai(self, photo_id):
         raise self.retry(exc=exc)
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+@shared_task(bind=True, max_retries=3, default_retry_delay=60, time_limit=300, soft_time_limit=240)
 def process_video_ai(self, video_id):
     """
     Process a single video with AI analysis.

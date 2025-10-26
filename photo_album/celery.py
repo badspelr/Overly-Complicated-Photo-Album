@@ -20,6 +20,11 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
 
+# Configure task time limits
+# AI processing can take longer, especially on CPU without GPU
+app.conf.task_time_limit = 300  # 5 minutes hard limit
+app.conf.task_soft_time_limit = 240  # 4 minutes soft limit (raises exception)
+
 # Configure Celery Beat schedule for automatic processing
 app.conf.beat_schedule = {
     'process-pending-photos-daily': {
