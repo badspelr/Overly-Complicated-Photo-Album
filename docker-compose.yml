@@ -99,9 +99,9 @@ services:
     networks:
       - photo_album_network
     healthcheck:
-      test: ["CMD-SHELL", "celery -A photo_album inspect ping -d celery@$$HOSTNAME"]
+      test: ["CMD-SHELL", "celery -A photo_album inspect ping --timeout=5"]
       interval: 30s
-      timeout: 10s
+      timeout: 15s
       retries: 3
       start_period: 40s
 
