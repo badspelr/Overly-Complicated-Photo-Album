@@ -609,7 +609,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Re-enable submit button
         submitButton.disabled = false;
-        submitButton.innerHTML = '<span class="icon">🤖</span> Start AI Processing';
+        submitButton.innerHTML = '<i class="material-icons">smart_toy</i> Start AI Processing';
         submitButton.style.opacity = '1';
     }
     
@@ -772,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         // Immediately disable button and show feedback
         submitButton.disabled = true;
-        submitButton.innerHTML = '<span class="icon">⏳</span> Starting...';
+        submitButton.innerHTML = '<i class="material-icons">hourglass_empty</i> Starting...';
         submitButton.style.opacity = '0.6';
         
         // Calculate estimated photo count for progress estimation
@@ -807,7 +807,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (estimatedPhotoCount === 0) {
             // Re-enable button if no photos to process
             submitButton.disabled = false;
-            submitButton.innerHTML = '<span class="icon">🤖</span> Start AI Processing';
+            submitButton.innerHTML = '<i class="material-icons">smart_toy</i> Start AI Processing';
             submitButton.style.opacity = '1';
             return; // Let the form submit normally to show "no photos to process" message
         }
@@ -832,7 +832,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
         
         // Update button to show processing state
-        submitButton.innerHTML = '<span class="icon">⏳</span> Processing...';
+        submitButton.innerHTML = '<i class="material-icons">hourglass_empty</i> Processing...';
         
         // Set a timeout to detect if processing fails or gets stuck
         const estimatedTotalTime = estimatedPhotoCount * 600; // 600ms per photo
