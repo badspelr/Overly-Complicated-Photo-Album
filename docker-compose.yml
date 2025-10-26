@@ -131,7 +131,7 @@ services:
     networks:
       - photo_album_network
     healthcheck:
-      test: ["CMD-SHELL", "ps aux | grep 'celery beat' | grep -v grep"]
+      test: ["CMD-SHELL", "test -f /app/celerybeat.pid && kill -0 $(cat /app/celerybeat.pid)"]
       interval: 30s
       timeout: 10s
       retries: 3
