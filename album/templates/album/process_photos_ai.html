@@ -531,11 +531,19 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('.process-form form');
+    
+    if (!form) {
+        console.error('Could not find form with selector .process-form form');
+        return;
+    }
+    
     const submitButton = form.querySelector('button[type="submit"]');
     const modal = document.getElementById('processingModal');
     const statusText = document.getElementById('processingStatus');
     const progressBar = document.getElementById('progressBar');
     const detailsText = document.getElementById('processingDetails');
+    
+    console.log('Photo AI processing modal initialized', { form, modal, submitButton });
     
     let processingStartTime = null;
     let estimatedPhotoCount = 0;
