@@ -547,6 +547,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let processingStartTime = null;
     let estimatedPhotoCount = 0;
+    let processingWarningActive = false;
     
     // Check if we just completed processing (look for success message)
     const successMessages = document.querySelectorAll('.alert-success, .messages .success');
@@ -700,8 +701,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Handle page unload warning (only after processing has been running for a bit)
-    let processingWarningActive = false;
-    
     window.addEventListener('beforeunload', function(e) {
         if (processingWarningActive && !modal.classList.contains('hidden')) {
             e.preventDefault();
