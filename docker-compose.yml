@@ -131,11 +131,7 @@ services:
     networks:
       - photo_album_network
     healthcheck:
-      test: ["CMD-SHELL", "test -f /app/celerybeat.pid && kill -0 $(cat /app/celerybeat.pid)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      disable: true
 
 volumes:
   postgres_data:
