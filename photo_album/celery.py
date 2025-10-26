@@ -22,8 +22,9 @@ app.autodiscover_tasks()
 
 # Configure task time limits
 # AI processing can take longer, especially on CPU without GPU
-app.conf.task_time_limit = 300  # 5 minutes hard limit
-app.conf.task_soft_time_limit = 240  # 4 minutes soft limit (raises exception)
+# Increased significantly for CPU-only servers
+app.conf.task_time_limit = 600  # 10 minutes hard limit
+app.conf.task_soft_time_limit = 540  # 9 minutes soft limit (raises exception)
 
 # Configure Celery Beat schedule for automatic processing
 app.conf.beat_schedule = {
@@ -44,3 +45,28 @@ app.conf.timezone = 'UTC'
 def debug_task(self):
     """Debug task to verify Celery is working."""
     print(f'Request: {self.request!r}')
+
+
+# Pre-load AI models when worker starts
+from celery.signals import worker_process_init
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+@worker_process_init.connect
+def init_worker_process(sender=None, **kwargs):
+    """
+    Initialize worker process by pre-loading AI models.
+    This runs once per worker process, significantly improving performance.
+    """
+    logger.info("Initializing worker process - pre-loading AI models...")
+    try:
+        from album.services.ai_analysis_service import ai_analysis_service
+        # Trigger model loading by checking availability
+        if ai_analysis_service.is_available():
+            logger.info("AI models successfully pre-loaded in worker process")
+        else:
+            logger.warning("AI models not available in this worker")
+    except Exception as e:
+        logger.error(f"Failed to pre-load AI models in worker: {e}")
