@@ -33,7 +33,13 @@
                     </div>
                     {% if user.is_superuser or album.owner == user %}
                         <div class="album-header-actions flex gap-2">
-                            <a href="{% url 'album:create_share_link' album.pk %}" class="btn btn-primary btn-sm">
+                            <a href="{% url 'album:process_photos_ai' %}?album={{ album.title }}" class="btn btn-primary btn-sm" title="Process photos in this album with AI">
+                                <i class="material-icons">auto_fix_high</i> AI Photos
+                            </a>
+                            <a href="{% url 'album:process_videos_ai' %}?album={{ album.title }}" class="btn btn-primary btn-sm" title="Process videos in this album with AI">
+                                <i class="material-icons">smart_display</i> AI Videos
+                            </a>
+                            <a href="{% url 'album:create_share_link' album.pk %}" class="btn btn-secondary btn-sm">
                                 <i class="material-icons">share</i> Share Album
                             </a>
                             <a href="{% url 'album:manage_share_links' album.pk %}" class="btn btn-secondary btn-sm">
