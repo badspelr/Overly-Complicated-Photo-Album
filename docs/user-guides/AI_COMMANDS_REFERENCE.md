@@ -98,6 +98,69 @@ python manage.py analyze_videos --limit 5
 
 ---
 
+### **📊 Check AI Processing Status**
+**Command:** `python manage.py check_ai_status`
+
+**Purpose:** Monitor the status of AI processing for photos and videos in real-time
+
+**Use Cases:**
+- Monitor long-running AI processing jobs
+- Check progress while processing is happening in another terminal
+- Identify failed items and error messages
+- Verify processing completion
+- Audit AI processing coverage across albums
+
+**Options:**
+- `--media-type [photos|videos|both]` - Choose what to check (default: both)
+- `--album "Album Name"` - Check only a specific album
+
+**Examples:**
+```bash
+# Check status of all photos and videos
+python manage.py check_ai_status
+
+# Check only photos
+python manage.py check_ai_status --media-type photos
+
+# Check only videos
+python manage.py check_ai_status --media-type videos
+
+# Check specific album
+python manage.py check_ai_status --album "Vacation 2024"
+
+# Check photos in specific album
+python manage.py check_ai_status --media-type photos --album "Family"
+```
+
+**Docker Usage:**
+```bash
+# Production
+docker compose -f docker-compose.prod.yml exec web python manage.py check_ai_status
+
+# Development
+docker compose exec web python manage.py check_ai_status
+```
+
+**Output Information:**
+- **Total count** - All photos/videos in scope
+- **✓ Completed** - Successfully processed with AI descriptions
+- **⏳ Processing** - Currently being processed
+- **⏸ Pending** - Waiting to be processed
+- **✗ Failed** - Errors during processing (with error messages)
+- **📝 Unprocessed** - No AI description generated yet
+
+**Monitoring During Processing:**
+Run this command in a separate terminal while AI processing is running to see real-time progress:
+```bash
+# Terminal 1: Start processing
+docker compose -f docker-compose.prod.yml exec web python manage.py analyze_photos
+
+# Terminal 2: Monitor progress (run repeatedly or use watch)
+watch -n 5 'docker compose -f docker-compose.prod.yml exec web python manage.py check_ai_status --media-type photos'
+```
+
+---
+
 ## 🌐 **Web-Based AI Processing Interfaces**
 
 ### **📸 Photo AI Processing Interface**
