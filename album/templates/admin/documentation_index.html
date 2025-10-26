@@ -184,10 +184,8 @@
             <ul class="doc-list">
                 {% for doc in docs %}
                 <li>
-                    <a href="https://github.com/badspelr/Overly-Complicated-Photo-Album/blob/dev/docs/{{ doc.path }}" 
-                       class="doc-link" 
-                       target="_blank"
-                       rel="noopener noreferrer">
+                    <a href="{% url 'album:documentation_view' doc.path %}" 
+                       class="doc-link">
                         {{ doc.title }}
                     </a>
                 </li>
@@ -205,8 +203,8 @@
     </div>
 {% endif %}
 
-<div style="margin-top: 2rem; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
-    <strong>💡 Tip:</strong> Most documentation files are Markdown (.md) files that are best viewed on GitHub or with a Markdown viewer.
+<div style="margin-top: 2rem; padding: 1rem; background: #e7f3ff; border: 1px solid #007bff; border-radius: 4px;">
+    <strong>💡 Tip:</strong> Documentation is rendered from local Markdown files with syntax highlighting and table of contents.
 </div>
 
 <script>

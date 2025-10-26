@@ -249,6 +249,7 @@ def documentation_index(request):
         'Features': [],
         'Technical': [],
         'Development': [],
+        'Deployment': [],
         'API': [],
     }
     
@@ -261,6 +262,7 @@ def documentation_index(request):
             ('Features', 'features'),
             ('Technical', 'technical'),
             ('Development', 'development'),
+            ('Deployment', 'deployment'),
             ('API', 'api'),
         ]:
             category_dir = docs_dir / folder_name
@@ -280,3 +282,73 @@ def documentation_index(request):
     }
     
     return render(request, 'admin/documentation_index.html', context)
+
+
+def documentation_view(request, doc_path):
+    """Render a documentation markdown file with syntax highlighting."""
+    from django.shortcuts import render
+    from django.http import Http404
+    from pathlib import Path
+    import markdown
+    from markdown.extensions.codehilite import CodeHiliteExtension
+    from markdown.extensions.fenced_code import FencedCodeExtension
+    from markdown.extensions.tables import TableExtension
+    from markdown.extensions.toc import TocExtension
+    
+    # Security: Prevent directory traversal
+    if '..' in doc_path or doc_path.startswith('/'):
+        raise Http404("Invalid document path")
+    
+    # Get the docs directory
+    docs_dir = Path(__file__).resolve().parent.parent.parent / 'docs'
+    doc_file = docs_dir / doc_path
+    
+    # Security: Ensure the file is within docs directory
+    try:
+        doc_file = doc_file.resolve()
+        docs_dir = docs_dir.resolve()
+        if not str(doc_file).startswith(str(docs_dir)):
+            raise Http404("Invalid document path")
+    except (OSError, RuntimeError):
+        raise Http404("Document not found")
+    
+    # Check if file exists and is a markdown file
+    if not doc_file.exists() or not doc_file.is_file() or not doc_file.suffix == '.md':
+        raise Http404("Document not found")
+    
+    # Read and render the markdown
+    try:
+        with open(doc_file, 'r', encoding='utf-8') as f:
+            markdown_content = f.read()
+        
+        # Convert markdown to HTML with extensions
+        md = markdown.Markdown(extensions=[
+            FencedCodeExtension(),
+            CodeHiliteExtension(css_class='highlight', linenums=False),
+            TableExtension(),
+            TocExtension(title='Table of Contents'),
+            'nl2br',
+            'sane_lists',
+        ])
+        html_content = md.convert(markdown_content)
+        
+        # Extract title from first h1 or use filename
+        title = doc_file.stem.replace('_', ' ').replace('-', ' ').title()
+        if '<h1>' in html_content:
+            import re
+            match = re.search(r'<h1[^>]*>(.*?)</h1>', html_content)
+            if match:
+                title = match.group(1)
+        
+        context = {
+            'title': title,
+            'content': html_content,
+            'doc_path': doc_path,
+            'toc': md.toc if hasattr(md, 'toc') else '',
+        }
+        
+        return render(request, 'admin/documentation_view.html', context)
+        
+    except Exception as e:
+        logger.error(f"Error rendering documentation {doc_path}: {e}")
+        raise Http404("Error rendering document")
