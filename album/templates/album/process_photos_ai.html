@@ -674,32 +674,67 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // ALWAYS clear processing state on page load unless we just submitted the form
-    // This prevents stuck modals when navigating back to the page
+    // Check if we just submitted the form - only trust this flag for a brief moment
     const justSubmitted = sessionStorage.getItem('justSubmittedProcessing') === 'true';
-    if (!justSubmitted) {
-        // Clear all processing state if we're just loading the page normally
-        sessionStorage.removeItem('aiProcessingInProgress');
-        sessionStorage.removeItem('processingStartTime');
-        sessionStorage.removeItem('estimatedPhotoCount');
-        console.log('Cleared processing state on page load');
-        return; // Don't show modal
-    } else {
-        // Clear the submission flag so next page load won't show modal
-        sessionStorage.removeItem('justSubmittedProcessing');
-    }
+    const submissionTime = parseInt(sessionStorage.getItem('submissionTime') || '0');
+    const timeSinceSubmission = Date.now() - submissionTime;
     
-    // If we have a success message, clear processing state
+    // If we have a success message, processing completed - clear everything
     if (successMessages.length > 0) {
         for (let msg of successMessages) {
             if (msg.textContent.includes('Successfully processed')) {
                 sessionStorage.removeItem('aiProcessingInProgress');
                 sessionStorage.removeItem('processingStartTime');
                 sessionStorage.removeItem('estimatedPhotoCount');
+                sessionStorage.removeItem('justSubmittedProcessing');
+                sessionStorage.removeItem('submissionTime');
                 processingWarningActive = false;
-                break;
+                return; // Don't show modal
             }
         }
+    }
+    
+    // If submission was recent (within 5 seconds) and we're supposedly processing, show the modal
+    if (justSubmitted && timeSinceSubmission < 5000 && sessionStorage.getItem('aiProcessingInProgress') === 'true') {
+        // Clear the submission flag so next page load won't show modal
+        sessionStorage.removeItem('justSubmittedProcessing');
+        sessionStorage.removeItem('submissionTime');
+        
+        // Continue showing processing modal
+    } else if (sessionStorage.getItem('aiProcessingInProgress') === 'true') {
+        // We're supposedly processing but submission wasn't recent - might be stale or continuing from before
+        // Check if we have saved state to continue from
+        const savedStartTime = sessionStorage.getItem('processingStartTime');
+        const savedPhotoCount = sessionStorage.getItem('estimatedPhotoCount');
+        
+        if (savedStartTime && savedPhotoCount) {
+            // We have state - check if it's not too old (processing should complete within reasonable time)
+            const timeSinceStart = Date.now() - parseInt(savedStartTime);
+            const maxExpectedTime = parseInt(savedPhotoCount) * 600 * 3; // 3x expected time
+            
+            if (timeSinceStart < maxExpectedTime) {
+                // State is recent enough, continue processing
+            } else {
+                // State is too old, clear it
+                console.log('Cleared stale processing state (too old)');
+                sessionStorage.removeItem('aiProcessingInProgress');
+                sessionStorage.removeItem('processingStartTime');
+                sessionStorage.removeItem('estimatedPhotoCount');
+                sessionStorage.removeItem('justSubmittedProcessing');
+                sessionStorage.removeItem('submissionTime');
+                return; // Don't show modal
+            }
+        } else {
+            // No state saved, clear everything
+            console.log('Cleared processing state (no saved state)');
+            sessionStorage.removeItem('aiProcessingInProgress');
+            sessionStorage.removeItem('justSubmittedProcessing');
+            sessionStorage.removeItem('submissionTime');
+            return; // Don't show modal
+        }
+    } else {
+        // Not processing at all
+        return; // Don't show modal
     }
     
     // Check if we were in the middle of processing when page loaded
@@ -773,6 +808,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sessionStorage.setItem('processingStartTime', processingStartTime.toString());
         sessionStorage.setItem('estimatedPhotoCount', estimatedPhotoCount.toString());
         sessionStorage.setItem('justSubmittedProcessing', 'true'); // Flag that we just submitted
+        sessionStorage.setItem('submissionTime', processingStartTime.toString()); // Timestamp of submission
         
         // Show processing modal immediately
         showProcessingModal();

@@ -664,7 +664,71 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // ALWAYS clear processing state on page load unless we just submitted the form
+    // Check if we just submitted the form - only trust this flag for a brief moment
+    const justSubmitted = sessionStorage.getItem('justSubmittedVideoProcessing') === 'true';
+    const submissionTime = parseInt(sessionStorage.getItem('videoSubmissionTime') || '0');
+    const timeSinceSubmission = Date.now() - submissionTime;
+    
+    // If we have a success message, processing completed - clear everything
+    if (successMessages.length > 0) {
+        for (let msg of successMessages) {
+            if (msg.textContent.includes('Successfully processed')) {
+                sessionStorage.removeItem('aiVideoProcessingInProgress');
+                sessionStorage.removeItem('videoProcessingStartTime');
+                sessionStorage.removeItem('estimatedVideoCount');
+                sessionStorage.removeItem('justSubmittedVideoProcessing');
+                sessionStorage.removeItem('videoSubmissionTime');
+                processingWarningActive = false;
+                return; // Don't show modal
+            }
+        }
+    }
+    
+    // If submission was recent (within 5 seconds) and we're supposedly processing, show the modal
+    if (justSubmitted && timeSinceSubmission < 5000 && sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {
+        // Clear the submission flag so next page load won't show modal
+        sessionStorage.removeItem('justSubmittedVideoProcessing');
+        sessionStorage.removeItem('videoSubmissionTime');
+        
+        // Continue showing processing modal
+    } else if (sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {
+        // We're supposedly processing but submission wasn't recent - might be stale or continuing from before
+        // Check if we have saved state to continue from
+        const savedStartTime = sessionStorage.getItem('videoProcessingStartTime');
+        const savedVideoCount = sessionStorage.getItem('estimatedVideoCount');
+        
+        if (savedStartTime && savedVideoCount) {
+            // We have state - check if it's not too old (processing should complete within reasonable time)
+            const timeSinceStart = Date.now() - parseInt(savedStartTime);
+            const maxExpectedTime = parseInt(savedVideoCount) * 1500 * 3; // 3x expected time
+            
+            if (timeSinceStart < maxExpectedTime) {
+                // State is recent enough, continue processing
+            } else {
+                // State is too old, clear it
+                console.log('Cleared stale video processing state (too old)');
+                sessionStorage.removeItem('aiVideoProcessingInProgress');
+                sessionStorage.removeItem('videoProcessingStartTime');
+                sessionStorage.removeItem('estimatedVideoCount');
+                sessionStorage.removeItem('justSubmittedVideoProcessing');
+                sessionStorage.removeItem('videoSubmissionTime');
+                return; // Don't show modal
+            }
+        } else {
+            // No state saved, clear everything
+            console.log('Cleared video processing state (no saved state)');
+            sessionStorage.removeItem('aiVideoProcessingInProgress');
+            sessionStorage.removeItem('justSubmittedVideoProcessing');
+            sessionStorage.removeItem('videoSubmissionTime');
+            return; // Don't show modal
+        }
+    } else {
+        // Not processing at all
+        return; // Don't show modal
+    }
+    
+    // Check if we were in the middle of processing when page loaded
+    if (sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {    // ALWAYS clear processing state on page load unless we just submitted the form
     // This prevents stuck modals when navigating back to the page
     const justSubmitted = sessionStorage.getItem('justSubmittedVideoProcessing') === 'true';
     if (!justSubmitted) {
@@ -772,6 +836,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sessionStorage.setItem('videoProcessingStartTime', processingStartTime.toString());
         sessionStorage.setItem('estimatedVideoCount', estimatedVideoCount.toString());
         sessionStorage.setItem('justSubmittedVideoProcessing', 'true'); // Flag that we just submitted
+        sessionStorage.setItem('videoSubmissionTime', processingStartTime.toString()); // Timestamp of submission
         
         // Show processing modal immediately
         showProcessingModal();
