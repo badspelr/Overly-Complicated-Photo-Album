@@ -600,6 +600,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Re-enable submit button
         submitButton.disabled = false;
         submitButton.innerHTML = '<i class="material-icons">auto_awesome</i> Start AI Processing';
+        submitButton.style.opacity = '1';
     }
     
     function showError(message) {
@@ -797,6 +798,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     form.addEventListener('submit', function(e) {
+        // Immediately disable button and show feedback
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="material-icons">hourglass_empty</i> Starting...';
+        submitButton.style.opacity = '0.6';
+        
         // Calculate estimated video count for progress estimation
         const forceReprocess = document.getElementById('force').checked;
         const albumSelect = document.getElementById('album');
@@ -827,6 +833,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (estimatedVideoCount === 0) {
+            // Re-enable button if no videos to process
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="material-icons">smart_toy</i> Start AI Processing';
+            submitButton.style.opacity = '1';
             return; // Let the form submit normally to show "no videos to process" message
         }
         
@@ -849,8 +859,7 @@ document.addEventListener('DOMContentLoaded', function() {
             processingWarningActive = true;
         }, 3000);
         
-        // Disable the submit button to prevent double submission
-        submitButton.disabled = true;
+        // Update button to show processing state
         submitButton.innerHTML = '<i class="material-icons">hourglass_empty</i> Processing...';
         
         // Set a timeout to detect if processing fails or gets stuck
