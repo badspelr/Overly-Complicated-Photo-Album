@@ -4,7 +4,7 @@ from .views.user_views import homepage, dashboard, UserUpdateView, invite_user, 
 from .views.album_views import AlbumListView, AlbumDetailView, create_album, delete_album, album_viewers, remove_viewer, create_share_link, shared_album, manage_share_links, delete_share_link
 from .views.media_views import PhotoListView, PhotoDetailView, VideoListView, VideoDetailView, delete_media, bulk_delete, bulk_download, search_media, photo_edit, minimal_upload, toggle_favorite, favorites_list, mobile_download_page, download_single_item, process_videos_ai, process_photos_ai
 from .views.category_views import CategoryCreateView, CategoryUpdateView, CategoryDeleteView, CategoryListView
-from .views.base_views import about_view, contact_view, ai_settings_view, cookie_policy_view
+from .views.base_views import about_view, contact_view, ai_settings_view, cookie_policy_view, documentation_index
 from .models import Photo, Video
 
 app_name = 'album'
@@ -63,4 +63,5 @@ urlpatterns = [
     path('about/', about_view, name='about'),
     path('contact/', contact_view, name='contact'),
     path('cookie-policy/', cookie_policy_view, name='cookie_policy'),
+    path('docs/', documentation_index, name='documentation_index'),
 ]

@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a>
+</h1>
+{% endblock %}
+
+{% block userlinks %}
+{{ block.super }}
+{% if documentation_url %}
+<div style="float: right; margin-right: 20px; margin-top: 8px;">
+    <a href="{{ documentation_url }}" 
+       style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+              color: white; 
+              padding: 8px 16px; 
+              border-radius: 6px; 
+              text-decoration: none; 
+              font-weight: 500;
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              transition: all 0.2s;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+       onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)';"
+       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">
+        📚 Documentation
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

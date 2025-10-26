@@ -230,3 +230,53 @@ def cookie_policy_view(request):
     """Display cookie policy page."""
     from django.shortcuts import render
     return render(request, 'album/cookie_policy.html')
+
+
+def documentation_index(request):
+    """Display documentation index page with links to all available documentation."""
+    from django.shortcuts import render
+    from pathlib import Path
+    import os
+    
+    # Get the docs directory
+    docs_dir = Path(__file__).resolve().parent.parent.parent / 'docs'
+    
+    # Organize documentation by category
+    doc_categories = {
+        'Getting Started': [],
+        'User Guides': [],
+        'Admin Guides': [],
+        'Features': [],
+        'Technical': [],
+        'Development': [],
+        'API': [],
+    }
+    
+    # Scan docs directory if it exists
+    if docs_dir.exists():
+        for category_name, folder_name in [
+            ('Getting Started', 'getting-started'),
+            ('User Guides', 'user-guides'),
+            ('Admin Guides', 'admin-guides'),
+            ('Features', 'features'),
+            ('Technical', 'technical'),
+            ('Development', 'development'),
+            ('API', 'api'),
+        ]:
+            category_dir = docs_dir / folder_name
+            if category_dir.exists() and category_dir.is_dir():
+                for md_file in sorted(category_dir.glob('*.md')):
+                    # Skip README files in the list (they'll be linked as category intros)
+                    if md_file.name != 'README.md':
+                        doc_categories[category_name].append({
+                            'title': md_file.stem.replace('_', ' ').replace('-', ' ').title(),
+                            'filename': md_file.name,
+                            'path': f'{folder_name}/{md_file.name}',
+                        })
+    
+    context = {
+        'doc_categories': doc_categories,
+        'docs_available': any(docs for docs in doc_categories.values()),
+    }
+    
+    return render(request, 'admin/documentation_index.html', context)

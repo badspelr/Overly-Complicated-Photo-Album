@@ -1,0 +1,170 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Documentation - {{ site_title }}{% endblock %}
+
+{% block extrastyle %}
+<style>
+    .documentation-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 2rem;
+        margin: -20px -20px 2rem -20px;
+        border-radius: 8px 8px 0 0;
+    }
+    
+    .documentation-header h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 2.5rem;
+        font-weight: 600;
+    }
+    
+    .documentation-header p {
+        margin: 0;
+        font-size: 1.1rem;
+        opacity: 0.95;
+    }
+    
+    .doc-category {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    .doc-category h2 {
+        margin: 0 0 1rem 0;
+        font-size: 1.5rem;
+        color: #495057;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+    }
+    
+    .doc-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .doc-list li {
+        margin-bottom: 0.75rem;
+    }
+    
+    .doc-link {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        color: #495057;
+        text-decoration: none;
+        transition: all 0.2s;
+        width: 100%;
+    }
+    
+    .doc-link:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: translateX(5px);
+        text-decoration: none;
+    }
+    
+    .doc-link::before {
+        content: "📄";
+        margin-right: 0.75rem;
+        font-size: 1.2rem;
+    }
+    
+    .no-docs {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .no-docs-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    
+    .quick-links {
+        background: #e7f3ff;
+        border-left: 4px solid #007bff;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        border-radius: 4px;
+    }
+    
+    .quick-links h3 {
+        margin: 0 0 0.5rem 0;
+        color: #007bff;
+        font-size: 1.2rem;
+    }
+    
+    .quick-links ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+    
+    .quick-links li {
+        margin: 0.25rem 0;
+    }
+    
+    .quick-links a {
+        color: #0056b3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="documentation-header">
+    <h1>📚 Photo Album Documentation</h1>
+    <p>Comprehensive guides and references for administrators and users</p>
+</div>
+
+<div class="quick-links">
+    <h3>🚀 Quick Links</h3>
+    <ul>
+        <li><a href="{% url 'album:user_manual' %}" target="_blank">User Manual</a> - End-user guide</li>
+        <li><a href="{% url 'album:ai_settings' %}">AI Settings</a> - Configure AI processing</li>
+        <li><a href="{% url 'album:process_photos_ai' %}">Process Photos with AI</a> - Bulk photo processing</li>
+        <li><a href="{% url 'album:process_videos_ai' %}">Process Videos with AI</a> - Bulk video processing</li>
+        <li><a href="https://github.com/badspelr/Overly-Complicated-Photo-Album" target="_blank">GitHub Repository</a> - Source code and issues</li>
+    </ul>
+</div>
+
+{% if docs_available %}
+    {% for category_name, docs in doc_categories.items %}
+        {% if docs %}
+        <div class="doc-category">
+            <h2>{{ category_name }}</h2>
+            <ul class="doc-list">
+                {% for doc in docs %}
+                <li>
+                    <a href="https://github.com/badspelr/Overly-Complicated-Photo-Album/blob/dev/docs/{{ doc.path }}" 
+                       class="doc-link" 
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        {{ doc.title }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    {% endfor %}
+{% else %}
+    <div class="no-docs">
+        <div class="no-docs-icon">📭</div>
+        <h2>No Documentation Files Found</h2>
+        <p>Documentation files should be located in the <code>docs/</code> directory.</p>
+        <p><a href="https://github.com/badspelr/Overly-Complicated-Photo-Album/tree/dev/docs" target="_blank">View documentation on GitHub</a></p>
+    </div>
+{% endif %}
+
+<div style="margin-top: 2rem; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
+    <strong>💡 Tip:</strong> Most documentation files are Markdown (.md) files that are best viewed on GitHub or with a Markdown viewer.
+</div>
+{% endblock %}
