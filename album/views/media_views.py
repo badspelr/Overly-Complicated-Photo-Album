@@ -1290,46 +1290,55 @@ def process_videos_ai(request):
                 messages.error(request, 'AI analysis service is not available. Please check the model loading.')
                 return redirect('album:process_videos_ai')
             
-            # Build parameters for the command
-            command_args = []
-            if force_regeneration:
-                command_args.append('--force')
-            if album_title:
-                command_args.extend(['--album', album_title])
-            if limit and limit.isdigit():
-                command_args.extend(['--limit', limit])
+            # Cap limit for album admins based on settings (site admins have no cap)
+            if not request.user.is_site_admin:
+                from ..models import AIProcessingSettings
+                ai_settings = AIProcessingSettings.load()
+                max_limit = ai_settings.album_admin_processing_limit
+                
+                if limit and limit.isdigit():
+                    limit = str(min(int(limit), max_limit))
+                else:
+                    limit = str(max_limit)
             
-            # Count videos that will be processed
+            # Build query to find videos to process
             if force_regeneration:
                 if album_title:
-                    videos_count = Video.objects.filter(album__title=album_title).count()
+                    video_query = Video.objects.filter(album__title=album_title)
                 else:
-                    videos_count = Video.objects.all().count()
+                    video_query = Video.objects.all()
             else:
-                filters = Q(ai_description__isnull=True) | Q(ai_description='')
+                filters = Q(ai_description__isnull=True) | Q(ai_description='') | Q(ai_processed=False)
                 if album_title:
                     filters &= Q(album__title=album_title)
-                videos_count = Video.objects.filter(filters).count()
+                video_query = Video.objects.filter(filters)
             
+            # Apply limit
             if limit and limit.isdigit():
-                videos_count = min(videos_count, int(limit))
+                video_query = video_query[:int(limit)]
             
-            if videos_count == 0:
+            # Get video IDs to process
+            video_ids = list(video_query.values_list('id', flat=True))
+            
+            if not video_ids:
                 messages.info(request, 'No videos found to process.')
                 return redirect('album:process_videos_ai')
             
-            # Run the analysis command
-            start_time = time.time()
-            call_command('analyze_videos', *command_args)
-            elapsed_time = time.time() - start_time
+            # Queue videos for background processing using Celery
+            from ..tasks import process_video_ai
+            queued_count = 0
+            
+            for video_id in video_ids:
+                process_video_ai.delay(video_id)
+                queued_count += 1
             
             messages.success(request, 
-                f'Successfully processed {videos_count} videos in {elapsed_time:.2f} seconds. '
-                f'Videos now have AI-generated descriptions and tags.')
+                f'Successfully queued {queued_count} video{"s" if queued_count != 1 else ""} for AI processing. '
+                f'Processing will happen in the background. Check back in a few minutes.')
             
         except Exception as e:
-            logger.error(f'Error processing videos with AI: {e}')
-            messages.error(request, f'Error processing videos: {str(e)}')
+            logger.error(f'Error queueing videos for AI processing: {e}')
+            messages.error(request, f'Error queueing videos: {str(e)}')
         
         return redirect('album:process_videos_ai')
     
@@ -1457,46 +1466,55 @@ def process_photos_ai(request):
                 messages.error(request, 'AI analysis service is not available. Please check the model loading.')
                 return redirect('album:process_photos_ai')
             
-            # Build parameters for the command
-            command_args = []
-            if force_regeneration:
-                command_args.append('--force')
-            if album_title:
-                command_args.extend(['--album', album_title])
-            if limit and limit.isdigit():
-                command_args.extend(['--limit', limit])
+            # Cap limit for album admins based on settings (site admins have no cap)
+            if not request.user.is_site_admin:
+                from ..models import AIProcessingSettings
+                ai_settings = AIProcessingSettings.load()
+                max_limit = ai_settings.album_admin_processing_limit
+                
+                if limit and limit.isdigit():
+                    limit = str(min(int(limit), max_limit))
+                else:
+                    limit = str(max_limit)
             
-            # Count photos that will be processed
+            # Build query to find photos to process
             if force_regeneration:
                 if album_title:
-                    photos_count = Photo.objects.filter(album__title=album_title).count()
+                    photo_query = Photo.objects.filter(album__title=album_title)
                 else:
-                    photos_count = Photo.objects.all().count()
+                    photo_query = Photo.objects.all()
             else:
-                filters = Q(ai_description__isnull=True) | Q(ai_description='')
+                filters = Q(ai_description__isnull=True) | Q(ai_description='') | Q(ai_processed=False)
                 if album_title:
                     filters &= Q(album__title=album_title)
-                photos_count = Photo.objects.filter(filters).count()
+                photo_query = Photo.objects.filter(filters)
             
+            # Apply limit
             if limit and limit.isdigit():
-                photos_count = min(photos_count, int(limit))
+                photo_query = photo_query[:int(limit)]
             
-            if photos_count == 0:
+            # Get photo IDs to process
+            photo_ids = list(photo_query.values_list('id', flat=True))
+            
+            if not photo_ids:
                 messages.info(request, 'No photos found to process.')
                 return redirect('album:process_photos_ai')
             
-            # Run the analysis command
-            start_time = time.time()
-            call_command('analyze_photos', *command_args)
-            elapsed_time = time.time() - start_time
+            # Queue photos for background processing using Celery
+            from ..tasks import process_photo_ai
+            queued_count = 0
+            
+            for photo_id in photo_ids:
+                process_photo_ai.delay(photo_id)
+                queued_count += 1
             
             messages.success(request, 
-                f'Successfully processed {photos_count} photos in {elapsed_time:.2f} seconds. '
-                f'Photos now have AI-generated descriptions and tags.')
+                f'Successfully queued {queued_count} photo{"s" if queued_count != 1 else ""} for AI processing. '
+                f'Processing will happen in the background. Check back in a few minutes.')
             
         except Exception as e:
-            logger.error(f'Error processing photos with AI: {e}')
-            messages.error(request, f'Error processing photos: {str(e)}')
+            logger.error(f'Error queueing photos for AI processing: {e}')
+            messages.error(request, f'Error queueing photos: {str(e)}')
         
         return redirect('album:process_photos_ai')
     

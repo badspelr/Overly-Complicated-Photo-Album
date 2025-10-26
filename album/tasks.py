@@ -22,26 +22,46 @@ def process_photo_ai(self, photo_id):
         dict: Processing result with status and details
     """
     from album.models import Photo
+    from album.services.ai_analysis_service import analyze_image, is_ai_analysis_available
+    import os
     
     try:
         photo = Photo.objects.get(id=photo_id)
         photo.processing_status = Photo.ProcessingStatus.PROCESSING
         photo.save(update_fields=['processing_status'])
         
-        logger.info(f"Processing photo {photo_id}: {photo.filename}")
+        logger.info(f"Processing photo {photo_id}: {photo.title}")
         
-        # Use existing management command for processing
-        call_command('process_photos_ai', photo_ids=[photo_id])
+        # Check if AI analysis is available
+        if not is_ai_analysis_available():
+            raise Exception("AI analysis service is not available")
         
-        # Update status
-        photo.refresh_from_db()
-        if photo.ai_processed:
+        # Check if image file exists
+        if not photo.image or not hasattr(photo.image, 'path'):
+            raise Exception("Photo has no image file path")
+        
+        if not os.path.exists(photo.image.path):
+            raise Exception(f"Image file does not exist: {photo.image.path}")
+        
+        # Analyze the image
+        analysis_result = analyze_image(photo.image.path)
+        
+        if analysis_result['description']:
+            # Update the photo with AI analysis results
+            photo.ai_description = analysis_result['description']
+            photo.ai_tags = analysis_result['tags']
+            photo.ai_confidence_score = analysis_result['confidence']
+            photo.ai_processed = True
             photo.processing_status = Photo.ProcessingStatus.COMPLETED
-            photo.save(update_fields=['processing_status'])
+            photo.save(update_fields=[
+                'ai_description', 'ai_tags', 'ai_confidence_score',
+                'ai_processed', 'processing_status'
+            ])
+            
             logger.info(f"Successfully processed photo {photo_id}")
             return {'status': 'success', 'photo_id': photo_id}
         else:
-            raise Exception("AI processing completed but ai_processed flag not set")
+            raise Exception("AI analysis returned no description")
             
     except Photo.DoesNotExist:
         logger.error(f"Photo {photo_id} not found")
@@ -74,26 +94,52 @@ def process_video_ai(self, video_id):
         dict: Processing result with status and details
     """
     from album.models import Video
+    from album.services.ai_analysis_service import analyze_image, is_ai_analysis_available
+    from album.services.embedding_service import generate_image_embedding
+    import os
     
     try:
         video = Video.objects.get(id=video_id)
         video.processing_status = Video.ProcessingStatus.PROCESSING
         video.save(update_fields=['processing_status'])
         
-        logger.info(f"Processing video {video_id}: {video.filename}")
+        logger.info(f"Processing video {video_id}: {video.title}")
         
-        # Use existing management command for processing
-        call_command('process_videos_ai', video_ids=[video_id])
+        # Check if AI analysis is available
+        if not is_ai_analysis_available():
+            raise Exception("AI analysis service is not available")
         
-        # Update status
-        video.refresh_from_db()
-        if video.ai_processed:
+        # Check if video has a thumbnail
+        if not video.thumbnail or not hasattr(video.thumbnail, 'path'):
+            raise Exception("Video has no thumbnail. Generate thumbnails first.")
+        
+        # Check if thumbnail file exists
+        if not os.path.exists(video.thumbnail.path):
+            raise Exception(f"Thumbnail file does not exist: {video.thumbnail.path}")
+        
+        # Analyze the video thumbnail
+        analysis_result = analyze_image(video.thumbnail.path)
+        
+        if analysis_result['description']:
+            # Generate embedding for the thumbnail
+            thumbnail_embedding = generate_image_embedding(video.thumbnail.path)
+            
+            # Update the video with AI analysis results
+            video.ai_description = analysis_result['description']
+            video.ai_tags = analysis_result['tags']
+            video.ai_confidence_score = analysis_result['confidence']
+            video.ai_processed = True
             video.processing_status = Video.ProcessingStatus.COMPLETED
-            video.save(update_fields=['processing_status'])
+            video.thumbnail_embedding = thumbnail_embedding
+            video.save(update_fields=[
+                'ai_description', 'ai_tags', 'ai_confidence_score',
+                'ai_processed', 'processing_status', 'thumbnail_embedding'
+            ])
+            
             logger.info(f"Successfully processed video {video_id}")
             return {'status': 'success', 'video_id': video_id}
         else:
-            raise Exception("AI processing completed but ai_processed flag not set")
+            raise Exception("AI analysis returned no description")
             
     except Video.DoesNotExist:
         logger.error(f"Video {video_id} not found")
