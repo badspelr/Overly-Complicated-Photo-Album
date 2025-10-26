@@ -1,8 +1,9 @@
 {% extends "admin/base.html" %}
 
-{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django administration') }}{% endblock %}
 
 {% block branding %}
+<!-- DEBUG: documentation_url = {{ documentation_url|default:"NOT SET" }} -->
 <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
     <h1 id="site-name">
         <a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a>
@@ -25,6 +26,8 @@
        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">
         📚 Documentation
     </a>
+    {% else %}
+    <!-- DEBUG: documentation_url NOT in context -->
     {% endif %}
 </div>
 {% endblock %}

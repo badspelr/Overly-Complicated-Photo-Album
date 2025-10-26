@@ -170,7 +170,9 @@ ROOT_URLCONF = 'photo_album.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'album' / 'templates',  # Prioritize our templates over Django's built-in ones
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
