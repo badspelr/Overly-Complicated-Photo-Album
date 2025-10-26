@@ -6,6 +6,9 @@ This guide explains how to run the Photo Album application using Docker containe
 
 - Docker (version 20.10 or later)
 - Docker Compose (version 2.0 or later)
+- (Optional) NVIDIA GPU with drivers for GPU-accelerated AI processing
+
+> **GPU Support:** By default, the application runs on CPU. For GPU acceleration, see [GPU_SUPPORT.md](GPU_SUPPORT.md).
 
 ## Quick Start
 

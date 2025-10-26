@@ -73,7 +73,7 @@ Visit `http://localhost:8000` and start uploading photos!
 ## 🤖 AI Features
 
 - **Local Processing:** All AI runs on your server (no external API calls)
-- **GPU Support:** CUDA acceleration for fast processing
+- **Flexible Deployment:** CPU-only by default, optional GPU acceleration
 - **Automatic Analysis:** Photos analyzed on upload (configurable)
 - **Smart Search:** Natural language queries like "sunset at the beach"
 - **Vector Database:** pgvector for efficient similarity search
@@ -85,16 +85,38 @@ Visit `http://localhost:8000` and start uploading photos!
 - PostgreSQL 15+ (with pgvector extension)
 - Redis 6+
 - 4GB+ RAM (8GB+ recommended for AI processing)
-- Optional: NVIDIA GPU with CUDA for faster AI processing
+- Optional: NVIDIA GPU with CUDA for faster AI processing (see [GPU Support](docs/deployment/GPU_SUPPORT.md))
 
 ## 🚀 Production Deployment
 
-For production deployment:
+### Quick Start (CPU-only)
+
+```bash
+# Clone and configure
+git clone https://github.com/yourusername/photo_album.git
+cd photo_album
+cp .env.example .env
+# Edit .env with your settings
+
+# Deploy with Docker
+docker compose -f docker-compose.prod.yml up -d
+```
+
+### With GPU Support (Optional)
+
+```bash
+# If you have NVIDIA GPU + drivers + Container Toolkit
+docker compose -f docker-compose.prod.yml -f docker-compose.gpu.yml up -d
+```
+
+### Comprehensive Guides
 
 1. Follow the [Deployment Checklist](docs/deployment/DEPLOYMENT_CHECKLIST.md)
-2. Use [Systemd Deployment Guide](docs/deployment/DEPLOYMENT_SYSTEMD.md) or [Docker Guide](docs/deployment/DOCKER_GUIDE.md)
-3. Configure [Celery Workers](docs/admin-guides/CELERY_SETUP.md) for background processing
-4. Set up proper [AI Settings](docs/admin-guides/ADMIN_GUIDE_AI_SETTINGS.md)
+2. Use [Docker Setup Guide](docs/deployment/DOCKER_SETUP.md) for containerized deployment
+3. Or use [Systemd Deployment Guide](docs/deployment/DEPLOYMENT_SYSTEMD.md) for traditional setup
+4. Configure [Celery Workers](docs/admin-guides/CELERY_SETUP.md) for background processing
+5. Set up proper [AI Settings](docs/admin-guides/ADMIN_GUIDE_AI_SETTINGS.md)
+6. For GPU acceleration, see [GPU Support Guide](docs/deployment/GPU_SUPPORT.md)
 
 ## 🤝 Contributing
 

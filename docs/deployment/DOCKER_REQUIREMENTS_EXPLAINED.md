@@ -143,3 +143,58 @@ Once GPU work is done, you could:
 - ✅ Focus on GPU setup next using current requirements.txt
 
 **No changes needed!** Your cleaned `requirements.txt` is the right file to use.
+
+---
+
+## Update - October 2025: Gunicorn Upgrade
+
+### What Changed
+
+**Gunicorn upgraded from v22.0 to v23.0** in both requirements files:
+
+**requirements.txt:**
+```python
+gunicorn==23.0.0  # Production WSGI server
+```
+
+**requirements-docker.txt:**
+```python
+gunicorn>=23.0,<24.0  # Updated from >=22.0,<23.0
+```
+
+### Why the Upgrade
+
+1. **Python 3.13 Compatibility**: Version 23.0 fixes critical bugs with Python 3.13
+   - Resolved `InvalidHTTPVersion` errors causing worker crashes
+   - Better handling of malformed HTTP requests from bots/scanners
+   - Improved error message formatting
+
+2. **Production Stability**: Eliminated worker crashes from external scanners
+   - Workers were crashing and restarting due to Gunicorn bug
+   - Version 23.0 handles these gracefully without worker restarts
+
+3. **Better Performance**: General improvements and bug fixes
+
+### Impact
+
+✅ **More stable workers** - No more crashes from invalid HTTP requests  
+✅ **Python 3.13 ready** - Fully compatible with latest Python  
+✅ **Better error handling** - Improved logging and error messages  
+✅ **Production tested** - Running successfully in production
+
+### When to Upgrade
+
+If you're still on Gunicorn v22.x:
+```bash
+# Update requirements files (already done)
+# Rebuild Docker images
+docker compose -f docker-compose.prod.yml build web
+docker compose -f docker-compose.prod.yml up -d web
+```
+
+### See Also
+
+- [CHANGELOG.md](../../CHANGELOG.md) - Full list of recent changes
+- [GPU_SUPPORT.md](GPU_SUPPORT.md) - New GPU configuration guide
+- [DOCKER_HEALTH_CHECK_FIX.md](DOCKER_HEALTH_CHECK_FIX.md) - Health check improvements
+

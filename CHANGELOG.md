@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Gunicorn Upgrade:** Updated Gunicorn from v22.0 to v23.0
+  - Fixes Python 3.13 compatibility issues with InvalidHTTPVersion errors
+  - Improves worker stability and error handling
+  - Reduces worker crashes from malformed HTTP requests
+- **Docker GPU Support:** Refactored GPU configuration for better compatibility
+  - CPU-only deployment by default (maximum server compatibility)
+  - Optional GPU support via `docker-compose.gpu.yml` overlay file
+  - Eliminates "could not select device driver 'nvidia'" errors on CPU-only servers
+  - GPU users can opt-in: `docker compose -f docker-compose.prod.yml -f docker-compose.gpu.yml up -d`
+- **Health Checks:** Improved Docker health check reliability
+  - Now follows HTTP redirects with `-L` flag
+  - Uses HEAD requests with `-I` flag for faster checks
+  - Increased start period to 60 seconds for AI model loading
+  - Reduces false-positive "unhealthy" container status
+
+### Added
+- **GPU Support Documentation:** New comprehensive GPU configuration guide
+  - Located at `docs/deployment/GPU_SUPPORT.md`
+  - Covers CPU vs GPU deployment options
+  - Prerequisites and troubleshooting for NVIDIA GPUs
+  - Performance comparison between CPU and GPU processing
+
+### Fixed
+- **Docker Deployment:** Fixed NVIDIA driver requirement errors on CPU-only servers
+- **Health Check Failures:** Resolved false health check failures due to auth redirects
+- **Worker Crashes:** Eliminated Gunicorn worker crashes with Python 3.13
+
 ## [1.2.0] - 2025-10-18
 
 ### Added

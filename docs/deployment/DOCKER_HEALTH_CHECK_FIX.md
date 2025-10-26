@@ -293,3 +293,49 @@ For production deployments:
 ✅ **Production Ready:** Proper health checks in place for orchestration
 
 The "unhealthy" status was a false alarm caused by an inappropriate health check. The Celery services were always working correctly - they just needed a health check that matched their actual functionality.
+
+---
+
+## Update - October 2025: Web Container Health Check Improvements
+
+### Additional Issue: Web Health Check Failures
+
+After fixing the Celery health checks, we discovered the web container health checks were also failing intermittently, showing "unhealthy" status while the application worked fine.
+
+### Root Causes
+
+1. **HTTP Redirects**: The root URL (`/`) redirects to login for unauthenticated users. The `curl -f` flag treats redirects (302) as failures.
+
+2. **Slow AI Processing**: During AI model loading or processing, requests could take longer than the 10s timeout.
+
+3. **Insufficient Start Period**: 40s wasn't enough for AI models to load on first startup.
+
+### Solution: Enhanced Web Health Check
+
+**Updated configuration:**
+```yaml
+healthcheck:
+  test: ["CMD", "curl", "-f", "-L", "-I", "http://localhost:8000/"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 60s
+```
+
+**Key Improvements:**
+- **`-L` flag**: Follow HTTP redirects (handles auth redirects properly)
+- **`-I` flag**: Use HEAD request instead of GET (faster, doesn't download page content)
+- **60s start_period**: Increased from 40s to give AI models time to load
+- **3 retries**: Adequate for detecting real issues without false positives
+
+### Impact
+
+✅ **Eliminated 504 Gateway Timeout** errors from Nginx  
+✅ **Accurate "healthy" status** even with auth redirects  
+✅ **Faster health checks** with HEAD requests  
+✅ **Better startup reliability** with AI models
+
+### For More Information
+
+See [GPU_SUPPORT.md](GPU_SUPPORT.md) for the full context of these improvements, which were part of refactoring GPU support for CPU-only deployments.
+

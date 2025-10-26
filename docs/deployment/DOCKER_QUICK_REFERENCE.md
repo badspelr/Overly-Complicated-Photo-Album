@@ -3,6 +3,21 @@
 
 Quick command reference for running Photo Album with Docker.
 
+## Production Deployment
+
+### Standard (CPU-only)
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
+### With GPU Support (Optional)
+```bash
+# If you have NVIDIA GPU + drivers + Container Toolkit
+docker compose -f docker-compose.prod.yml -f docker-compose.gpu.yml up -d
+```
+
+> **Note:** GPU support is optional. See [GPU_SUPPORT.md](GPU_SUPPORT.md) for details.
+
 ## Essential Commands
 
 ### Start/Stop
