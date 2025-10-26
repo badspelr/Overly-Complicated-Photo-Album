@@ -67,7 +67,7 @@ class Command(BaseCommand):
                 self.stdout.write('\nRecently Failed Photos:')
                 failed_photos = photo_queryset.filter(
                     processing_status=Photo.ProcessingStatus.FAILED
-                ).order_by('-modified_at')[:5]
+                ).order_by('-uploaded_at')[:5]
                 
                 for photo in failed_photos:
                     error_msg = getattr(photo, 'ai_processing_error', 'No error message')
@@ -82,7 +82,7 @@ class Command(BaseCommand):
                 self.stdout.write('\nCurrently Processing:')
                 processing_photos = photo_queryset.filter(
                     processing_status=Photo.ProcessingStatus.PROCESSING
-                ).order_by('-modified_at')[:10]
+                ).order_by('-uploaded_at')[:10]
                 
                 for photo in processing_photos:
                     self.stdout.write(
@@ -129,7 +129,7 @@ class Command(BaseCommand):
                 self.stdout.write('\nRecently Failed Videos:')
                 failed_videos = video_queryset.filter(
                     processing_status=Video.ProcessingStatus.FAILED
-                ).order_by('-modified_at')[:5]
+                ).order_by('-uploaded_at')[:5]
                 
                 for video in failed_videos:
                     error_msg = getattr(video, 'ai_processing_error', 'No error message')
@@ -144,7 +144,7 @@ class Command(BaseCommand):
                 self.stdout.write('\nCurrently Processing:')
                 processing_videos = video_queryset.filter(
                     processing_status=Video.ProcessingStatus.PROCESSING
-                ).order_by('-modified_at')[:10]
+                ).order_by('-uploaded_at')[:10]
                 
                 for video in processing_videos:
                     self.stdout.write(
