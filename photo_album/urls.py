@@ -7,14 +7,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from album.views.user_views import AppPasswordChangeView, AppPasswordChangeDoneView
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
-    # OpenAPI Schema & Documentation
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    
     path('admin/', admin.site.urls),
     # Custom auth URLs with our templates
     path('accounts/password_change/', AppPasswordChangeView.as_view(), name='password_change'),

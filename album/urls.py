@@ -2,10 +2,9 @@ from django.urls import path
 from .views import album_views
 from .views.user_views import homepage, dashboard, UserUpdateView, invite_user, ManageUsersView, UserEditView, UserDeleteView, register, user_manual, AccountDeleteView, AppPasswordChangeView, AppPasswordChangeDoneView, terms_of_conduct, csam_policy
 from .views.album_views import AlbumListView, AlbumDetailView, create_album, delete_album, album_viewers, remove_viewer, create_share_link, shared_album, manage_share_links, delete_share_link
-from .views.media_views import PhotoListView, PhotoDetailView, VideoListView, VideoDetailView, delete_media, bulk_delete, bulk_download, search_media, photo_edit, video_edit, minimal_upload, toggle_favorite, favorites_list, mobile_download_page, download_single_item, process_videos_ai, process_photos_ai
+from .views.media_views import PhotoListView, PhotoDetailView, VideoListView, VideoDetailView, delete_media, bulk_delete, bulk_download, search_media, photo_edit, minimal_upload, toggle_favorite, favorites_list, mobile_download_page, download_single_item, process_videos_ai, process_photos_ai
 from .views.category_views import CategoryCreateView, CategoryUpdateView, CategoryDeleteView, CategoryListView
 from .views.base_views import about_view, contact_view, ai_settings_view, cookie_policy_view
-from .views.docs_views import documentation_index, documentation_view
 from .models import Photo, Video
 
 app_name = 'album'
@@ -36,10 +35,9 @@ urlpatterns = [
     path('photos/<int:pk>/', PhotoDetailView.as_view(), name='photo_detail'),
     path('photos/<int:pk>/edit/', photo_edit, name='photo_edit'),
     path('photos/<int:pk>/delete/', delete_media, {'model': Photo}, name='delete_photo'),
+    path('videos/<int:pk>/delete/', delete_media, {'model': Video}, name='delete_video'),
     path('videos/', VideoListView.as_view(), name='video_list'),
     path('videos/<int:pk>/', VideoDetailView.as_view(), name='video_detail'),
-    path('videos/<int:pk>/edit/', video_edit, name='video_edit'),
-    path('videos/<int:pk>/delete/', delete_media, {'model': Video}, name='delete_video'),
     path('profile/', UserUpdateView.as_view(), name='profile_edit'),
     path('profile/delete/', AccountDeleteView.as_view(), name='delete_account'),
     path('users/invite/', invite_user, name='invite_user'),
@@ -65,8 +63,4 @@ urlpatterns = [
     path('about/', about_view, name='about'),
     path('contact/', contact_view, name='contact'),
     path('cookie-policy/', cookie_policy_view, name='cookie_policy'),
-    
-    # Admin Documentation
-    path('admin-docs/', documentation_index, name='documentation_index'),
-    path('admin-docs/<path:filename>/', documentation_view, name='documentation_view'),
 ]

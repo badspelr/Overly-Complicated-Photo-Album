@@ -18,16 +18,6 @@ class UserFactory(DjangoModelFactory):
     first_name = factory.Faker('first_name')
     last_name = factory.Faker('last_name')
     is_active = True
-    
-    @factory.post_generation
-    def password(self, create, extracted, **kwargs):
-        """Hash password after user creation."""
-        if not create:
-            return
-        if extracted:
-            self.set_password(extracted)
-        else:
-            self.set_password('defaultpassword123')
 
 
 class CategoryFactory(DjangoModelFactory):

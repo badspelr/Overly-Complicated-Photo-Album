@@ -148,9 +148,6 @@
     font-size: 0.875rem;
 }
 
-.form-control {
-    width: 100%;
-    padding: 0.75rem;
     background: var(--bg-default);
     border: 1px solid var(--divider);
     border-radius: 4px;
@@ -529,20 +526,178 @@
     </div>
 </div>
 
-{% load static %}
-<script src="{% static 'album/js/ai-processing.js' %}"></script>
 <script>
-// Initialize AI processing handler for videos
-new AIProcessingHandler({
-    formSelector: '.card form',
-    modalId: 'processingModal',
-    storagePrefix: 'aiVideoProcessing',
-    itemType: 'video',
-    itemTypePlural: 'videos',
-    processingTimePerItem: 40, // 40 seconds per video (includes thumbnail analysis)
-    getTotalItems: () => {{ total_videos }},
-    getUnprocessedItems: () => {{ unprocessed_videos }},
-    submitButtonProcessingHTML: '<i class="material-icons">hourglass_empty</i> Processing...'
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.card form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const modal = document.getElementById('processingModal');
+    const statusText = document.getElementById('processingStatus');
+    const progressBar = document.getElementById('progressBar');
+    const detailsText = document.getElementById('processingDetails');
+    
+    let processingStartTime = null;
+    let estimatedVideoCount = 0;
+    let processingWarningActive = false;
+    
+    // Check if we just completed processing (look for success message)
+    const successMessages = document.querySelectorAll('.alert-success, .messages .success');
+    if (successMessages.length > 0) {
+        // Check if the message contains "Successfully processed"
+        for (let msg of successMessages) {
+            if (msg.textContent.includes('Successfully processed')) {
+                // Clear any stored processing state
+                sessionStorage.removeItem('aiVideoProcessingInProgress');
+                sessionStorage.removeItem('videoProcessingStartTime');
+                sessionStorage.removeItem('estimatedVideoCount');
+                processingWarningActive = false;
+                break;
+            }
+        }
+    }
+    
+    // Check if we were in the middle of processing when page loaded
+    if (sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {
+        // We might have been processing, show modal and continue progress
+        const savedStartTime = sessionStorage.getItem('videoProcessingStartTime');
+        const savedVideoCount = sessionStorage.getItem('estimatedVideoCount');
+        
+        if (savedStartTime && savedVideoCount) {
+            processingStartTime = parseInt(savedStartTime);
+            estimatedVideoCount = parseInt(savedVideoCount);
+            showProcessingModal();
+            startProgressSimulation();
+            
+            // Activate unload warning since we're continuing processing
+            processingWarningActive = true;
+            
+            // Disable submit button
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="material-icons">hourglass_empty</i> Processing...';
+        }
+    }
+    
+    form.addEventListener('submit', function(e) {
+        // Calculate estimated video count for progress estimation
+        const forceReprocess = document.getElementById('force').checked;
+        const albumSelect = document.getElementById('album');
+        const limitInput = document.getElementById('limit');
+        
+        if (forceReprocess) {
+            estimatedVideoCount = {{ total_videos }};
+        } else {
+            estimatedVideoCount = {{ unprocessed_videos }};
+        }
+        
+        // Apply album filter if selected
+        if (albumSelect.value) {
+            const selectedOption = albumSelect.options[albumSelect.selectedIndex];
+            const albumVideoCount = parseInt(selectedOption.text.match(/\((\d+) videos\)/)?.[1] || '0');
+            if (!forceReprocess) {
+                // Estimate unprocessed videos in selected album (rough estimate)
+                estimatedVideoCount = Math.max(1, Math.round(albumVideoCount * ({{ unprocessed_videos }} / {{ total_videos }})));
+            } else {
+                estimatedVideoCount = albumVideoCount;
+            }
+        }
+        
+        // Apply limit if specified
+        const limit = parseInt(limitInput.value);
+        if (limit && limit > 0) {
+            estimatedVideoCount = Math.min(estimatedVideoCount, limit);
+        }
+        
+        if (estimatedVideoCount === 0) {
+            return; // Let the form submit normally to show "no videos to process" message
+        }
+        
+        // Store processing state in session storage
+        processingStartTime = Date.now();
+        sessionStorage.setItem('aiVideoProcessingInProgress', 'true');
+        sessionStorage.setItem('videoProcessingStartTime', processingStartTime.toString());
+        sessionStorage.setItem('estimatedVideoCount', estimatedVideoCount.toString());
+        
+        // Show processing modal immediately
+        showProcessingModal();
+        
+        // Start progress simulation
+        startProgressSimulation();
+        
+        // Activate unload warning after 3 seconds (give time for form submission to complete)
+        setTimeout(function() {
+            processingWarningActive = true;
+        }, 3000);
+        
+        // Disable the submit button to prevent double submission
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="material-icons">hourglass_empty</i> Processing...';
+    });
+    
+    function showProcessingModal() {
+        modal.classList.remove('hidden');
+        statusText.textContent = `Analyzing ${estimatedVideoCount} video${estimatedVideoCount !== 1 ? 's' : ''} with AI...`;
+        progressBar.style.width = '5%';
+        
+        if (estimatedVideoCount > 0) {
+            const estimatedTime = Math.round(estimatedVideoCount * 1.5); // ~1.5 seconds per video
+            detailsText.textContent = `Estimated time: ${formatTime(estimatedTime)}. Please keep this page open.`;
+        }
+    }
+    
+    function startProgressSimulation() {
+        // Simulate progress based on estimated processing time
+        const estimatedTotalTime = estimatedVideoCount * 1500; // 1.5 seconds = 1500ms per video
+        const updateInterval = Math.max(100, estimatedTotalTime / 100); // Update every 1% or minimum 100ms
+        
+        let currentProgress = 5; // Start at 5%
+        
+        const progressInterval = setInterval(function() {
+            const elapsed = Date.now() - processingStartTime;
+            const estimatedProgress = Math.min(90, (elapsed / estimatedTotalTime) * 100);
+            
+            // Smooth progress update (don't jump too fast)
+            if (estimatedProgress > currentProgress) {
+                currentProgress = Math.min(currentProgress + 2, estimatedProgress);
+            }
+            
+            progressBar.style.width = currentProgress + '%';
+            
+            const elapsedSeconds = Math.floor(elapsed / 1000);
+            statusText.textContent = `Processing... (${elapsedSeconds}s elapsed)`;
+            
+            // Stop at 90% and wait for actual completion
+            if (currentProgress >= 90) {
+                clearInterval(progressInterval);
+                statusText.textContent = 'Finalizing analysis...';
+                progressBar.style.width = '95%';
+            }
+        }, updateInterval);
+        
+        // Store interval ID to clear it if needed
+        window.progressInterval = progressInterval;
+    }
+    
+    function formatTime(seconds) {
+        if (seconds < 60) {
+            return `${seconds} seconds`;
+        } else {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            if (remainingSeconds === 0) {
+                return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+            } else {
+                return `${minutes}m ${remainingSeconds}s`;
+            }
+        }
+    }
+    
+    // Handle page unload warning (only after processing has been running for a bit)
+    window.addEventListener('beforeunload', function(e) {
+        if (processingWarningActive && !modal.classList.contains('hidden')) {
+            e.preventDefault();
+            e.returnValue = 'AI processing is in progress. Leaving this page may interrupt the process.';
+            return e.returnValue;
+        }
+    });
 });
 </script>
 {% endblock %}

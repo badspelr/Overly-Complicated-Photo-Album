@@ -1,70 +1,20 @@
 # Django Photo Album - Installation Guide
 
-## Installation Methods
+## Prerequisites
 
-### Method 1: Docker (Recommended) 🐳
+Before installing Django Photo Album, ensure you have the following installed on your system:
 
-**No virtual environment needed!** Docker provides complete isolation and matches production exactly.
-
-#### Prerequisites
-- **Docker** - Latest version
-- **Docker Compose** - Latest version
-- **Git** - For cloning the repository
-
-#### Installation Steps
-
-```bash
-# 1. Clone the repository
-git clone <repository-url>
-cd photo_album
-
-# 2. Configure environment
-cp .env.example .env
-# Edit .env if needed (defaults work for development)
-
-# 3. Start all services
-docker-compose -f docker-compose.light.yml up -d
-
-# 4. Create superuser
-docker-compose -f docker-compose.light.yml exec web python manage.py createsuperuser
-
-# 5. Access application
-# Open: http://localhost:8000
-```
-
-**That's it!** PostgreSQL, Redis, Celery, and the web server are all running in isolated containers.
-
-#### Why Docker?
-
-- ✅ No virtual environment setup needed
-- ✅ Automatic dependency isolation
-- ✅ Matches production environment exactly
-- ✅ One command starts everything
-- ✅ No manual PostgreSQL/Redis setup
-- ✅ Easy cleanup with `docker compose down`
-
-See [`docs/deployment/DOCKER.md`](../deployment/DOCKER.md) for complete Docker guide.
-
----
-
-### Method 2: Local Development (Without Docker)
-
-⚠️ **Only use this if Docker is not available.** This method requires manual setup of PostgreSQL, Redis, and Celery.
-
-#### Prerequisites
-
-Before installing Django Photo Album locally, ensure you have:
-
-**Required Software:**
+### Required Software
 - **Python 3.11+** - The application requires Python 3.11 or higher
 - **PostgreSQL 14+** - Database with pgvector extension support
 - **Redis** - For caching, session storage, and Celery message broker
 - **Git** - For cloning the repository
 
-**Optional Components:**
+### Optional Components
+- **Celery** - For background AI processing (included in requirements.txt)
 - **NVIDIA GPU with CUDA** - For faster AI processing (optional, CPU works too)
 
-**System Dependencies:**
+### System Dependencies
 ```bash
 # Ubuntu/Debian
 sudo apt update
@@ -85,21 +35,21 @@ brew install python postgresql redis git
 # Install Redis from redis.io
 ```
 
-#### Installation Steps
+## Installation Steps
 
-##### 1. Clone the Repository
+### 1. Clone the Repository
 ```bash
 git clone <repository-url>
 cd photo_album
 ```
 
-##### 2. Create Virtual Environment
+### 2. Create Virtual Environment
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-##### 3. Install Python Dependencies
+### 3. Install Python Dependencies
 
 There are two separate files for dependencies: one for production and one for development.
 

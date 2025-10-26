@@ -35,9 +35,7 @@
     </form>
 
     <div class="form-footer-link">
-        {% if site_settings.allow_registration %}
         <p>Don't have an account? <a href="{% url 'album:register' %}">Sign Up</a></p>
-        {% endif %}
         <a href="{% url 'password_reset' %}">Forgot your password?</a>
     </div>
 </div>

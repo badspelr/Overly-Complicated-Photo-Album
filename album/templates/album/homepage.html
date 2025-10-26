@@ -18,9 +18,7 @@
                 <a href="{% url 'album:dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
             {% else %}
                 <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
-                {% if site_settings.allow_registration %}
                 <a href="{% url 'album:register' %}" class="btn btn-secondary">Sign Up</a>
-                {% endif %}
             {% endif %}
         </div>
     </div>

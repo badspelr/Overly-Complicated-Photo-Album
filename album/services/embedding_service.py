@@ -10,24 +10,13 @@ logger = logging.getLogger(__name__)
 # Allow loading of truncated images to prevent hangs on corrupted files
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-# Lazy-load the model only when needed (don't load at import time)
-_model = None
-
-def _get_model():
-    """Lazy-load the SentenceTransformer model on first use with GPU support."""
-    global _model
-    if _model is None:
-        try:
-            # Detect available device
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
-            logger.info(f"Loading SentenceTransformer model on {device}...")
-            
-            _model = SentenceTransformer('clip-ViT-B-32-multilingual-v1', device=device)
-            logger.info(f"Successfully loaded SentenceTransformer model on {device}.")
-        except Exception as e:
-            logger.error(f"Failed to load SentenceTransformer model: {e}")
-            _model = False  # Mark as failed to avoid retrying
-    return _model if _model is not False else None
+# Load the pre-trained CLIP model
+try:
+    model = SentenceTransformer('clip-ViT-B-32-multilingual-v1')
+    logger.info("Successfully loaded SentenceTransformer model.")
+except Exception as e:
+    logger.error(f"Failed to load SentenceTransformer model: {e}")
+    model = None
 
 def generate_image_embedding(image_path):
     """
@@ -39,7 +28,6 @@ def generate_image_embedding(image_path):
     Returns:
         list[float]: A 512-dimension vector embedding of the image, or None on failure.
     """
-    model = _get_model()
     if model is None:
         logger.error("Embedding model is not loaded. Cannot generate embedding.")
         return None
@@ -84,11 +72,6 @@ def generate_text_embedding(text):
     Returns:
         list[float]: A 512-dimension vector embedding of the text.
     """
-    model = _get_model()
-    if model is None:
-        logger.error("Embedding model is not loaded. Cannot generate text embedding.")
-        return None
-    
     try:
         # Generate the embedding for the text
         embedding = model.encode(text, convert_to_tensor=True)

@@ -1,17 +1,16 @@
-# Docker Compose configuration for CPU-only deployment (no GPU required)
-# This is the lightweight version that works on servers without NVIDIA GPU
+version: '3.8'
 
 services:
   db:
-    image: ankane/pgvector:latest
+    image: postgres:15
     environment:
-      POSTGRES_DB: ${DB_NAME:-photo_album}
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_DB: photo_album
+      POSTGRES_USER: dniel
+      POSTGRES_PASSWORD: jbsacer
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U dniel"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,20 +29,16 @@ services:
       dockerfile: Dockerfile.light  # Use lightweight version
     ports:
       - "8000:8000"
-    ulimits:
-      nofile:
-        soft: 65536
-        hard: 65536
-    env_file:
-      - .env
     environment:
+      - DEBUG=False
+      - SECRET_KEY=your-secret-key-change-this
       - DB_HOST=db
-      - DB_PORT=5432
+      - DB_NAME=photo_album
+      - DB_USER=dniel
+      - DB_PASSWORD=jbsacer
       - REDIS_URL=redis://redis:6379/0
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      # ALLOWED_HOSTS is set in .env file
-      - NVIDIA_VISIBLE_DEVICES=all  # Make GPU visible to container (auto-detects and falls back to CPU)
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - AI_ENABLE_GPU=False  # Force CPU mode
     depends_on:
       db:
         condition: service_healthy
@@ -54,62 +49,6 @@ services:
       - ./staticfiles:/app/staticfiles
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  celery-worker:
-    build:
-      context: .
-      dockerfile: Dockerfile.light
-    command: celery-worker
-    env_file:
-      - .env
-    environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_URL=redis://redis:6379/0
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - NVIDIA_VISIBLE_DEVICES=all  # Make GPU visible to container (auto-detects and falls back to CPU)
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./media:/app/media
-    healthcheck:
-      test: ["CMD-SHELL", "celery -A photo_album inspect ping -d celery@$$HOSTNAME"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  celery-beat:
-    build:
-      context: .
-      dockerfile: Dockerfile.light
-    command: celery-beat
-    env_file:
-      - .env
-    environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-      - REDIS_URL=redis://redis:6379/0
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - NVIDIA_VISIBLE_DEVICES=all  # Make GPU visible to container (auto-detects and falls back to CPU)
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      web:
-        condition: service_started
-    volumes:
-      - ./media:/app/media
-    healthcheck:
-      test: ["CMD-SHELL", "test -f /app/celerybeat-schedule || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

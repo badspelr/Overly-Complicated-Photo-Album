@@ -31,13 +31,7 @@ docker-compose up
 ### Accessing the Application
 - **Web Interface**: http://localhost:8000
 - **Admin Panel**: http://localhost:8000/admin/
-
-**Create your admin account:**
-```bash
-docker-compose exec web python manage.py createsuperuser
-```
-
-Follow the prompts to create your admin user with a secure password.
+- **Default Login**: admin / admin123 (⚠️ change immediately!)
 
 ### Stopping the Application
 ```bash

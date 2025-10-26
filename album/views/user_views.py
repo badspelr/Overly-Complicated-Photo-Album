@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.models import User, Group
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.core.mail import send_mail
 from django.conf import settings
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView, DeleteView
@@ -24,12 +24,6 @@ logger = logging.getLogger(__name__)
 
 def register(request):
     """Register a new user."""
-    # Check if registration is allowed
-    site_settings = SiteSettings.get_settings()
-    if not site_settings.allow_registration:
-        messages.error(request, 'Registration is currently disabled. Please contact the administrator.')
-        return redirect('login')
-    
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -185,33 +179,20 @@ def invite_user(request):
                     # Send invitation email (for album admins or when no username/password provided)
                     album = albums.first() if albums else None
                     if album:
-                        from django.template.loader import render_to_string
-                        
                         subject = 'Invitation to view albums'
                         album_titles = ", ".join([album.title for album in albums])
-                        
-                        # Context for email templates
-                        context = {
-                            'inviter_name': request.user.username,
-                            'album_titles': album_titles,
-                            'site_url': request.build_absolute_uri('/'),
-                        }
-                        
-                        # Render plain text and HTML versions
-                        text_message = render_to_string('album/emails/invitation_email.txt', context)
-                        html_message = render_to_string('album/emails/invitation_email.html', context)
-                        
+                        message = f'''
+                        Hello!
+
+                        {request.user.username} has invited you to view their photo albums: {album_titles}.
+
+                        Please register at {request.build_absolute_uri('/')} to access the albums.
+
+                        Best regards,
+                        {request.user.username}
+                        '''
                         try:
-                            # Send email with both text and HTML versions
-                            email_msg = EmailMultiAlternatives(
-                                subject,
-                                text_message,
-                                settings.DEFAULT_FROM_EMAIL,
-                                [email]
-                            )
-                            email_msg.attach_alternative(html_message, "text/html")
-                            email_msg.send()
-                            
+                            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
                             log_user_action('invitation_email_sent', request.user, 'albums', [album.id for album in albums])
                             messages.success(request, f'Invitation sent to {email} for albums: {album_titles}')
                         except Exception as e:

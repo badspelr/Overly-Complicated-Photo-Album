@@ -16,30 +16,17 @@ from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# =============================================================================
-# SENTRY ERROR TRACKING
-# =============================================================================
-# Sentry configuration - will be initialized after database is ready
-# The actual initialization happens in album/apps.py to access database settings
-SENTRY_DSN = config('SENTRY_DSN', default='')
-SENTRY_ENVIRONMENT = config('SENTRY_ENVIRONMENT', default='development')
-SENTRY_TRACES_SAMPLE_RATE = config('SENTRY_TRACES_SAMPLE_RATE', default=0.1, cast=float)
-SENTRY_PROFILES_SAMPLE_RATE = config('SENTRY_PROFILES_SAMPLE_RATE', default=0.1, cast=float)
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# Generate with: python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = True
 
-# SECURITY WARNING: Update this with your actual domain names in production!
-# Example: ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ['*']
 
 # Security settings - Production ready configuration
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
@@ -53,18 +40,13 @@ SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool
 CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
-
-# CSRF Trusted Origins - Required for production with reverse proxy
-# Example: CSRF_TRUSTED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
-_csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='')
-CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in _csrf_origins.split(',') if origin.strip()] if _csrf_origins else []
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
 
 # File upload security
 FILE_UPLOAD_MAX_MEMORY_SIZE = config('FILE_UPLOAD_MAX_MEMORY_SIZE', default=52428800, cast=int)  # Increased to 50MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = config('DATA_UPLOAD_MAX_MEMORY_SIZE', default=104857600, cast=int)  # Increased to 100MB
-DATA_UPLOAD_MAX_NUMBER_FILES = config('DATA_UPLOAD_MAX_NUMBER_FILES', default=10000, cast=int)  # Allow large directory uploads
+DATA_UPLOAD_MAX_NUMBER_FILES = config('DATA_UPLOAD_MAX_NUMBER_FILES', default=1000, cast=int)  # Increased from 100 to 1000
 FILE_UPLOAD_PERMISSIONS = 0o644
 
 # AI Configuration
@@ -104,26 +86,12 @@ AI_PROCESSING = {
 # Cache configuration
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': config('REDIS_URL', default='redis://redis:6379/1'),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'SOCKET_CONNECT_TIMEOUT': 5,
-            'SOCKET_TIMEOUT': 5,
-            'CONNECTION_POOL_KWARGS': {
-                'max_connections': 50,
-            },
-        },
-        'KEY_PREFIX': 'photo_album',
-        'TIMEOUT': 300,  # 5 minutes default
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     },
     'ai_cache': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': config('REDIS_URL', default='redis://redis:6379/2'),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-        'KEY_PREFIX': 'ai_embeddings',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'ai-embeddings',
         'TIMEOUT': 86400,  # 24 hours
     }
 }
@@ -159,18 +127,16 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
-    'album',  # MUST be before admin to override admin templates
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'drf_spectacular',
     'pgvector',
     'imagekit',
     'corsheaders',
+    'album',
 ]
 
 MIDDLEWARE = [
@@ -201,7 +167,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'album.context_processors.site_settings',
             ],
         },
     },
@@ -217,9 +182,9 @@ DATABASES = {
     'default': {
         'ENGINE': config('DB_ENGINE', default='django.db.backends.postgresql'),
         'NAME': config('DB_NAME', default='photo_album'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='db'),
+        'USER': config('DB_USER', default='dniel'),
+        'PASSWORD': config('DB_PASSWORD', default='jbsacer'),
+        'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
     }
 }
@@ -396,66 +361,16 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
-    # Use drf-spectacular for OpenAPI schema generation
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
-
-# DRF Spectacular (OpenAPI/Swagger) Settings
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Photo Album API',
-    'DESCRIPTION': 'AI-powered photo and video management system with advanced search capabilities',
-    'VERSION': '1.3.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    'COMPONENT_SPLIT_REQUEST': True,
-    'SCHEMA_PATH_PREFIX': r'/api/',
-    
-    # API Documentation UI Settings
-    'SWAGGER_UI_SETTINGS': {
-        'deepLinking': True,
-        'persistAuthorization': True,
-        'displayOperationId': True,
-        'filter': True,
-    },
-    
-    # Authentication
-    'SERVE_AUTHENTICATION': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
-    
-    # Contact & License
-    'CONTACT': {
-        'name': 'Photo Album Support',
-        'email': 'support@photoalbum.example.com',
-    },
-    'LICENSE': {
-        'name': 'MIT License',
-    },
-    
-    # Tagging - Only define tags that are actually used
-    'TAGS': [
-        {'name': 'Authentication', 'description': 'User registration, login, and profile management'},
-        {'name': 'Media', 'description': 'Media upload and bulk operations'},
-    ],
-    
-    # Tag sorting
-    'TAGS_SORTER': 'alpha',
-    'OPERATIONS_SORTER': 'alpha',
 }
 
 # CORS settings
-# Configure allowed origins from environment variable for security
-# In production, set CORS_ALLOWED_ORIGINS in .env to your specific domains
-CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000',
-    cast=lambda v: [s.strip() for s in v.split(',')]
-)
-
-# SECURITY WARNING: Never set CORS_ALLOW_ALL_ORIGINS=True in production!
-# This is a major security vulnerability that allows any website to access your API.
-CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",  # React development server
+#     "http://127.0.0.1:3000",
+#     "http://localhost:8000",  # Django development server
+#     "http://127.0.0.1:8000",
+# ]
+CORS_ALLOW_ALL_ORIGINS = True # WARNING: This is for debugging only and should not be used in production.
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -470,8 +385,7 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 600  # 10 minutes hard timeout per task
-CELERY_TASK_SOFT_TIME_LIMIT = 540  # 9 minutes soft timeout per task
+CELERY_TASK_TIME_LIMIT = 60  # 1 minute timeout per task
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1  # Process one task at a time
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 50  # Restart worker after 50 tasks (prevent memory leaks)
 
@@ -487,7 +401,7 @@ CELERY_BROKER_CONNECTION_RETRY_DELAY = config('CELERY_BROKER_CONNECTION_RETRY_DE
 
 # AI Processing Configuration
 AI_PROCESSING_ENABLED = config('AI_PROCESSING_ENABLED', default=True, cast=bool)
-AI_AUTO_PROCESS_ON_UPLOAD = config('AI_AUTO_PROCESS_ON_UPLOAD', default=False, cast=bool)  # Disabled: Use scheduled batch processing instead
+AI_AUTO_PROCESS_ON_UPLOAD = config('AI_AUTO_PROCESS_ON_UPLOAD', default=True, cast=bool)
 AI_SCHEDULED_PROCESSING = config('AI_SCHEDULED_PROCESSING', default=True, cast=bool)
 AI_BATCH_SIZE = config('AI_BATCH_SIZE', default=500, cast=int)
 AI_PROCESSING_TIMEOUT = config('AI_PROCESSING_TIMEOUT', default=30, cast=int)  # seconds per item

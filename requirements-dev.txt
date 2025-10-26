@@ -3,12 +3,4 @@
 # Testing
 pytest
 pytest-django
-pytest-cov
-pytest-mock
-pytest-asyncio
 Faker
-factory-boy
-coverage
-
-# Linting & Formatting
-ruff>=0.8.0

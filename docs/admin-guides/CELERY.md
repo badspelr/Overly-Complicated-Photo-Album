@@ -42,28 +42,22 @@ sudo tail -f /var/log/celery/worker.log
 ## 🧠 How It Works
 
 ### Overview
-The Photo Album uses Celery for scheduled batch AI processing of photos and videos. Processing happens during low-traffic hours (2 AM daily) using efficient batch commands that load AI models once and process multiple items.
+The Photo Album uses Celery for background AI processing of photos and videos. This allows uploads to complete quickly while AI analysis happens asynchronously in the background.
 
 ### Processing Flow
 
-#### On Upload (Fast - Recommended)
+#### On Upload (Automatic)
 1. User uploads photo/video
-2. File is saved immediately to database with metadata
-3. No AI processing - instant upload completion
-4. Status: **Pending** (waiting for scheduled processing)
-5. AI processing happens later via scheduled batch or on-demand
+2. File is saved immediately to database
+3. If `AI_AUTO_PROCESS_ON_UPLOAD=True`, analysis task is queued
+4. User sees confirmation, continues browsing
+5. Celery worker picks up task asynchronously
+6. AI generates description and tags
+7. Status: **Pending** → **Processing** → **Completed**
 
-#### Scheduled Batch Processing (Daily - Primary Method)
-- **2:00 AM**: Process up to 500 pending photos (batch command)
-- **2:30 AM**: Process up to 500 pending videos (batch command)
-- Much faster: Loads AI model once, processes all items
-- More stable: No worker crashes from individual tasks
-
-#### On-Demand Processing (Manual)
-- Visit `/process-photos-ai/` or `/process-videos-ai/`
-- Album admins: Process up to 50 items at once
-- Site admins: No limit
-- Uses same efficient batch processing
+#### Scheduled Batch Processing (Daily)
+- **2:00 AM**: Process up to 500 pending photos
+- **2:30 AM**: Process up to 500 pending videos
 - Catches any items that failed during upload
 - Configurable via AI Settings interface
 
@@ -280,21 +274,15 @@ Add to `.env` file:
 CELERY_BROKER_URL=redis://localhost:6379/0
 CELERY_RESULT_BACKEND=redis://localhost:6379/0
 
-# AI Processing Configuration (Recommended Settings)
+# AI Processing Configuration
 AI_PROCESSING_ENABLED=True
-AI_AUTO_PROCESS_ON_UPLOAD=False    # Disabled: Use batch processing (faster, more stable)
-AI_SCHEDULED_PROCESSING=True       # Enable 2 AM batch processing (recommended)
+AI_AUTO_PROCESS_ON_UPLOAD=True    # Process immediately on upload
+AI_SCHEDULED_PROCESSING=True       # Enable 2 AM batch processing
 AI_BATCH_SIZE=500                  # Process 500 photos per scheduled run
-AI_PROCESSING_TIMEOUT=600          # 10 minutes timeout for batch processing
+AI_PROCESSING_TIMEOUT=30           # 30 seconds timeout per item
 AI_SCHEDULE_HOUR=2                 # Batch processing hour (2 AM)
 AI_SCHEDULE_MINUTE=0               # Batch processing minute (on the hour)
 ```
-
-**Note:** `AI_AUTO_PROCESS_ON_UPLOAD=False` is recommended because:
-- Batch processing is 50x faster (loads model once)
-- More stable (no worker crashes)
-- Better resource usage
-- Instant uploads for users
 
 ### Web-Based Configuration (Preferred)
 
@@ -302,12 +290,12 @@ Configure via Django admin interface at `/ai-settings/`:
 
 1. Navigate to `/ai-settings/` (admin only)
 2. Adjust settings:
-   - **Auto-process on upload**: ⚠️ OFF (recommended - use batch processing)
-   - **Scheduled processing**: ✅ ON (recommended - primary method)
-   - **Batch size**: 500 (20-10,000 items)
-   - **Processing timeout**: 600 seconds (10 minutes for batches)
-   - **Schedule hour**: 2 (0-23, 24-hour format)
-   - **Schedule minute**: 0 (0-59)
+   - **Auto-process on upload**: On/Off
+   - **Scheduled processing**: On/Off
+   - **Batch size**: 20-10,000 items
+   - **Processing timeout**: 10-300 seconds
+   - **Schedule hour**: 0-23 (24-hour format)
+   - **Schedule minute**: 0-59
 
 Changes take effect immediately without restart!
 

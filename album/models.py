@@ -40,24 +40,6 @@ class CustomAlbum(models.Model):
 class SiteSettings(models.Model):
     title = models.CharField(max_length=100, default='Photo Album Site', help_text='The main title displayed on the homepage.')
     description = models.TextField(blank=True, help_text='Optional description for the site.')
-    allow_registration = models.BooleanField(
-        default=True, 
-        help_text='Allow new users to register. Uncheck to disable public registration.'
-    )
-    
-    # Sentry Error Tracking Settings
-    sentry_enabled = models.BooleanField(
-        default=False,
-        help_text='Enable Sentry error tracking. Requires SENTRY_DSN to be configured in environment variables.'
-    )
-    sentry_traces_sample_rate = models.FloatField(
-        default=0.1,
-        help_text='Sample rate for performance monitoring (0.0 to 1.0). 0.1 = 10% of requests.'
-    )
-    sentry_profiles_sample_rate = models.FloatField(
-        default=0.1,
-        help_text='Sample rate for profiling (0.0 to 1.0). 0.1 = 10% of requests.'
-    )
 
     class Meta:
         verbose_name = 'Site Settings'
@@ -65,68 +47,6 @@ class SiteSettings(models.Model):
 
     def __str__(self):
         return self.title
-    
-    @classmethod
-    def get_settings(cls):
-        """Get or create the singleton settings instance."""
-        settings, created = cls.objects.get_or_create(pk=1)
-        return settings
-    
-    def save(self, *args, **kwargs):
-        """Override save to enforce singleton pattern and reinitialize Sentry."""
-        # Enforce singleton pattern - always use ID 1
-        self.pk = 1
-        self.id = 1
-        super().save(*args, **kwargs)
-        # Reinitialize Sentry with new settings
-        self._reinitialize_sentry()
-    
-    def delete(self, *args, **kwargs):
-        """Prevent deletion of the singleton settings instance."""
-        pass  # Do nothing - prevent deletion
-    
-    def _reinitialize_sentry(self):
-        """Reinitialize Sentry with current settings."""
-        try:
-            import sentry_sdk
-            from django.conf import settings as django_settings
-            
-            if self.sentry_enabled and django_settings.SENTRY_DSN and not django_settings.DEBUG:
-                # Re-initialize Sentry with updated settings
-                from sentry_sdk.integrations.django import DjangoIntegration
-                from sentry_sdk.integrations.celery import CeleryIntegration
-                from sentry_sdk.integrations.redis import RedisIntegration
-                
-                sentry_sdk.init(
-                    dsn=django_settings.SENTRY_DSN,
-                    environment=django_settings.SENTRY_ENVIRONMENT,
-                    integrations=[
-                        DjangoIntegration(),
-                        CeleryIntegration(),
-                        RedisIntegration(),
-                    ],
-                    traces_sample_rate=float(self.sentry_traces_sample_rate),
-                    profiles_sample_rate=float(self.sentry_profiles_sample_rate),
-                    send_default_pii=False,
-                    before_send=lambda event, hint: self._scrub_sensitive_data(event, hint),
-                )
-            else:
-                # Disable Sentry if not enabled
-                sentry_sdk.init()
-        except ImportError:
-            pass  # Sentry SDK not installed
-    
-    @staticmethod
-    def _scrub_sensitive_data(event, hint):
-        """Remove sensitive data from Sentry events."""
-        if 'request' in event:
-            if 'data' in event['request']:
-                data = event['request']['data']
-                if isinstance(data, dict):
-                    for key in ['password', 'token', 'secret', 'api_key']:
-                        if key in data:
-                            data[key] = '[REDACTED]'
-        return event
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True, help_text='Category name.')
@@ -151,7 +71,7 @@ class Album(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_albums', help_text='User who owns this album.')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='albums', help_text='Optional category for this album.')
     viewers = models.ManyToManyField(User, related_name='viewable_albums', blank=True, help_text='Users who can view this album.')
-    is_public = models.BooleanField(default=False, verbose_name='Is Public', help_text='If true, album is visible to all users.')
+    is_public = models.BooleanField(default=False, help_text='If true, album is visible to all users.')
     created_at = models.DateTimeField(auto_now_add=True)
     cover_image = models.ImageField(upload_to='album_covers/', null=True, blank=True, help_text='Optional cover image for the album.')
 
@@ -366,8 +286,8 @@ class Favorite(models.Model):
 class AIProcessingSettings(models.Model):
     """Singleton model for AI processing configuration"""
     auto_process_on_upload = models.BooleanField(
-        default=False,
-        help_text="[FUTURE FEATURE] Automatically process photos/videos with AI when uploaded. Currently disabled - use scheduled processing or manual processing instead."
+        default=True,
+        help_text="Automatically process photos/videos with AI when uploaded"
     )
     scheduled_processing = models.BooleanField(
         default=True,
@@ -388,10 +308,6 @@ class AIProcessingSettings(models.Model):
     schedule_minute = models.IntegerField(
         default=0,
         help_text="Minute of the hour (0-59) to run scheduled processing"
-    )
-    album_admin_processing_limit = models.IntegerField(
-        default=50,
-        help_text="Maximum number of photos an album admin can process in one batch (site admins have no limit)"
     )
     last_modified = models.DateTimeField(auto_now=True)
     
@@ -417,9 +333,6 @@ class AIProcessingSettings(models.Model):
         
         if self.processing_timeout < 1:
             raise ValidationError({'processing_timeout': 'Timeout must be at least 1 second'})
-        
-        if self.album_admin_processing_limit < 1:
-            raise ValidationError({'album_admin_processing_limit': 'Album admin limit must be at least 1'})
     
     def save(self, *args, **kwargs):
         # Validate before saving

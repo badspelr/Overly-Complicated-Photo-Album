@@ -22,7 +22,7 @@
     <!-- Favicon -->
         <link rel="icon" type="image/png" href="{% static 'favicon.png' %}">
     
-    <title>{% block title %}{{ site_settings.title|default:"Photo Album" }}{% endblock %}</title>
+    <title>{% block title %}Photo Album{% endblock %}</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,7 +46,7 @@
                 <i class="material-icons">menu</i>
             </button>
             <div class="app-bar-title">
-                {% block header %}{{ site_settings.title|default:"Photo Album" }}{% endblock %}
+                {% block header %}Photo Album{% endblock %}
             </div>
             {% if user.is_authenticated %}
                 <div class="user-info">
@@ -139,14 +139,6 @@
                         <a href="{% url 'album:invite_user' %}">
                             <i class="material-icons nav-icon">person_add</i>
                             Invite User
-                        </a>
-                        <a href="{% url 'album:process_photos_ai' %}">
-                            <i class="material-icons nav-icon">auto_fix_high</i>
-                            Process Photos AI
-                        </a>
-                        <a href="{% url 'album:process_videos_ai' %}">
-                            <i class="material-icons nav-icon">smart_display</i>
-                            Process Videos AI
                         </a>
                             {% endif %}
                         {% endif %}

@@ -33,24 +33,6 @@
     background-color: var(--bg-default);
     color: var(--text-primary);
 }
-
-/* Checkbox-specific styling */
-.form-group input[type="checkbox"] {
-    display: inline-block;
-    width: auto;
-    padding: 0;
-    margin-left: 0.5rem;
-    vertical-align: middle;
-    cursor: pointer;
-}
-
-/* Make checkbox labels inline with checkbox */
-.form-group:has(input[type="checkbox"]) label {
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-}
-
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
     outline: none;
     border-color: var(--primary-main);

@@ -1,5 +1,5 @@
 # Multi-stage build for smaller final image
-FROM python:3.13.0-slim AS builder
+FROM python:3.13-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir gunicorn psycopg2-binary
 
 # Final stage
-FROM python:3.13.0-slim
+FROM python:3.13-slim
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \

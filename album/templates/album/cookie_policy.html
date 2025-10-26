@@ -370,6 +370,15 @@
     </div>
 </div>
 
-{% load static %}
-<script src="{% static 'album/js/cookie-consent.js' %}"></script>
+<script>
+function showCookieSettings() {
+    // Re-show the cookie consent banner
+    const banner = document.getElementById('cookieConsentBanner');
+    if (banner) {
+        banner.style.display = 'flex';
+        // Scroll to bottom to show banner
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+}
+</script>
 {% endblock %}

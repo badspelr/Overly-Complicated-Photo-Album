@@ -1,6 +1,5 @@
 {% extends 'album/base.html' %}
 {% load static %}
-{% load album_tags %}
 
 {% block title %}{{ video.title }}{% endblock %}
 
@@ -31,42 +30,6 @@
         <h1>{{ video.title }}</h1>
         <p class="description">{{ video.description }}</p>
         
-        {# AI-Generated Information Section #}
-        {% if video.ai_processed and video.ai_description %}
-        <div class="ai-info-section">
-            <h3 class="ai-section-title">
-                <i class="material-icons ai-icon">smart_toy</i>
-                AI Analysis
-            </h3>
-            <div class="ai-description">
-                <p>{{ video.ai_description }}</p>
-            </div>
-            {% if video.ai_tags %}
-            <div class="ai-tags">
-                <strong>AI Tags:</strong>
-                <div class="tags-container">
-                    {% for tag in video.ai_tags %}
-                        <span class="ai-tag">{{ tag }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-            {% if video.ai_confidence_score > 0 %}
-            <div class="ai-confidence">
-                <small>Confidence: {{ video.ai_confidence_score|as_percentage }}%</small>
-            </div>
-            {% endif %}
-        </div>
-        {% elif video.processing_status == 'processing' %}
-        <div class="ai-info-section processing">
-            <p><i class="material-icons rotating">autorenew</i> AI analysis in progress...</p>
-        </div>
-        {% elif video.processing_status == 'failed' %}
-        <div class="ai-info-section error">
-            <p><i class="material-icons">error_outline</i> AI analysis failed</p>
-        </div>
-        {% endif %}
-        
         <ul class="metadata-list">
             <li><strong>Uploaded:</strong> {{ video.uploaded_at|date:"M j, Y" }}</li>
             {% if video.category %}
@@ -87,12 +50,6 @@
         </ul>
         
         <a href="{{ video.video.url }}" download class="btn-download">Download Video</a>
-
-        {# Show edit/delete buttons only to album owner or superuser #}
-        {% if user.is_superuser or video.album.owner == user %}
-            <a href="{% url 'album:video_edit' video.pk %}" class="btn btn-warning mt-2">Edit Metadata</a>
-            <a href="{% url 'album:delete_video' video.pk %}" class="btn btn-danger mt-2" onclick="return confirm('Are you sure you want to delete this video?')">Delete Video</a>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

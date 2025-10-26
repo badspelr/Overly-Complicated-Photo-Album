@@ -4,6 +4,7 @@ Celery tasks for background AI processing of photos and videos.
 import logging
 from celery import shared_task
 from django.conf import settings
+from django.utils import timezone
 from django.core.management import call_command
 
 logger = logging.getLogger(__name__)
@@ -21,46 +22,26 @@ def process_photo_ai(self, photo_id):
         dict: Processing result with status and details
     """
     from album.models import Photo
-    from album.services.ai_analysis_service import analyze_image, is_ai_analysis_available
-    import os
     
     try:
         photo = Photo.objects.get(id=photo_id)
         photo.processing_status = Photo.ProcessingStatus.PROCESSING
         photo.save(update_fields=['processing_status'])
         
-        logger.info(f"Processing photo {photo_id}: {photo.title}")
+        logger.info(f"Processing photo {photo_id}: {photo.filename}")
         
-        # Check if AI analysis is available
-        if not is_ai_analysis_available():
-            raise Exception("AI analysis service is not available")
+        # Use existing management command for processing
+        call_command('process_photos_ai', photo_ids=[photo_id])
         
-        # Check if image file exists
-        if not photo.image or not hasattr(photo.image, 'path'):
-            raise Exception("Photo has no image file path")
-        
-        if not os.path.exists(photo.image.path):
-            raise Exception(f"Image file does not exist: {photo.image.path}")
-        
-        # Analyze the image
-        analysis_result = analyze_image(photo.image.path)
-        
-        if analysis_result['description']:
-            # Update the photo with AI analysis results
-            photo.ai_description = analysis_result['description']
-            photo.ai_tags = analysis_result['tags']
-            photo.ai_confidence_score = analysis_result['confidence']
-            photo.ai_processed = True
+        # Update status
+        photo.refresh_from_db()
+        if photo.ai_processed:
             photo.processing_status = Photo.ProcessingStatus.COMPLETED
-            photo.save(update_fields=[
-                'ai_description', 'ai_tags', 'ai_confidence_score',
-                'ai_processed', 'processing_status'
-            ])
-            
+            photo.save(update_fields=['processing_status'])
             logger.info(f"Successfully processed photo {photo_id}")
             return {'status': 'success', 'photo_id': photo_id}
         else:
-            raise Exception("AI analysis returned no description")
+            raise Exception("AI processing completed but ai_processed flag not set")
             
     except Photo.DoesNotExist:
         logger.error(f"Photo {photo_id} not found")
@@ -93,56 +74,26 @@ def process_video_ai(self, video_id):
         dict: Processing result with status and details
     """
     from album.models import Video
-    from album.services.ai_analysis_service import analyze_image, is_ai_analysis_available
-    from album.services.embedding_service import generate_image_embedding
-    import os
     
     try:
         video = Video.objects.get(id=video_id)
         video.processing_status = Video.ProcessingStatus.PROCESSING
         video.save(update_fields=['processing_status'])
         
-        logger.info(f"Processing video {video_id}: {video.title}")
+        logger.info(f"Processing video {video_id}: {video.filename}")
         
-        # Check if AI analysis is available
-        if not is_ai_analysis_available():
-            raise Exception("AI analysis service is not available")
+        # Use existing management command for processing
+        call_command('process_videos_ai', video_ids=[video_id])
         
-        # Check if thumbnail exists
-        if not video.thumbnail or not hasattr(video.thumbnail, 'path'):
-            raise Exception("Video has no thumbnail")
-        
-        if not os.path.exists(video.thumbnail.path):
-            raise Exception(f"Thumbnail file does not exist: {video.thumbnail.path}")
-        
-        # Analyze the thumbnail image
-        analysis_result = analyze_image(video.thumbnail.path)
-        
-        if analysis_result['description']:
-            # Update the video with AI analysis results
-            video.ai_description = analysis_result['description']
-            video.ai_tags = analysis_result['tags']
-            video.ai_confidence_score = analysis_result['confidence']
-            
-            # Generate embedding for the thumbnail
-            try:
-                embedding = generate_image_embedding(video.thumbnail.path)
-                if embedding is not None:
-                    video.thumbnail_embedding = embedding.tolist()
-            except Exception as e:
-                logger.warning(f"Failed to generate embedding for video {video_id}: {e}")
-            
-            video.ai_processed = True
+        # Update status
+        video.refresh_from_db()
+        if video.ai_processed:
             video.processing_status = Video.ProcessingStatus.COMPLETED
-            video.save(update_fields=[
-                'ai_description', 'ai_tags', 'ai_confidence_score',
-                'thumbnail_embedding', 'ai_processed', 'processing_status'
-            ])
-            
+            video.save(update_fields=['processing_status'])
             logger.info(f"Successfully processed video {video_id}")
             return {'status': 'success', 'video_id': video_id}
         else:
-            raise Exception("AI analysis returned no description")
+            raise Exception("AI processing completed but ai_processed flag not set")
             
     except Video.DoesNotExist:
         logger.error(f"Video {video_id} not found")
@@ -168,7 +119,6 @@ def process_pending_photos_batch():
     """
     Scheduled task to process pending photos in batch.
     Runs daily at 2 AM via Celery Beat.
-    Uses the management command for efficient batch processing.
     """
     from album.models import Photo
     
@@ -178,26 +128,25 @@ def process_pending_photos_batch():
     
     batch_size = settings.AI_BATCH_SIZE
     
-    # Count pending photos
-    pending_count = Photo.objects.filter(
+    # Get pending photos
+    pending_photos = Photo.objects.filter(
         processing_status=Photo.ProcessingStatus.PENDING,
         ai_processed=False
-    ).count()
+    ).order_by('uploaded_at')[:batch_size]
     
-    logger.info(f"Starting batch processing of {pending_count} pending photos (limit {batch_size})")
+    count = pending_photos.count()
+    logger.info(f"Starting batch processing of {count} pending photos (max {batch_size})")
     
-    if pending_count == 0:
+    if count == 0:
         logger.info("No pending photos to process")
         return {'status': 'success', 'processed': 0}
     
-    # Process using management command (much faster than individual tasks)
-    try:
-        call_command('analyze_photos', limit=batch_size)
-        logger.info(f"Successfully processed up to {batch_size} photos via batch command")
-        return {'status': 'success', 'processed': min(pending_count, batch_size)}
-    except Exception as e:
-        logger.error(f"Error in batch photo processing: {e}")
-        return {'status': 'error', 'message': str(e)}
+    # Queue individual tasks
+    for photo in pending_photos:
+        process_photo_ai.delay(photo.id)
+    
+    logger.info(f"Queued {count} photos for processing")
+    return {'status': 'success', 'queued': count}
 
 
 @shared_task
@@ -205,7 +154,6 @@ def process_pending_videos_batch():
     """
     Scheduled task to process pending videos in batch.
     Runs daily at 2:30 AM via Celery Beat.
-    Uses the management command for efficient batch processing.
     """
     from album.models import Video
     
@@ -215,26 +163,25 @@ def process_pending_videos_batch():
     
     batch_size = settings.AI_BATCH_SIZE
     
-    # Count pending videos
-    pending_count = Video.objects.filter(
+    # Get pending videos
+    pending_videos = Video.objects.filter(
         processing_status=Video.ProcessingStatus.PENDING,
         ai_processed=False
-    ).count()
+    ).order_by('uploaded_at')[:batch_size]
     
-    logger.info(f"Starting batch processing of {pending_count} pending videos (limit {batch_size})")
+    count = pending_videos.count()
+    logger.info(f"Starting batch processing of {count} pending videos (max {batch_size})")
     
-    if pending_count == 0:
+    if count == 0:
         logger.info("No pending videos to process")
         return {'status': 'success', 'processed': 0}
     
-    # Process using management command (much faster than individual tasks)
-    try:
-        call_command('analyze_videos', limit=batch_size)
-        logger.info(f"Successfully processed up to {batch_size} videos via batch command")
-        return {'status': 'success', 'processed': min(pending_count, batch_size)}
-    except Exception as e:
-        logger.error(f"Error in batch video processing: {e}")
-        return {'status': 'error', 'message': str(e)}
+    # Queue individual tasks
+    for video in pending_videos:
+        process_video_ai.delay(video.id)
+    
+    logger.info(f"Queued {count} videos for processing")
+    return {'status': 'success', 'queued': count}
 
 
 @shared_task

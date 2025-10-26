@@ -22,10 +22,6 @@ class MediaService:
         with ErrorHandler('extract_photo_metadata', additional_context={'photo_id': photo.id}):
             try:
                 img = Image.open(photo.image.path)
-                
-                # Always extract dimensions
-                photo.width, photo.height = img.size
-                
                 # Use the public getexif() method and check if it exists
                 exif_data = None
                 if hasattr(img, 'getexif'):

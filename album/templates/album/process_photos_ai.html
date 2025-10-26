@@ -445,7 +445,7 @@
             </div>
         {% endif %}
 
-        <form method="post" id="aiProcessingForm">
+        <form method="post">
             {% csrf_token %}
             
             <div class="form-section">
@@ -526,20 +526,179 @@
     </div>
 </div>
 
-{% load static %}
-<script src="{% static 'album/js/ai-processing.js' %}"></script>
 <script>
-// Initialize AI processing handler for photos
-new AIProcessingHandler({
-    formSelector: '#aiProcessingForm',
-    modalId: 'processingModal',
-    storagePrefix: 'aiPhotoProcessing',
-    itemType: 'photo',
-    itemTypePlural: 'photos',
-    processingTimePerItem: 0.6, // 0.6 seconds per photo with GPU
-    getTotalItems: () => {{ total_photos }},
-    getUnprocessedItems: () => {{ unprocessed_photos }},
-    submitButtonProcessingHTML: '<span class="icon">⏳</span> Processing...'
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.process-form form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const modal = document.getElementById('processingModal');
+    const statusText = document.getElementById('processingStatus');
+    const progressBar = document.getElementById('progressBar');
+    const detailsText = document.getElementById('processingDetails');
+    
+    let processingStartTime = null;
+    let estimatedPhotoCount = 0;
+    
+    // Check if we just completed processing (look for success message)
+    const successMessages = document.querySelectorAll('.alert-success, .messages .success');
+    if (successMessages.length > 0) {
+        // Check if the message contains "Successfully processed"
+        for (let msg of successMessages) {
+            if (msg.textContent.includes('Successfully processed')) {
+                // Clear any stored processing state
+                sessionStorage.removeItem('aiProcessingInProgress');
+                sessionStorage.removeItem('processingStartTime');
+                sessionStorage.removeItem('estimatedPhotoCount');
+                processingWarningActive = false;
+                break;
+            }
+        }
+    }
+    
+    // Check if we were in the middle of processing when page loaded
+    if (sessionStorage.getItem('aiProcessingInProgress') === 'true') {
+        // We might have been processing, show modal and continue progress
+        const savedStartTime = sessionStorage.getItem('processingStartTime');
+        const savedPhotoCount = sessionStorage.getItem('estimatedPhotoCount');
+        
+        if (savedStartTime && savedPhotoCount) {
+            processingStartTime = parseInt(savedStartTime);
+            estimatedPhotoCount = parseInt(savedPhotoCount);
+            showProcessingModal();
+            startProgressSimulation();
+            
+            // Activate unload warning since we're continuing processing
+            processingWarningActive = true;
+            
+            // Disable submit button
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="icon">⏳</span> Processing...';
+        }
+    }
+    
+    form.addEventListener('submit', function(e) {
+        // Calculate estimated photo count for progress estimation
+        const forceReprocess = document.getElementById('force').checked;
+        const albumSelect = document.getElementById('album');
+        const limitInput = document.getElementById('limit');
+        
+        if (forceReprocess) {
+            estimatedPhotoCount = {{ total_photos }};
+        } else {
+            estimatedPhotoCount = {{ unprocessed_photos }};
+        }
+        
+        // Apply album filter if selected
+        if (albumSelect.value) {
+            const selectedOption = albumSelect.options[albumSelect.selectedIndex];
+            const albumPhotoCount = parseInt(selectedOption.text.match(/\((\d+) photos\)/)?.[1] || '0');
+            if (!forceReprocess) {
+                // Estimate unprocessed photos in selected album (rough estimate)
+                estimatedPhotoCount = Math.max(1, Math.round(albumPhotoCount * ({{ unprocessed_photos }} / {{ total_photos }})));
+            } else {
+                estimatedPhotoCount = albumPhotoCount;
+            }
+        }
+        
+        // Apply limit if specified
+        const limit = parseInt(limitInput.value);
+        if (limit && limit > 0) {
+            estimatedPhotoCount = Math.min(estimatedPhotoCount, limit);
+        }
+        
+        if (estimatedPhotoCount === 0) {
+            return; // Let the form submit normally to show "no photos to process" message
+        }
+        
+        // Store processing state in session storage
+        processingStartTime = Date.now();
+        sessionStorage.setItem('aiProcessingInProgress', 'true');
+        sessionStorage.setItem('processingStartTime', processingStartTime.toString());
+        sessionStorage.setItem('estimatedPhotoCount', estimatedPhotoCount.toString());
+        
+        // Show processing modal immediately
+        showProcessingModal();
+        
+        // Start progress simulation
+        startProgressSimulation();
+        
+        // Activate unload warning after 3 seconds (give time for form submission to complete)
+        setTimeout(function() {
+            processingWarningActive = true;
+        }, 3000);
+        
+        // Disable the submit button to prevent double submission
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="icon">⏳</span> Processing...';
+    });
+    
+    function showProcessingModal() {
+        modal.classList.remove('hidden');
+        statusText.textContent = `Analyzing ${estimatedPhotoCount} photo${estimatedPhotoCount !== 1 ? 's' : ''} with AI...`;
+        progressBar.style.width = '5%';
+        
+        if (estimatedPhotoCount > 0) {
+            const estimatedTime = Math.round(estimatedPhotoCount * 0.6); // ~0.6 seconds per photo
+            detailsText.textContent = `Estimated time: ${formatTime(estimatedTime)}. Please keep this page open.`;
+        }
+    }
+    
+    function startProgressSimulation() {
+        // Simulate progress based on estimated processing time
+        const estimatedTotalTime = estimatedPhotoCount * 600; // 0.6 seconds = 600ms per photo
+        const updateInterval = Math.max(100, estimatedTotalTime / 100); // Update every 1% or minimum 100ms
+        
+        let currentProgress = 5; // Start at 5%
+        
+        const progressInterval = setInterval(function() {
+            const elapsed = Date.now() - processingStartTime;
+            const estimatedProgress = Math.min(90, (elapsed / estimatedTotalTime) * 100);
+            
+            // Smooth progress update (don't jump too fast)
+            if (estimatedProgress > currentProgress) {
+                currentProgress = Math.min(currentProgress + 2, estimatedProgress);
+            }
+            
+            progressBar.style.width = currentProgress + '%';
+            
+            const elapsedSeconds = Math.floor(elapsed / 1000);
+            statusText.textContent = `Processing... (${elapsedSeconds}s elapsed)`;
+            
+            // Stop at 90% and wait for actual completion
+            if (currentProgress >= 90) {
+                clearInterval(progressInterval);
+                statusText.textContent = 'Finalizing analysis...';
+                progressBar.style.width = '95%';
+            }
+        }, updateInterval);
+        
+        // Store interval ID to clear it if needed
+        window.progressInterval = progressInterval;
+    }
+    
+    function formatTime(seconds) {
+        if (seconds < 60) {
+            return `${seconds} seconds`;
+        } else {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            if (remainingSeconds === 0) {
+                return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+            } else {
+                return `${minutes}m ${remainingSeconds}s`;
+            }
+        }
+    }
+    
+    // Handle page unload warning (only after processing has been running for a bit)
+    let processingWarningActive = false;
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (processingWarningActive && !modal.classList.contains('hidden')) {
+            e.preventDefault();
+            e.returnValue = 'AI processing is in progress. Leaving this page may interrupt the process.';
+            return e.returnValue;
+        }
+    });
 });
 </script>
 

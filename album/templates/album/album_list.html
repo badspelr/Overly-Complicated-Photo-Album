@@ -240,7 +240,7 @@
     <div class="album-grid">
         {% for album in albums %}
         <a href="{% url 'album:album_detail' album.pk %}" class="album-card">
-            <img class="album-card-cover" src="{% if album.cover_image %}{{ album.cover_image.url }}{% elif album.photos.first %}{{ album.photos.first.thumbnail.url }}{% elif album.videos.first.thumbnail %}{{ album.videos.first.thumbnail.url }}{% else %}https://via.placeholder.com/300x160.png?text=No+Media{% endif %}" alt="{{ album.title }} cover">
+            <img class="album-card-cover" src="{% if album.cover_image %}{{ album.cover_image.url }}{% elif album.photos.first %}{{ album.photos.first.thumbnail.url }}{% else %}https://via.placeholder.com/300x160.png?text=No+Cover{% endif %}" alt="{{ album.title }} cover">
             <div class="album-card-content">
                 <h2 class="album-card-title">{{ album.title }}</h2>
                 <p class="album-card-owner">

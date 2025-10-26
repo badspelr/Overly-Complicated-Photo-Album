@@ -74,21 +74,3 @@ def get_pagination_range(page_obj, max_pages=7):
         pages.append(total)
     
     return pages
-
-
-@register.filter
-def as_percentage(value):
-    """
-    Convert decimal confidence score to percentage.
-    Handles both old format (80-100) and new format (0.8-1.0).
-    Usage: {{ photo.ai_confidence_score|as_percentage }}
-    """
-    if value is None:
-        return 0
-    
-    # If value is already > 1, it's in percentage format (old data)
-    if value > 1:
-        return int(value)
-    
-    # Otherwise, it's in decimal format (0.0-1.0), convert to percentage
-    return int(value * 100)

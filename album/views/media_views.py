@@ -11,7 +11,7 @@ from urllib.parse import quote
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse, FileResponse
 from django.views.generic import ListView, DetailView
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.decorators import method_decorator
 from django.contrib import messages
@@ -20,61 +20,38 @@ from django.views.decorators.http import require_POST
 from PIL import Image, ExifTags
 from moviepy.editor import VideoFileClip
 from ..models import Photo, Video, Album, Category, Favorite
-from ..forms import PhotoForm, VideoForm
+from ..forms import PhotoForm
 from ..security import ALLOWED_IMAGE_TYPES, ALLOWED_VIDEO_TYPES, validate_file_type, validate_image_file, validate_video_file
 from ..services.media_service import MediaService
 from .base_views import AlbumListPermissionMixin, AlbumDetailPermissionMixin, check_object_permission, get_delete_context, log_user_action, log_security_event
 
 logger = logging.getLogger(__name__)
 
+def is_album_admin(user, album):
+    return user.is_superuser or album.owner == user or user in album.viewers.all()
+
+
 @login_required
 def photo_edit(request, pk):
-    """Edit photo metadata, tags, and custom albums for album owners only."""
+    """Edit photo metadata, tags, and custom albums for album admins."""
     photo = get_object_or_404(Photo, pk=pk)
     album = photo.album
     
-    # Check permissions - only album owner or superuser can edit
-    if not check_object_permission(request.user, photo, 'photo', action='edit'):
-        messages.error(request, 'You do not have permission to edit this photo. Only the album owner can edit photos.')
-        log_security_event('unauthorized_photo_edit', request.user, f'Photo ID: {pk}')
-        return redirect('album:photo_detail', pk=pk)
+    # Check permissions - user must be album admin (owner, viewer, or superuser)
+    if not is_album_admin(request.user, album):
+        messages.error(request, 'You do not have permission to edit this photo.')
+        return redirect('album:dashboard')
 
     if request.method == 'POST':
         form = PhotoForm(request.POST, request.FILES, instance=photo, user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'Photo updated successfully.')
-            log_user_action('photo_edited', request.user, 'photo', pk)
             return redirect('album:photo_detail', pk=photo.pk)
     else:
         form = PhotoForm(instance=photo, user=request.user)
 
     return render(request, 'album/photo_edit.html', {'form': form, 'photo': photo})
-
-
-@login_required
-def video_edit(request, pk):
-    """Edit video metadata, tags, and custom albums for album owners only."""
-    video = get_object_or_404(Video, pk=pk)
-    album = video.album
-    
-    # Check permissions - only album owner or superuser can edit
-    if not check_object_permission(request.user, video, 'video', action='edit'):
-        messages.error(request, 'You do not have permission to edit this video. Only the album owner can edit videos.')
-        log_security_event('unauthorized_video_edit', request.user, f'Video ID: {pk}')
-        return redirect('album:video_detail', pk=pk)
-
-    if request.method == 'POST':
-        form = VideoForm(request.POST, request.FILES, instance=video, user=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Video updated successfully.')
-            log_user_action('video_edited', request.user, 'video', pk)
-            return redirect('album:video_detail', pk=video.pk)
-    else:
-        form = VideoForm(instance=video, user=request.user)
-
-    return render(request, 'album/video_edit.html', {'form': form, 'video': video})
 
 
 # New: Photo upload view using the new PhotoForm
@@ -619,43 +596,23 @@ def bulk_delete(request):
         album_id = None
         
         for media_id in media_ids:
-            # Parse media_id format: "photo-123" or "video-456"
-            if '-' in str(media_id):
-                media_type, numeric_id = media_id.split('-', 1)
+            try:
+                # Try photo first
+                photo = Photo.objects.get(id=media_id)
+                if check_object_permission(request.user, photo, 'photo', action='delete'):
+                    photos_to_delete.append(photo)
+                    if not album_id:
+                        album_id = photo.album.id
+            except Photo.DoesNotExist:
                 try:
-                    numeric_id = int(numeric_id)
-                except ValueError:
-                    continue
-            else:
-                # Fallback: assume it's just a numeric ID (try both types)
-                try:
-                    numeric_id = int(media_id)
-                    media_type = None
-                except ValueError:
-                    continue
-            
-            # Try to get the media object based on type
-            if media_type == 'photo' or media_type is None:
-                try:
-                    photo = Photo.objects.get(id=numeric_id)
-                    if check_object_permission(request.user, photo, 'photo', action='delete'):
-                        photos_to_delete.append(photo)
-                        if not album_id:
-                            album_id = photo.album.id
-                    if media_type == 'photo':
-                        continue  # Skip video check if we know it's a photo
-                except Photo.DoesNotExist:
-                    pass
-            
-            if media_type == 'video' or media_type is None:
-                try:
-                    video = Video.objects.get(id=numeric_id)
+                    # Try video
+                    video = Video.objects.get(id=media_id)
                     if check_object_permission(request.user, video, 'video', action='delete'):
                         videos_to_delete.append(video)
                         if not album_id:
                             album_id = video.album.id
                 except Video.DoesNotExist:
-                    pass
+                    continue
         
         # Delete the media
         for photo in photos_to_delete:
@@ -690,39 +647,19 @@ def bulk_download(request):
         videos_to_download = []
         
         for media_id in media_ids:
-            # Parse media_id format: "photo-123" or "video-456"
-            if '-' in str(media_id):
-                media_type, numeric_id = media_id.split('-', 1)
+            try:
+                # Try photo first
+                photo = Photo.objects.get(id=media_id)
+                if check_object_permission(request.user, photo, 'photo', action='view'):
+                    photos_to_download.append(photo)
+            except Photo.DoesNotExist:
                 try:
-                    numeric_id = int(numeric_id)
-                except ValueError:
-                    continue
-            else:
-                # Fallback: assume it's just a numeric ID (try both types)
-                try:
-                    numeric_id = int(media_id)
-                    media_type = None
-                except ValueError:
-                    continue
-            
-            # Try to get the media object based on type
-            if media_type == 'photo' or media_type is None:
-                try:
-                    photo = Photo.objects.get(id=numeric_id)
-                    if check_object_permission(request.user, photo, 'photo', action='view'):
-                        photos_to_download.append(photo)
-                    if media_type == 'photo':
-                        continue  # Skip video check if we know it's a photo
-                except Photo.DoesNotExist:
-                    pass
-            
-            if media_type == 'video' or media_type is None:
-                try:
-                    video = Video.objects.get(id=numeric_id)
+                    # Try video
+                    video = Video.objects.get(id=media_id)
                     if check_object_permission(request.user, video, 'video', action='view'):
                         videos_to_download.append(video)
                 except Video.DoesNotExist:
-                    pass
+                    continue
         
         if not photos_to_download and not videos_to_download:
             messages.error(request, 'No media items found or you do not have permission to download them.')
@@ -926,7 +863,7 @@ def download_single_item(request, item_type, item_id):
 
 @login_required
 def delete_media(request, pk, model):
-    """Delete a media object and redirect to next item or album."""
+    """Delete a media object."""
     media = get_object_or_404(model, pk=pk)
     if not check_object_permission(request.user, media, model._meta.model_name, action='delete'):
         messages.error(request, f'You do not have permission to delete this {model._meta.verbose_name}.')
@@ -936,49 +873,11 @@ def delete_media(request, pk, model):
     if request.method == 'POST':
         media_id = media.id
         media_title = media.title
-        album = media.album
-        
-        # Get the next item in the album before deletion
-        # Get all items in the same album, ordered by date_taken (or uploaded_at as fallback)
-        order_field = 'date_taken' if hasattr(media, 'date_taken') and media.date_taken else 'date_recorded' if hasattr(media, 'date_recorded') and media.date_recorded else 'uploaded_at'
-        
-        items_in_album = model.objects.filter(album=album).order_by(order_field, 'id')
-        
-        # Find next item after the current one
-        next_item = None
-        found_current = False
-        for item in items_in_album:
-            if found_current:
-                next_item = item
-                break
-            if item.id == media.id:
-                found_current = True
-        
-        # If no next item, try to get the previous item
-        if not next_item:
-            prev_item = None
-            for item in items_in_album:
-                if item.id == media.id:
-                    break
-                prev_item = item
-            next_item = prev_item
-        
-        # Delete the media
         media.delete()
         
         log_user_action(f'{model._meta.model_name}_deleted', request.user, model._meta.model_name, media_id)
         messages.success(request, f'{model._meta.verbose_name} "{media_title}" deleted successfully.')
-        
-        # Redirect to next item or album
-        if next_item:
-            # Redirect to the next item's detail page
-            if model._meta.model_name == 'photo':
-                return redirect('album:photo_detail', pk=next_item.id)
-            else:  # video
-                return redirect('album:video_detail', pk=next_item.id)
-        else:
-            # No more items in album, redirect to album detail
-            return redirect('album:album_detail', pk=album.id)
+        return redirect('album:dashboard')
     
     context = get_delete_context(media, model._meta.verbose_name, f'This will permanently delete the {model._meta.verbose_name} file.')
     return render(request, 'album/delete_confirmation.html', context)
@@ -1131,6 +1030,7 @@ def search_media(request):
     return render(request, 'album/search_results.html', context)
 
 from django import forms
+import os
 from .album_views import Album
 
 class SimpleUploadForm(forms.Form):
@@ -1174,7 +1074,6 @@ def minimal_upload(request):
             
             successful_uploads = []
             failed_uploads = []
-            skipped_duplicates = []
             
             for f in files:
                 try:
@@ -1186,21 +1085,6 @@ def minimal_upload(request):
                         # Validate image file
                         validate_file_type(f, ALLOWED_IMAGE_TYPES)
                         validate_image_file(f)
-                        
-                        # Check for duplicates by filename in the same album
-                        existing_photo = Photo.objects.filter(
-                            album=album,
-                            image__endswith=f.name
-                        ).first()
-                        
-                        if existing_photo:
-                            skipped_duplicates.append({
-                                'name': f.name,
-                                'type': 'photo',
-                                'reason': 'File with same name already exists in this album',
-                                'existing_url': reverse('album:photo_detail', kwargs={'pk': existing_photo.pk})
-                            })
-                            continue
                         
                         # Create Photo object
                         photo = Photo.objects.create(
@@ -1230,21 +1114,6 @@ def minimal_upload(request):
                         # Validate video file
                         validate_file_type(f, ALLOWED_VIDEO_TYPES)
                         validate_video_file(f)
-                        
-                        # Check for duplicates by filename in the same album
-                        existing_video = Video.objects.filter(
-                            album=album,
-                            video__endswith=f.name
-                        ).first()
-                        
-                        if existing_video:
-                            skipped_duplicates.append({
-                                'name': f.name,
-                                'type': 'video',
-                                'reason': 'File with same name already exists in this album',
-                                'existing_url': reverse('album:video_detail', kwargs={'pk': existing_video.pk})
-                            })
-                            continue
                         
                         # Create Video object
                         video = Video.objects.create(
@@ -1282,33 +1151,23 @@ def minimal_upload(request):
                         'reason': str(e)
                     })
             
-            if successful_uploads:
-                messages.success(request, f"Successfully uploaded {len(successful_uploads)} file(s).")
-            if failed_uploads:
-                messages.error(request, f"Failed to upload {len(failed_uploads)} file(s).")
-            if skipped_duplicates:
-                messages.info(request, f"Skipped {len(skipped_duplicates)} duplicate file(s).")
-
-            return redirect('album:album_detail', pk=album.pk)
+            upload_results = {
+                'album': album,
+                'successful': successful_uploads,
+                'failed': failed_uploads,
+                'total_attempted': len(files),
+                'total_successful': len(successful_uploads),
+                'total_failed': len(failed_uploads),
+                'title': title,
+                'description': description
+            }
         else:
             upload_results = {
                 'error': 'Form validation failed',
                 'form_errors': form.errors
             }
     else:
-        # Pre-select album if provided in query params
-        initial_data = {}
-        album_id = request.GET.get('album')
-        if album_id:
-            try:
-                album = Album.objects.get(pk=album_id)
-                # Check if user has permission to upload to this album
-                if request.user == album.owner or request.user.is_superuser:
-                    initial_data['album'] = album
-            except (Album.DoesNotExist, ValueError):
-                pass
-        
-        form = SimpleUploadForm(user=request.user, initial=initial_data)
+        form = SimpleUploadForm(user=request.user)
     return render(request, 'album/minimal_upload.html', {'form': form, 'upload_results': upload_results})
 
 
@@ -1412,17 +1271,6 @@ def process_videos_ai(request):
         force_regeneration = request.POST.get('force', False) == 'on'
         album_title = request.POST.get('album', '').strip()
         limit = request.POST.get('limit', '').strip()
-        
-        # Cap limit for album admins based on settings (site admins have no cap)
-        if not request.user.is_site_admin:
-            from ..models import AIProcessingSettings
-            ai_settings = AIProcessingSettings.load()
-            max_limit = ai_settings.album_admin_processing_limit
-            
-            if limit and limit.isdigit():
-                limit = str(min(int(limit), max_limit))
-            else:
-                limit = str(max_limit)  # Use configured limit for album admins
         
         # For album admins, validate they can only process their albums
         if album_title and not request.user.is_site_admin:
@@ -1590,17 +1438,6 @@ def process_photos_ai(request):
         force_regeneration = request.POST.get('force', False) == 'on'
         album_title = request.POST.get('album', '').strip()
         limit = request.POST.get('limit', '').strip()
-        
-        # Cap limit for album admins based on settings (site admins have no cap)
-        if not request.user.is_site_admin:
-            from ..models import AIProcessingSettings
-            ai_settings = AIProcessingSettings.load()
-            max_limit = ai_settings.album_admin_processing_limit
-            
-            if limit and limit.isdigit():
-                limit = str(min(int(limit), max_limit))
-            else:
-                limit = str(max_limit)  # Use configured limit for album admins
         
         # For album admins, validate they can only process their albums
         if album_title and not request.user.is_site_admin:

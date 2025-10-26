@@ -1,102 +1,27 @@
 from django.contrib import admin
-from django.urls import reverse
-from django.utils.html import format_html
-from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import SiteSettings, Category, Album, Photo, Video, Tag, AlbumShareLink, Favorite, AIProcessingSettings
 
 
-# Removed PhotoInline and VideoInline - they cause performance issues
-# by loading all media when editing an album
+class PhotoInline(admin.StackedInline):
+    model = Photo
+    extra = 0
+    readonly_fields = ('ai_description', 'ai_tags', 'uploaded_at')
+
+class VideoInline(admin.StackedInline):
+    model = Video
+    extra = 0
+    readonly_fields = ('ai_description', 'ai_tags', 'uploaded_at')
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description', 'allow_registration', 'sentry_status')
+    list_display = ('title', 'description')
     fieldsets = (
         ('Basic Settings', {
             'fields': ('title', 'description')
         }),
-        ('Registration Settings', {
-            'fields': ('allow_registration',),
-            'description': 'Control whether new users can register for accounts.'
-        }),
-        ('🔔 Sentry Error Tracking', {
-            'fields': ('sentry_enabled', 'sentry_traces_sample_rate', 'sentry_profiles_sample_rate'),
-            'description': (
-                '<strong>Monitor errors and performance in production.</strong><br>'
-                '✅ Enable Sentry to receive real-time error alerts<br>'
-                '📊 Sample rates control data collection (0.1 = 10%)<br>'
-                '⚠️ Requires SENTRY_DSN environment variable and DEBUG=False<br>'
-                '📖 See: <a href="/static/docs/deployment/SENTRY_SETUP.md" target="_blank">Sentry Setup Guide</a>'
-            ),
-            'classes': ('collapse',)  # Make it collapsible
-        }),
     )
-    
-    def changelist_view(self, request, extra_context=None):
-        """Redirect to the single instance edit page instead of showing a list."""
-        from django.shortcuts import redirect
-        from django.urls import reverse
-        
-        # Get or create the singleton instance
-        settings = SiteSettings.get_settings()
-        
-        # Redirect to the change page for this instance
-        return redirect(reverse('admin:album_sitesettings_change', args=[settings.pk]))
-    
-    def sentry_status(self, obj):
-        """Display Sentry status with colored indicator."""
-        from django.conf import settings
-        if obj.sentry_enabled:
-            if not settings.SENTRY_DSN:
-                return format_html(
-                    '<span style="color: orange;">⚠️ Enabled (DSN missing)</span>'
-                )
-            elif settings.DEBUG:
-                return format_html(
-                    '<span style="color: orange;">⚠️ Enabled (DEBUG=True)</span>'
-                )
-            else:
-                return format_html(
-                    '<span style="color: green;">✅ Active</span>'
-                )
-        return format_html('<span style="color: gray;">❌ Disabled</span>')
-    sentry_status.short_description = 'Sentry Status'
-    
-    def save_model(self, request, obj, form, change):
-        """Display message after saving with Sentry status."""
-        super().save_model(request, obj, form, change)
-        from django.contrib import messages
-        from django.conf import settings
-        
-        if obj.sentry_enabled:
-            if not settings.SENTRY_DSN:
-                messages.warning(
-                    request,
-                    'Sentry is enabled but SENTRY_DSN is not configured. '
-                    'Add SENTRY_DSN to your .env file to activate error tracking.'
-                )
-            elif settings.DEBUG:
-                messages.info(
-                    request,
-                    'Sentry is enabled but will only activate in production (DEBUG=False).'
-                )
-            else:
-                messages.success(
-                    request,
-                    f'✅ Sentry is now active! '
-                    f'Tracking {int(obj.sentry_traces_sample_rate * 100)}% of requests. '
-                    f'Environment: {settings.SENTRY_ENVIRONMENT}'
-                )
-        else:
-            messages.info(request, 'Sentry error tracking is disabled.')
-    
-    def has_add_permission(self, request):
-        """Only allow one SiteSettings instance."""
-        return not SiteSettings.objects.exists()
-    
-    def has_delete_permission(self, request, obj=None):
-        """Prevent deletion of site settings."""
-        return False
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -104,210 +29,46 @@ class CategoryAdmin(admin.ModelAdmin):
     list_filter = ('created_by',)
     search_fields = ('name', 'description')
 
+@admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
-    list_display = ('title', 'owner', 'is_public', 'photo_count', 'video_count', 'created_at', 'manage_media_link')
+    list_display = ('title', 'owner', 'is_public', 'photo_count', 'video_count', 'created_at')
     list_filter = ('is_public', 'created_at', 'owner')
     search_fields = ('title', 'description', 'owner__username')
-    # Use raw_id_fields instead of filter_horizontal for better performance with many users
-    raw_id_fields = ('viewers',)
-    readonly_fields = ('created_at', 'photo_count', 'video_count', 'view_photos_link', 'view_videos_link')
-    # Explicitly exclude any reverse relations that might be auto-added
-    inlines = []  # No inlines for photos or videos
-    show_full_result_count = False  # Performance optimization
-    
-    def get_inline_instances(self, request, obj=None):
-        """Override to ensure no inlines are ever loaded"""
-        return []
-    
-    def get_formsets_with_inlines(self, request, obj=None):
-        """Override to prevent any formsets from being generated"""
-        return []
-    
-    def get_inline_formsets(self, request, formsets, inline_instances, obj=None):
-        """Override to prevent inline formsets"""
-        return []
-    
-    # Only show essential fields by default - media counts are readonly
-    fieldsets = (
-        ('Album Information', {
-            'fields': ('title', 'description', 'owner', 'is_public')
-        }),
-        ('Access Control', {
-            'fields': ('viewers',),
-            'description': 'Select users who can view this album (only applies to private albums)'
-        }),
-        ('Statistics', {
-            'fields': ('photo_count', 'video_count'),
-            'classes': ('collapse',),
-            'description': 'Photo and video counts (click "Manage Photos/Videos" buttons below to edit media)'
-        }),
-        ('Media Management', {
-            'fields': ('view_photos_link', 'view_videos_link'),
-            'description': 'Use these links to manage photos and videos separately for better performance'
-        }),
-        ('Metadata', {
-            'fields': ('created_at',),
-            'classes': ('collapse',)
-        }),
-    )
+    filter_horizontal = ('viewers',)
+    readonly_fields = ('created_at',)
+    inlines = [PhotoInline, VideoInline]
     
     def photo_count(self, obj):
-        """Display count of photos in this album"""
-        if obj.pk:
-            # Use only() to optimize the count query
-            count = obj.photos.only('id').count()
-            return f"{count} photo{'s' if count != 1 else ''}"
-        return "0 photos"
+        return obj.photos.count()
     photo_count.short_description = 'Photos'
     
     def video_count(self, obj):
-        """Display count of videos in this album"""
-        if obj.pk:
-            # Use only() to optimize the count query
-            count = obj.videos.only('id').count()
-            return f"{count} video{'s' if count != 1 else ''}"
-        return "0 videos"
+        return obj.videos.count()
     video_count.short_description = 'Videos'
-    
-    def view_photos_link(self, obj):
-        """Link to manage photos in this album"""
-        if obj.pk:
-            url = reverse('admin:album_photo_changelist') + f'?album__id__exact={obj.pk}'
-            count = obj.photos.count()
-            return format_html(
-                '<a class="button" href="{}">Manage Photos ({})</a>',
-                url, count
-            )
-        return "Save the album first to manage photos"
-    view_photos_link.short_description = 'Manage Photos'
-    
-    def view_videos_link(self, obj):
-        """Link to manage videos in this album"""
-        if obj.pk:
-            url = reverse('admin:album_video_changelist') + f'?album__id__exact={obj.pk}'
-            count = obj.videos.count()
-            return format_html(
-                '<a class="button" href="{}">Manage Videos ({})</a>',
-                url, count
-            )
-        return "Save the album first to manage videos"
-    view_videos_link.short_description = 'Manage Videos'
-    
-    def manage_media_link(self, obj):
-        """Quick link in list view to manage media"""
-        if obj.pk:
-            photo_url = reverse('admin:album_photo_changelist') + f'?album__id__exact={obj.pk}'
-            video_url = reverse('admin:album_video_changelist') + f'?album__id__exact={obj.pk}'
-            return format_html(
-                '<a href="{}">Photos ({})</a> | <a href="{}">Videos ({})</a>',
-                photo_url, obj.photos.count(),
-                video_url, obj.videos.count()
-            )
-        return "-"
-    manage_media_link.short_description = 'Manage Media'
-
-# Unregister and re-register to ensure clean state
-try:
-    admin.site.unregister(Album)
-except admin.sites.NotRegistered:
-    pass
-admin.site.register(Album, AlbumAdmin)
 
 @admin.register(Photo)
 class PhotoAdmin(admin.ModelAdmin):
-    list_display = ('thumbnail_preview', 'title', 'album', 'category', 'uploaded_at', 'ai_analyzed')
-    list_filter = ('uploaded_at', 'album', 'category', 'album__owner')
-    search_fields = ('title', 'ai_description', 'ai_tags', 'album__title')
-    readonly_fields = ('uploaded_at', 'ai_description', 'ai_tags', 'image_preview')
-    list_per_page = 50  # Pagination for better performance
-    
-    fieldsets = (
-        ('Photo Information', {
-            'fields': ('title', 'album', 'category', 'image', 'image_preview')
-        }),
-        ('AI Analysis', {
-            'fields': ('ai_description', 'ai_tags'),
-            'classes': ('collapse',)
-        }),
-        ('Metadata', {
-            'fields': ('uploaded_at',),
-            'classes': ('collapse',)
-        }),
-    )
+    list_display = ('title', 'album', 'category', 'uploaded_at', 'ai_analyzed')
+    list_filter = ('uploaded_at', 'album', 'category')
+    search_fields = ('title', 'ai_description', 'ai_tags')
+    readonly_fields = ('uploaded_at', 'ai_description', 'ai_tags')
     
     def ai_analyzed(self, obj):
-        """Show if photo has been AI analyzed"""
         return bool(obj.ai_description)
     ai_analyzed.boolean = True
     ai_analyzed.short_description = 'AI Analyzed'
-    
-    def thumbnail_preview(self, obj):
-        """Show small thumbnail in list view"""
-        if obj.image:
-            return format_html(
-                '<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />',
-                obj.image.url
-            )
-        return "-"
-    thumbnail_preview.short_description = 'Preview'
-    
-    def image_preview(self, obj):
-        """Show larger image in detail view"""
-        if obj.image:
-            return format_html(
-                '<img src="{}" style="max-width: 500px; max-height: 500px; border-radius: 8px;" />',
-                obj.image.url
-            )
-        return "No image"
-    image_preview.short_description = 'Image Preview'
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ('thumbnail_preview', 'title', 'album', 'category', 'uploaded_at', 'ai_analyzed')
-    list_filter = ('uploaded_at', 'album', 'category', 'album__owner')
-    search_fields = ('title', 'ai_description', 'ai_tags', 'album__title')
-    readonly_fields = ('uploaded_at', 'ai_description', 'ai_tags', 'video_preview')
-    list_per_page = 50  # Pagination for better performance
-    
-    fieldsets = (
-        ('Video Information', {
-            'fields': ('title', 'album', 'category', 'video', 'video_preview')
-        }),
-        ('AI Analysis', {
-            'fields': ('ai_description', 'ai_tags'),
-            'classes': ('collapse',)
-        }),
-        ('Metadata', {
-            'fields': ('uploaded_at',),
-            'classes': ('collapse',)
-        }),
-    )
+    list_display = ('title', 'album', 'category', 'uploaded_at', 'ai_analyzed')
+    list_filter = ('uploaded_at', 'album', 'category')
+    search_fields = ('title', 'ai_description', 'ai_tags')
+    readonly_fields = ('uploaded_at', 'ai_description', 'ai_tags')
     
     def ai_analyzed(self, obj):
-        """Show if video has been AI analyzed"""
         return bool(obj.ai_description)
     ai_analyzed.boolean = True
     ai_analyzed.short_description = 'AI Analyzed'
-    
-    def thumbnail_preview(self, obj):
-        """Show video thumbnail in list view"""
-        if obj.thumbnail:
-            return format_html(
-                '<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />',
-                obj.thumbnail.url
-            )
-        return "🎥"
-    thumbnail_preview.short_description = 'Preview'
-    
-    def video_preview(self, obj):
-        """Show video player in detail view"""
-        if obj.video:
-            return format_html(
-                '<video controls style="max-width: 500px; border-radius: 8px;"><source src="{}" type="video/mp4">Your browser does not support the video tag.</video>',
-                obj.video.url
-            )
-        return "No video"
-    video_preview.short_description = 'Video Preview'
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -336,37 +97,10 @@ class AIProcessingSettingsAdmin(admin.ModelAdmin):
     Admin interface for AI processing settings.
     Singleton model - only one instance exists.
     """
-    
-    class AIProcessingSettingsForm(forms.ModelForm):
-        """Custom form to disable the auto_process_on_upload field"""
-        class Meta:
-            model = AIProcessingSettings
-            fields = '__all__'
-            widgets = {
-                'auto_process_on_upload': forms.CheckboxInput(attrs={
-                    'disabled': 'disabled',
-                    'title': 'Future Feature - Not yet implemented'
-                })
-            }
-        
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            # Make the field disabled and add visual indicator
-            self.fields['auto_process_on_upload'].disabled = True
-            self.fields['auto_process_on_upload'].label = '🚧 Auto Process on Upload (Future Feature)'
-            self.fields['auto_process_on_upload'].help_text = (
-                '<strong style="color: #666;">FUTURE FEATURE - Not yet implemented.</strong><br>'
-                'This feature will automatically process photos/videos with AI when uploaded. '
-                'Currently disabled. Use <strong>Scheduled Processing</strong> or manual processing instead.'
-            )
-    
-    form = AIProcessingSettingsForm
-    
     list_display = (
         'auto_process_on_upload',
         'scheduled_processing', 
         'batch_size',
-        'album_admin_processing_limit',
         'schedule_hour',
         'schedule_minute',
         'last_modified'
@@ -375,21 +109,11 @@ class AIProcessingSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Processing Modes', {
             'fields': ('auto_process_on_upload', 'scheduled_processing'),
-            'description': (
-                '<div style="background: #fef3cd; border-left: 4px solid #ffc107; padding: 10px; margin-bottom: 15px;">'
-                '<strong>ℹ️ Note:</strong> Auto Process on Upload is a <strong>future feature</strong> and currently disabled. '
-                'Use <strong>Scheduled Processing</strong> below for automatic AI processing.'
-                '</div>'
-                'Control when AI processing occurs'
-            )
+            'description': 'Control when AI processing occurs'
         }),
         ('Batch Processing Settings', {
             'fields': ('batch_size', 'processing_timeout'),
             'description': 'Configure batch processing parameters'
-        }),
-        ('Permission Limits', {
-            'fields': ('album_admin_processing_limit',),
-            'description': 'Set limits for album admins (site admins have no limits)'
         }),
         ('Schedule Configuration', {
             'fields': ('schedule_hour', 'schedule_minute'),

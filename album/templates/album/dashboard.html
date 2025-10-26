@@ -64,11 +64,9 @@
                                         <img src="{{ album.cover_image.url }}" alt="{{ album.title }}">
                                     {% elif album.photos.first %}
                                         <img src="{{ album.photos.first.thumbnail.url }}" alt="{{ album.title }}">
-                                    {% elif album.videos.first.thumbnail %}
-                                        <img src="{{ album.videos.first.thumbnail.url }}" alt="{{ album.title }}">
                                     {% else %}
                                         <div class="no-photo">
-                                            <span>No media</span>
+                                            <span>No photos</span>
                                         </div>
                                     {% endif %}
                                 </a>

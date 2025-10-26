@@ -1,13 +1,9 @@
 # Core Django & Web Framework
 Django==5.2.6
 djangorestframework==3.15.2
-drf-spectacular==0.27.2
 gunicorn==23.0.0
 whitenoise
 asgiref==3.9.1
-
-# Error Tracking & Monitoring
-sentry-sdk[django]==2.18.0
 
 # Django Extensions
 django-cors-headers==4.6.0
@@ -91,7 +87,7 @@ urllib3==2.5.0
 annotated-types==0.7.0
 anyio==4.11.0
 charset-normalizer==3.4.3
-cffi==2.0.0
+cffi==1.2.0
 cryptography==46.0.1
 filelock==3.19.1
 fsspec==2025.9.0

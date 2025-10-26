@@ -147,5 +147,98 @@
 }
 </style>
 
-{% load static %}
-<script src="{% static 'album/js/cookie-consent.js' %}"></script>
+<script>
+// Cookie consent functionality
+(function() {
+    'use strict';
+    
+    // Use localStorage as primary method since cookies may have restrictions
+    function getConsent() {
+        // Check localStorage first
+        const localConsent = localStorage.getItem('cookie_consent');
+        if (localConsent) {
+            return localConsent;
+        }
+        
+        // Fallback to cookie check
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; cookie_consent=`);
+        if (parts.length === 2) {
+            return parts.pop().split(';').shift();
+        }
+        
+        return null;
+    }
+    
+    function setConsent(value) {
+        // Store in localStorage (always works)
+        localStorage.setItem('cookie_consent', value);
+        
+        // Also try to set cookie for cross-tab consistency
+        const expires = new Date();
+        expires.setTime(expires.getTime() + 365 * 24 * 60 * 60 * 1000);
+        
+        let cookieString = `cookie_consent=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+        
+        // Only add Secure flag if on HTTPS
+        if (window.location.protocol === 'https:') {
+            cookieString += ';Secure';
+        }
+        
+        document.cookie = cookieString;
+    }
+    
+    // Show banner if no consent exists
+    window.addEventListener('load', function() {
+        const consent = getConsent();
+        
+        if (!consent) {
+            setTimeout(function() {
+                const banner = document.getElementById('cookieConsentBanner');
+                if (banner) {
+                    banner.style.display = 'flex';
+                }
+            }, 1000); // Show after 1 second
+        }
+    });
+    
+    // Accept cookies
+    window.acceptCookies = function() {
+        setConsent('accepted');
+        hideBanner();
+    };
+    
+    // Decline optional cookies (accept essential only)
+    window.declineCookies = function() {
+        setConsent('essential_only');
+        hideBanner();
+    };
+    
+    // Hide banner with animation
+    function hideBanner() {
+        const banner = document.getElementById('cookieConsentBanner');
+        if (banner) {
+            banner.style.animation = 'slideDown 0.3s ease-out';
+            setTimeout(function() {
+                banner.style.display = 'none';
+            }, 300);
+        }
+    }
+    
+    // Animation for hiding
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideDown {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+})();
+</script>

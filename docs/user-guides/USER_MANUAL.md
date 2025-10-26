@@ -296,11 +296,8 @@ Access video AI processing at `/process-videos-ai/`:
 
 #### Album Admin Access
 - **Album Admins** can only process AI for albums they own or have viewer access to
-- **Album Admins** are limited by a configurable batch size (default: 50 photos/videos per batch)
-- **Site Admins** can process AI for any album system-wide with no batch limits
+- **Site Admins** can process AI for any album system-wide
 - **Regular Users** cannot access AI processing interfaces
-
-**Note**: The album admin batch limit can be adjusted by site administrators in Django Admin → AI Processing Settings → Album admin processing limit.
 
 #### Album-Scoped Processing
 The system enforces strict album-level permissions:

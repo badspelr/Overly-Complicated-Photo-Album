@@ -21,22 +21,16 @@ def check_object_permission(user, obj, obj_type='album', action='view'):
         if action == 'delete':
             # Only album owner can delete albums
             return obj.owner == user
-        elif action == 'edit':
-            # Only album owner can edit album settings
-            return obj.owner == user
-        else:  # view
+        else:
             # Check if user is owner, viewer, or album is public
             return obj.owner == user or obj.viewers.filter(pk=user.pk).exists() or obj.is_public
     elif obj_type in ['photo', 'video']:
         if action == 'delete':
-            # Only album owner can delete photos/videos
-            return obj.album and obj.album.owner == user
-        elif action == 'edit':
-            # Only album owner can edit photos/videos
-            return obj.album and obj.album.owner == user
-        else:  # view
+            # Album owner can delete photos/videos, superusers can delete any
+            return obj.album and (obj.album.owner == user or user.is_superuser)
+        else:
             # Check if user can view the album containing the media
-            return obj.album and (obj.album.owner == user or obj.album.viewers.filter(pk=user.pk).exists() or obj.album.is_public)
+            return obj.album and (user.is_superuser or obj.album.owner == user or obj.album.viewers.filter(pk=user.pk).exists() or obj.album.is_public)
     elif obj_type == 'category':
         return obj.created_by == user
     

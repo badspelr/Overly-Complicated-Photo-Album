@@ -45,9 +45,7 @@ python manage.py analyze_photos --force --album "Vacation"
 **Web Interface Alternative:**
 - Access user-friendly processing at `/process-photos-ai/`
 - Real-time progress indicators and album-scoped processing
-- Requires Album Admin or Site Admin permissions
-- Album admins have a configurable batch limit (default: 50 photos)
-- Site admins have unlimited batch processing
+- Requires Album Admin permissions
 
 ---
 
@@ -142,10 +140,7 @@ python manage.py analyze_videos --limit 5
 
 **Permission Model:**
 - **Album Admins**: Can only process albums they own or have viewer access to
-  - Limited by configurable batch size (default: 50 photos per request)
-  - Limit can be adjusted in Django Admin → AI Processing Settings
 - **Site Admins**: Can process any album in the system
-  - No batch size limits
 - **Validation**: POST requests verify album ownership before processing
 - **Error Handling**: Clear messages for permission violations
 

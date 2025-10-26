@@ -19,34 +19,32 @@ or
 **Toggle**: ☑️ ON / ☐ OFF
 
 When **enabled**:
-- Photos/videos are processed immediately after upload (one at a time)
-- Individual Celery task per photo/video
-- May slow down uploads and cause worker crashes under load
+- Photos/videos are processed immediately after upload
+- Users see "AI processing queued" message
+- Processing happens in background (doesn't slow down upload)
 
-When **disabled** (recommended):
-- Photos/videos upload instantly - no processing delay
+When **disabled**:
+- Photos/videos upload but are not processed automatically
 - Items remain in "Pending" status
-- Processed via scheduled batches (2 AM daily) or on-demand
+- Can be processed later via manual tools
 
-**Recommended**: ⚠️ **OFF** (use scheduled batch processing instead)
-**Why?** Batch processing is 50x faster, more stable, and doesn't crash workers
+**Recommended**: ✅ **ON** (for best user experience)
 
 ---
 
 ### Scheduled Processing
 **Toggle**: ☑️ ON / ☐ OFF
 
-When **enabled** (recommended):
+When **enabled**:
 - Batch processing runs daily at configured time (default 2 AM)
 - Processes up to configured batch size (default 500 items)
-- Much faster than individual task processing (50x speedup)
-- Stable - no worker crashes
+- Catches any items missed during upload
 
 When **disabled**:
 - No automatic batch processing
-- Items must be processed manually via `/process-photos-ai/` or `/process-videos-ai/`
+- Items must be processed manually or on upload
 
-**Recommended**: ✅ **ON** (primary processing method)
+**Recommended**: ✅ **ON** (as backup for upload processing)
 
 ---
 
@@ -97,30 +95,6 @@ Minute within the hour to start processing.
 
 ---
 
-### Album Admin Processing Limit
-**Default**: 50
-**Range**: 1 - unlimited
-
-Maximum number of photos/videos an album admin can process in one batch via the web interface (`/process-photos-ai/` or `/process-videos-ai/`).
-
-**Note**: This limit only applies to **album admins** (users who own albums). **Site admins** (superusers) have no limits.
-
-**Recommendations:**
-- **Small installations**: 50-100 (prevents accidental overload)
-- **Medium installations**: 100-500 (balance between flexibility and control)
-- **Large installations with GPU**: 500-1000 (album admins can process more efficiently)
-- **Unlimited processing needed**: Set to a very high number (e.g., 999999)
-
-**Use Cases:**
-- **Limit resource usage**: Prevent album admins from submitting huge batch jobs
-- **Fair resource allocation**: Ensure multiple album admins can use the system
-- **Testing**: Lower limit during testing, raise for production
-- **GPU optimization**: Higher limits work well with GPU acceleration
-
-**Security Note**: Site admins always have unlimited processing regardless of this setting.
-
----
-
 ## Common Scenarios
 
 ### Scenario 1: Disable Auto-Processing for Testing
@@ -150,22 +124,6 @@ Maximum number of photos/videos an album admin can process in one batch via the 
 2. Click **Save**
 3. No restart needed
 
-### Scenario 5: Increase Album Admin Processing Limit
-**Use Case**: You want album admins to be able to process more photos at once (e.g., for GPU-accelerated systems)
-
-1. Change **Album admin processing limit** to `200` (or desired value)
-2. Click **Save**
-3. No restart needed
-4. Album admins can now process up to 200 photos/videos per batch
-
-### Scenario 6: Restrict Album Admin Processing
-**Use Case**: You want to limit resource usage during peak hours
-
-1. Change **Album admin processing limit** to `25`
-2. Click **Save**
-3. Album admins are now limited to 25 photos/videos per batch
-4. Site admins remain unlimited
-
 ---
 
 ## Checking if Settings are Active
@@ -192,16 +150,7 @@ s = AIProcessingSettings.load()
 print(f'Auto-process: {s.auto_process_on_upload}')
 print(f'Scheduled: {s.scheduled_processing}')
 print(f'Batch size: {s.batch_size}')
-print(f'Album admin limit: {s.album_admin_processing_limit}')
 "
-```
-
-**Example Output:**
-```
-Auto-process: False
-Scheduled: True
-Batch size: 500
-Album admin limit: 50
 ```
 
 ---
@@ -301,14 +250,13 @@ print('Queued batch processing')
 
 ---
 
-## Best Practices (Updated October 2025)
+## Best Practices
 
-1. ⚠️ **Keep auto-processing OFF** for stability and performance
-2. ✅ **Enable scheduled processing** as primary method (2 AM daily)
-3. ✅ **Use on-demand processing** at `/process-photos-ai/` for immediate needs
-4. **Adjust batch size** based on server capacity (500 default)
-5. **Monitor logs regularly** to catch issues early
-6. **Set schedule during low-traffic hours** (typically 2-4 AM)
+1. **Keep auto-processing ON** for best user experience
+2. **Use scheduled processing as backup** to catch missed items
+3. **Adjust batch size** based on server capacity
+4. **Monitor logs regularly** to catch issues early
+5. **Set schedule during low-traffic hours** (typically 2-4 AM)
 
 ---
 
@@ -316,18 +264,12 @@ print('Queued batch processing')
 
 | Setting | Recommended | Why |
 |---------|-------------|-----|
-| Auto-process on upload | ⚠️ **OFF** | Batch processing is 50x faster and more stable |
-| Scheduled processing | ✅ **ON** | Primary processing method |
+| Auto-process on upload | ✅ ON | Best UX, instant processing |
+| Scheduled processing | ✅ ON | Catches missed items |
 | Batch size | 500 | Good balance for most servers |
 | Schedule hour | 2 | Low traffic time |
-| Processing timeout | 600 | Allows batch processing to complete |
-
-### Processing Methods Priority:
-1. **Scheduled batches** (2 AM daily) - Primary method
-2. **On-demand batches** (`/process-photos-ai/`) - For immediate needs
-3. ~~Auto-process on upload~~ - Deprecated (slow, crashes workers)
+| Processing timeout | 30 | Safe default |
 
 ---
 
 For detailed troubleshooting, see: **DEPLOYMENT_SYSTEMD.md**
-

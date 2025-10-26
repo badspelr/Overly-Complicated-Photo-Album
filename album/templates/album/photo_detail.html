@@ -40,43 +40,6 @@
             </button>
         </div>
         <p class="description">{{ photo.description }}</p>
-        
-        {# AI-Generated Information Section #}
-        {% if photo.ai_processed and photo.ai_description %}
-        <div class="ai-info-section">
-            <h3 class="ai-section-title">
-                <i class="material-icons ai-icon">smart_toy</i>
-                AI Analysis
-            </h3>
-            <div class="ai-description">
-                <p>{{ photo.ai_description }}</p>
-            </div>
-            {% if photo.ai_tags %}
-            <div class="ai-tags">
-                <strong>AI Tags:</strong>
-                <div class="tags-container">
-                    {% for tag in photo.ai_tags %}
-                        <span class="ai-tag">{{ tag }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-            {% if photo.ai_confidence_score > 0 %}
-            <div class="ai-confidence">
-                <small>Confidence: {{ photo.ai_confidence_score|as_percentage }}%</small>
-            </div>
-            {% endif %}
-        </div>
-        {% elif photo.processing_status == 'processing' %}
-        <div class="ai-info-section processing">
-            <p><i class="material-icons rotating">autorenew</i> AI analysis in progress...</p>
-        </div>
-        {% elif photo.processing_status == 'failed' %}
-        <div class="ai-info-section error">
-            <p><i class="material-icons">error_outline</i> AI analysis failed</p>
-        </div>
-        {% endif %}
-        
         <ul class="metadata-list">
             <li><strong>Uploaded:</strong> {{ photo.uploaded_at|date:"M j, Y" }}</li>
             {% if photo.category %}
@@ -97,10 +60,9 @@
         </ul>
         <a href="{{ photo.image.url }}" download class="btn-download">Download Photo</a>
 
-        {# Show edit/delete buttons only to album owner or superuser #}
-        {% if user.is_superuser or photo.album.owner == user %}
+        {# Show edit button only to album admins (superuser, owner, or album viewer) #}
+        {% if user.is_superuser or photo.album.owner == user or user in photo.album.viewers.all %}
             <a href="{% url 'album:photo_edit' photo.pk %}" class="btn btn-warning mt-2">Edit Metadata</a>
-            <a href="{% url 'album:delete_photo' photo.pk %}" class="btn btn-danger mt-2" onclick="return confirm('Are you sure you want to delete this photo?')">Delete Photo</a>
         {% endif %}
     </div>
 </div>

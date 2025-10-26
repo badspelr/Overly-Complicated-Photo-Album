@@ -6,6 +6,11 @@
 # - Proper restart policies
 # - Health checks enabled
 # - Security-hardened configuration
+# - CPU-only by default (lightweight deployment)
+#
+# GPU Support (Optional):
+# If you have an NVIDIA GPU, add the GPU override:
+#   docker compose -f docker-compose.prod.yml -f docker-compose.gpu.yml up -d
 # =============================================================================
 
 services:
@@ -69,9 +74,6 @@ services:
       - DB_PORT=5432
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      # Uncomment if using GPU
-      # - NVIDIA_VISIBLE_DEVICES=all
-      # - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       # Only data volumes in production - NO code mounting
       - media_data:/app/media
@@ -91,12 +93,6 @@ services:
         limits:
           cpus: '2.0'
           memory: 4G
-        # GPU support (optional - comment out if no GPU available)
-        # reservations:
-        #   devices:
-        #     - driver: nvidia
-        #       count: 1
-        #       capabilities: [gpu]
     healthcheck:
       test: ["CMD", "curl", "-f", "-L", "-I", "http://localhost:8000/"]
       interval: 30s
@@ -121,9 +117,6 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - CELERY_WORKER_CONCURRENCY=${CELERY_WORKER_CONCURRENCY:-4}
-      # Uncomment if using GPU
-      # - NVIDIA_VISIBLE_DEVICES=all
-      # - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     volumes:
       # Only data volumes in production
       - media_data:/app/media
@@ -142,12 +135,6 @@ services:
         limits:
           cpus: '2.0'
           memory: 4G
-        # GPU support (optional - comment out if no GPU available)
-        # reservations:
-        #   devices:
-        #     - driver: nvidia
-        #       count: 1
-        #       capabilities: [gpu]
     healthcheck:
       test: ["CMD-SHELL", "celery -A photo_album inspect ping -d celery@$$HOSTNAME"]
       interval: 60s

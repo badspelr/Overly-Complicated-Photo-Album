@@ -15,15 +15,8 @@
         
         {% for field in form %}
             <div class="form-group">
-                {% if field.field.widget.input_type == 'checkbox' %}
-                    <label for="{{ field.id_for_label }}">
-                        {{ field.label }}
-                        {{ field }}
-                    </label>
-                {% else %}
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                {% endif %}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
                 {% if field.help_text %}
                     <small class="form-help-text">{{ field.help_text }}</small>
                 {% endif %}

@@ -26,9 +26,8 @@
             this.playPauseBtn = document.getElementById('slideshow-play-pause');
             this.speedSelect = document.getElementById('slideshow-speed');
 
-            // Get album ID
-            const mediaContainer = document.getElementById('media-container');
-            this.albumId = mediaContainer ? mediaContainer.getAttribute('data-album-id') : null;
+            // Get photos from current page
+            this.loadPhotosFromPage();
 
             // Event listeners
             document.getElementById('slideshow-btn')?.addEventListener('click', () => this.start());
@@ -44,45 +43,6 @@
 
             // Handle fullscreen change
             document.addEventListener('fullscreenchange', () => this.handleFullscreenChange());
-        },
-
-        async loadPhotosFromAlbum() {
-            // Fetch all photos from the album via API
-            if (!this.albumId) {
-                console.error('No album ID found');
-                this.loadPhotosFromPage();
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/albums/${this.albumId}/media/?media_type=photos&page_size=1000`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch photos');
-                }
-                
-                const data = await response.json();
-                this.photos = [];
-                
-                // Process the results - handle both paginated and non-paginated responses
-                const results = data.results || data;
-                
-                if (Array.isArray(results)) {
-                    results.forEach(photo => {
-                        this.photos.push({
-                            id: photo.id,
-                            url: `/photos/${photo.id}/`,
-                            thumbnailUrl: photo.image || photo.thumbnail,
-                            title: photo.title || 'Untitled'
-                        });
-                    });
-                }
-                
-                console.log(`Loaded ${this.photos.length} photos from album API`);
-            } catch (error) {
-                console.error('Error fetching photos from API:', error);
-                // Fallback to loading from page
-                this.loadPhotosFromPage();
-            }
         },
 
         loadPhotosFromPage() {
@@ -110,9 +70,6 @@
         },
 
         async start() {
-            // Load all photos from the album before starting
-            await this.loadPhotosFromAlbum();
-            
             if (this.photos.length === 0) {
                 alert('No photos available for slideshow. Slideshow only works with photos, not videos.');
                 return;
