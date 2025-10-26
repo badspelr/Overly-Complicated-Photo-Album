@@ -652,7 +652,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if processing was completed or if we navigated back without processing
     const successMessages = document.querySelectorAll('.alert-success, .messages .success');
     const errorMessages = document.querySelectorAll('.alert-error, .messages .error, .alert-danger');
-    const hasProcessingMessage = successMessages.length > 0 || errorMessages.length > 0;
+    
+    // ALWAYS clear processing state on page load unless we just submitted the form
+    // This prevents stuck modals when navigating back to the page
+    const justSubmitted = sessionStorage.getItem('justSubmittedProcessing') === 'true';
+    if (!justSubmitted) {
+        // Clear all processing state if we're just loading the page normally
+        sessionStorage.removeItem('aiProcessingInProgress');
+        sessionStorage.removeItem('processingStartTime');
+        sessionStorage.removeItem('estimatedPhotoCount');
+        console.log('Cleared processing state on page load');
+        return; // Don't show modal
+    } else {
+        // Clear the submission flag so next page load won't show modal
+        sessionStorage.removeItem('justSubmittedProcessing');
+    }
     
     // If we have a success message, clear processing state
     if (successMessages.length > 0) {
@@ -674,20 +688,6 @@ document.addEventListener('DOMContentLoaded', function() {
         showProcessingModal();
         showError(errorText || 'An error occurred during processing. Please try again.');
         return;
-    }
-    
-    // If we're supposedly processing but no processing indicators exist, and we're just viewing the page normally
-    // (no form submission in progress), clear the stale state
-    const isStaleProcessing = sessionStorage.getItem('aiProcessingInProgress') === 'true' && 
-                               !hasProcessingMessage && 
-                               !document.referrer.includes('/process-photos-ai/');
-    
-    if (isStaleProcessing) {
-        // Clear stale processing state
-        sessionStorage.removeItem('aiProcessingInProgress');
-        sessionStorage.removeItem('processingStartTime');
-        sessionStorage.removeItem('estimatedPhotoCount');
-        console.log('Cleared stale processing state');
     }
     
     // Check if we were in the middle of processing when page loaded
@@ -760,6 +760,7 @@ document.addEventListener('DOMContentLoaded', function() {
         sessionStorage.setItem('aiProcessingInProgress', 'true');
         sessionStorage.setItem('processingStartTime', processingStartTime.toString());
         sessionStorage.setItem('estimatedPhotoCount', estimatedPhotoCount.toString());
+        sessionStorage.setItem('justSubmittedProcessing', 'true'); // Flag that we just submitted
         
         // Show processing modal immediately
         showProcessingModal();
