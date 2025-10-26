@@ -649,13 +649,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Check if we just completed processing (look for success message)
+    // Check if processing was completed or if we navigated back without processing
     const successMessages = document.querySelectorAll('.alert-success, .messages .success');
+    const errorMessages = document.querySelectorAll('.alert-error, .messages .error, .alert-danger');
+    const hasProcessingMessage = successMessages.length > 0 || errorMessages.length > 0;
+    
+    // If we have a success message, clear processing state
     if (successMessages.length > 0) {
-        // Check if the message contains "Successfully processed"
         for (let msg of successMessages) {
             if (msg.textContent.includes('Successfully processed')) {
-                // Clear any stored processing state
                 sessionStorage.removeItem('aiProcessingInProgress');
                 sessionStorage.removeItem('processingStartTime');
                 sessionStorage.removeItem('estimatedPhotoCount');
@@ -666,13 +668,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Check for error messages on page load
-    const errorMessages = document.querySelectorAll('.alert-error, .messages .error, .alert-danger');
     if (errorMessages.length > 0 && sessionStorage.getItem('aiProcessingInProgress') === 'true') {
         // If there's an error and we were processing, show it in the modal
         const errorText = errorMessages[0].textContent.trim();
         showProcessingModal();
         showError(errorText || 'An error occurred during processing. Please try again.');
         return;
+    }
+    
+    // If we're supposedly processing but no processing indicators exist, and we're just viewing the page normally
+    // (no form submission in progress), clear the stale state
+    const isStaleProcessing = sessionStorage.getItem('aiProcessingInProgress') === 'true' && 
+                               !hasProcessingMessage && 
+                               !document.referrer.includes('/process-photos-ai/');
+    
+    if (isStaleProcessing) {
+        // Clear stale processing state
+        sessionStorage.removeItem('aiProcessingInProgress');
+        sessionStorage.removeItem('processingStartTime');
+        sessionStorage.removeItem('estimatedPhotoCount');
+        console.log('Cleared stale processing state');
     }
     
     // Check if we were in the middle of processing when page loaded
