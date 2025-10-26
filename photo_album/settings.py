@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,11 +45,13 @@ X_FRAME_OPTIONS = 'DENY'
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
 
 # CSRF Trusted Origins - Add your domain(s) here
-CSRF_TRUSTED_ORIGINS = config(
+CSRF_TRUSTED_ORIGINS = os.environ.get(
     'CSRF_TRUSTED_ORIGINS',
-    default='http://localhost:8000,http://127.0.0.1:8000',
-    cast=lambda v: [s.strip() for s in v.split(',')]
-)
+    'http://localhost:8000,http://127.0.0.1:8000'
+).split(',') if os.environ.get('CSRF_TRUSTED_ORIGINS') else [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000'
+]
 
 # File upload security
 FILE_UPLOAD_MAX_MEMORY_SIZE = config('FILE_UPLOAD_MAX_MEMORY_SIZE', default=52428800, cast=int)  # Increased to 50MB
