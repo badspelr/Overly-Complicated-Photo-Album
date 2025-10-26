@@ -597,22 +597,23 @@ def bulk_delete(request):
         
         for media_id in media_ids:
             try:
-                # Try photo first
-                photo = Photo.objects.get(id=media_id)
-                if check_object_permission(request.user, photo, 'photo', action='delete'):
-                    photos_to_delete.append(photo)
-                    if not album_id:
-                        album_id = photo.album.id
-            except Photo.DoesNotExist:
-                try:
-                    # Try video
-                    video = Video.objects.get(id=media_id)
+                # Parse media_id format: "photo-123" or "video-456"
+                if media_id.startswith('photo-'):
+                    photo_id = int(media_id.replace('photo-', ''))
+                    photo = Photo.objects.get(id=photo_id)
+                    if check_object_permission(request.user, photo, 'photo', action='delete'):
+                        photos_to_delete.append(photo)
+                        if not album_id:
+                            album_id = photo.album.id
+                elif media_id.startswith('video-'):
+                    video_id = int(media_id.replace('video-', ''))
+                    video = Video.objects.get(id=video_id)
                     if check_object_permission(request.user, video, 'video', action='delete'):
                         videos_to_delete.append(video)
                         if not album_id:
                             album_id = video.album.id
-                except Video.DoesNotExist:
-                    continue
+            except (Photo.DoesNotExist, Video.DoesNotExist, ValueError):
+                continue
         
         # Delete the media
         for photo in photos_to_delete:
