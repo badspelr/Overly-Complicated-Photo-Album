@@ -277,6 +277,32 @@
     width: 100%;
     text-align: center;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.close-modal-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
 }
 
 .modal-content h3 {
@@ -518,13 +544,16 @@
 <!-- Processing Status Modal -->
 <div id="processingModal" class="hidden">
     <div class="modal-content">
-        <div class="spinner"></div>
-        <h3 style="font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem;">Processing Photos with AI</h3>
+        <button id="closeModalBtn" class="close-modal-btn" style="display: none;" title="Close">×</button>
+        <div class="spinner" id="modalSpinner"></div>
+        <h3 style="font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem;" id="modalTitle">Processing Photos with AI</h3>
         <p style="color: #666; margin-bottom: 1rem;" id="processingStatus">Initializing AI analysis...</p>
         <div class="progress-container">
             <div id="progressBar" class="progress-bar-fill" style="width: 0%"></div>
         </div>
         <p style="font-size: 0.9rem; color: #888;" id="processingDetails">This may take several minutes depending on the number of photos.</p>
+        <div id="errorMessage" style="display: none; color: #d32f2f; margin-top: 1rem; padding: 1rem; background: #ffebee; border-radius: 4px;"></div>
+        <button id="dismissModalBtn" style="display: none; margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--primary-main); color: white; border: none; border-radius: 4px; cursor: pointer;">Dismiss</button>
     </div>
 </div>
 
@@ -542,12 +571,83 @@ document.addEventListener('DOMContentLoaded', function() {
     const statusText = document.getElementById('processingStatus');
     const progressBar = document.getElementById('progressBar');
     const detailsText = document.getElementById('processingDetails');
+    const closeBtn = document.getElementById('closeModalBtn');
+    const dismissBtn = document.getElementById('dismissModalBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalSpinner = document.getElementById('modalSpinner');
     
     console.log('Photo AI processing modal initialized', { form, modal, submitButton });
     
     let processingStartTime = null;
     let estimatedPhotoCount = 0;
     let processingWarningActive = false;
+    let processingTimeout = null;
+    
+    // Add click handlers for close/dismiss buttons
+    closeBtn.addEventListener('click', hideModal);
+    dismissBtn.addEventListener('click', hideModal);
+    
+    function hideModal() {
+        modal.classList.add('hidden');
+        sessionStorage.removeItem('aiProcessingInProgress');
+        sessionStorage.removeItem('processingStartTime');
+        sessionStorage.removeItem('estimatedPhotoCount');
+        processingWarningActive = false;
+        
+        // Clear timeout if exists
+        if (processingTimeout) {
+            clearTimeout(processingTimeout);
+            processingTimeout = null;
+        }
+        
+        // Clear progress interval if exists
+        if (window.progressInterval) {
+            clearInterval(window.progressInterval);
+            window.progressInterval = null;
+        }
+        
+        // Re-enable submit button
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<span class="icon">🤖</span> Start AI Processing';
+    }
+    
+    function showError(message) {
+        // Hide spinner
+        modalSpinner.style.display = 'none';
+        
+        // Update title
+        modalTitle.textContent = 'Processing Error';
+        modalTitle.style.color = '#d32f2f';
+        
+        // Show error message
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+        
+        // Hide progress elements
+        statusText.style.display = 'none';
+        progressBar.parentElement.style.display = 'none';
+        detailsText.style.display = 'none';
+        
+        // Show dismiss button and close button
+        dismissBtn.style.display = 'inline-block';
+        closeBtn.style.display = 'flex';
+        
+        // Clear processing state
+        processingWarningActive = false;
+        
+        // Clear timeout
+        if (processingTimeout) {
+            clearTimeout(processingTimeout);
+            processingTimeout = null;
+        }
+        
+        // Clear progress interval
+        if (window.progressInterval) {
+            clearInterval(window.progressInterval);
+            window.progressInterval = null;
+        }
+    }
     
     // Check if we just completed processing (look for success message)
     const successMessages = document.querySelectorAll('.alert-success, .messages .success');
@@ -563,6 +663,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             }
         }
+    }
+    
+    // Check for error messages on page load
+    const errorMessages = document.querySelectorAll('.alert-error, .messages .error, .alert-danger');
+    if (errorMessages.length > 0 && sessionStorage.getItem('aiProcessingInProgress') === 'true') {
+        // If there's an error and we were processing, show it in the modal
+        const errorText = errorMessages[0].textContent.trim();
+        showProcessingModal();
+        showError(errorText || 'An error occurred during processing. Please try again.');
+        return;
     }
     
     // Check if we were in the middle of processing when page loaded
@@ -583,6 +693,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // Disable submit button
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="icon">⏳</span> Processing...';
+            
+            // Set a timeout to detect if processing is stuck
+            const elapsedTime = Date.now() - processingStartTime;
+            const estimatedTotalTime = estimatedPhotoCount * 600; // 600ms per photo
+            const timeoutDuration = Math.max(120000, estimatedTotalTime * 2); // At least 2 minutes or 2x estimated time
+            
+            processingTimeout = setTimeout(function() {
+                showError('Processing is taking longer than expected. The process may have failed. You can dismiss this modal and check the processing status.');
+                closeBtn.style.display = 'flex'; // Allow closing if stuck
+            }, timeoutDuration);
         }
     }
     
@@ -640,9 +760,29 @@ document.addEventListener('DOMContentLoaded', function() {
         // Disable the submit button to prevent double submission
         submitButton.disabled = true;
         submitButton.innerHTML = '<span class="icon">⏳</span> Processing...';
+        
+        // Set a timeout to detect if processing fails or gets stuck
+        const estimatedTotalTime = estimatedPhotoCount * 600; // 600ms per photo
+        const timeoutDuration = Math.max(120000, estimatedTotalTime * 2); // At least 2 minutes or 2x estimated time
+        
+        processingTimeout = setTimeout(function() {
+            showError('Processing is taking longer than expected. The process may have failed. You can dismiss this modal and check the processing status.');
+            closeBtn.style.display = 'flex'; // Allow closing if stuck
+        }, timeoutDuration);
     });
     
     function showProcessingModal() {
+        // Reset modal to processing state
+        modalSpinner.style.display = 'inline-block';
+        modalTitle.textContent = 'Processing Photos with AI';
+        modalTitle.style.color = '';
+        errorMessage.style.display = 'none';
+        statusText.style.display = 'block';
+        progressBar.parentElement.style.display = 'block';
+        detailsText.style.display = 'block';
+        dismissBtn.style.display = 'none';
+        closeBtn.style.display = 'none';
+        
         modal.classList.remove('hidden');
         statusText.textContent = `Analyzing ${estimatedPhotoCount} photo${estimatedPhotoCount !== 1 ? 's' : ''} with AI...`;
         progressBar.style.width = '5%';
