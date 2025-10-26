@@ -309,6 +309,10 @@ class AIProcessingSettings(models.Model):
         default=0,
         help_text="Minute of the hour (0-59) to run scheduled processing"
     )
+    album_admin_processing_limit = models.IntegerField(
+        default=50,
+        help_text="Maximum number of photos an album admin can process in one batch (site admins have no limit)"
+    )
     last_modified = models.DateTimeField(auto_now=True)
     
     class Meta:

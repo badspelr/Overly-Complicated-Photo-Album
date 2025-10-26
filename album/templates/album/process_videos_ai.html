@@ -641,7 +641,28 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check if processing was completed or if we navigated back without processing
     const successMessages = document.querySelectorAll('.alert-success, .messages .success');
-    const errorMessages = document.querySelectorAll('.alert-error, .messages .error, .alert-danger');
+    const errorMessages = document.querySelectorAll('.alert-error, .messages .error, .alert-danger, .errorlist');
+    
+    // Check for error messages FIRST - if there's an error, show it in the modal
+    if (errorMessages.length > 0 && sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {
+        // Extract all error text
+        let errorTexts = [];
+        errorMessages.forEach(function(errEl) {
+            const text = errEl.textContent.trim();
+            if (text && !errorTexts.includes(text)) {
+                errorTexts.push(text);
+            }
+        });
+        const errorText = errorTexts.join(' ');
+        
+        // Clear the submission flag
+        sessionStorage.removeItem('justSubmittedVideoProcessing');
+        
+        // Show modal with error
+        showProcessingModal();
+        showError(errorText || 'An error occurred during processing. Please try again.');
+        return;
+    }
     
     // ALWAYS clear processing state on page load unless we just submitted the form
     // This prevents stuck modals when navigating back to the page
