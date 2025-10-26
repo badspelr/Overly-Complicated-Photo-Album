@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import SiteSettings, Category, Album, Photo, Video, Tag, AlbumShareLink, Favorite, AIProcessingSettings
+from .admin_site import custom_admin_site
 
 
 class PhotoInline(admin.StackedInline):
@@ -14,7 +15,6 @@ class VideoInline(admin.StackedInline):
     extra = 0
     readonly_fields = ('ai_description', 'ai_tags', 'uploaded_at')
 
-@admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
     list_display = ('title', 'description')
     fieldsets = (
@@ -23,13 +23,11 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         }),
     )
 
-@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'created_by', 'description')
     list_filter = ('created_by',)
     search_fields = ('name', 'description')
 
-@admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
     list_display = ('title', 'owner', 'is_public', 'photo_count', 'video_count', 'created_at')
     list_filter = ('is_public', 'created_at', 'owner')
@@ -46,7 +44,6 @@ class AlbumAdmin(admin.ModelAdmin):
         return obj.videos.count()
     video_count.short_description = 'Videos'
 
-@admin.register(Photo)
 class PhotoAdmin(admin.ModelAdmin):
     list_display = ('title', 'album', 'category', 'uploaded_at', 'ai_analyzed')
     list_filter = ('uploaded_at', 'album', 'category')
@@ -58,7 +55,6 @@ class PhotoAdmin(admin.ModelAdmin):
     ai_analyzed.boolean = True
     ai_analyzed.short_description = 'AI Analyzed'
 
-@admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
     list_display = ('title', 'album', 'category', 'uploaded_at', 'ai_analyzed')
     list_filter = ('uploaded_at', 'album', 'category')
@@ -70,20 +66,17 @@ class VideoAdmin(admin.ModelAdmin):
     ai_analyzed.boolean = True
     ai_analyzed.short_description = 'AI Analyzed'
 
-@admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'created_by')
     list_filter = ('created_by',)
     search_fields = ('name',)
 
-@admin.register(AlbumShareLink)
 class AlbumShareLinkAdmin(admin.ModelAdmin):
     list_display = ('album', 'created_by', 'share_token', 'expires_at', 'is_active', 'created_at')
     list_filter = ('is_active', 'expires_at', 'created_at')
     search_fields = ('album__title', 'created_by__username', 'share_token')
     readonly_fields = ('created_at', 'share_token')
 
-@admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'photo', 'created')
     list_filter = ('created',)
@@ -91,7 +84,6 @@ class FavoriteAdmin(admin.ModelAdmin):
     readonly_fields = ('created',)
 
 
-@admin.register(AIProcessingSettings)
 class AIProcessingSettingsAdmin(admin.ModelAdmin):
     """
     Admin interface for AI processing settings.
@@ -155,3 +147,17 @@ class AIProcessingSettingsAdmin(admin.ModelAdmin):
         extra_context['show_save_and_add_another'] = False
         return super().change_view(request, object_id, form_url, extra_context)
 
+
+# Register all models with the custom admin site
+custom_admin_site.register(SiteSettings, SiteSettingsAdmin)
+custom_admin_site.register(Category, CategoryAdmin)
+custom_admin_site.register(Album, AlbumAdmin)
+custom_admin_site.register(Photo, PhotoAdmin)
+custom_admin_site.register(Video, VideoAdmin)
+custom_admin_site.register(Tag, TagAdmin)
+custom_admin_site.register(AlbumShareLink, AlbumShareLinkAdmin)
+custom_admin_site.register(Favorite, FavoriteAdmin)
+custom_admin_site.register(AIProcessingSettings, AIProcessingSettingsAdmin)
+
+# Also register User model with custom admin site
+custom_admin_site.register(User, BaseUserAdmin)

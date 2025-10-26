@@ -7,9 +7,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from album.views.user_views import AppPasswordChangeView, AppPasswordChangeDoneView
+from album.admin_site import custom_admin_site
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', custom_admin_site.urls),
     # Custom auth URLs with our templates
     path('accounts/password_change/', AppPasswordChangeView.as_view(), name='password_change'),
     path('accounts/password_change/done/', AppPasswordChangeDoneView.as_view(), name='password_change_done'),
