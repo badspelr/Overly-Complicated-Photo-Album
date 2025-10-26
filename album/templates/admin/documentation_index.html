@@ -25,12 +25,44 @@
         opacity: 0.95;
     }
     
+    .search-container {
+        margin: 0 0 2rem 0;
+        position: relative;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 1rem 3rem 1rem 1rem;
+        font-size: 1rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        transition: border-color 0.2s;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .search-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    
     .doc-category {
         background: #f8f9fa;
         border-radius: 8px;
         padding: 1.5rem;
         margin-bottom: 2rem;
         border: 1px solid #e9ecef;
+        transition: opacity 0.2s;
+    }
+    
+    .doc-category.hidden {
+        display: none;
     }
     
     .doc-category h2 {
@@ -135,6 +167,15 @@
     </ul>
 </div>
 
+<div class="search-container">
+    <input type="text" 
+           id="docSearch" 
+           class="search-input" 
+           placeholder="🔍 Search documentation..." 
+           autocomplete="off">
+    <span class="search-icon">⌨️</span>
+</div>
+
 {% if docs_available %}
     {% for category_name, docs in doc_categories.items %}
         {% if docs %}
@@ -167,4 +208,42 @@
 <div style="margin-top: 2rem; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
     <strong>💡 Tip:</strong> Most documentation files are Markdown (.md) files that are best viewed on GitHub or with a Markdown viewer.
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('docSearch');
+    const categories = document.querySelectorAll('.doc-category');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        categories.forEach(category => {
+            const categoryName = category.querySelector('h2').textContent.toLowerCase();
+            const links = category.querySelectorAll('.doc-link');
+            let hasVisibleLinks = false;
+            
+            links.forEach(link => {
+                const linkText = link.textContent.toLowerCase();
+                const shouldShow = searchTerm === '' || 
+                                   linkText.includes(searchTerm) || 
+                                   categoryName.includes(searchTerm);
+                
+                link.parentElement.style.display = shouldShow ? '' : 'none';
+                if (shouldShow) hasVisibleLinks = true;
+            });
+            
+            // Hide category if no links are visible
+            category.classList.toggle('hidden', !hasVisibleLinks && searchTerm !== '');
+        });
+    });
+    
+    // Focus search on '/' key press
+    document.addEventListener('keydown', function(e) {
+        if (e.key === '/' && document.activeElement !== searchInput) {
+            e.preventDefault();
+            searchInput.focus();
+        }
+    });
+});
+</script>
 {% endblock %}
