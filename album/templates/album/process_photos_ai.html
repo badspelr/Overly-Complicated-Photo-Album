@@ -697,12 +697,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // If submission was recent (within 5 seconds) and we're supposedly processing, show the modal
     if (justSubmitted && timeSinceSubmission < 5000 && sessionStorage.getItem('aiProcessingInProgress') === 'true') {
+        console.log('Recent submission detected, showing modal', { justSubmitted, timeSinceSubmission });
         // Clear the submission flag so next page load won't show modal
         sessionStorage.removeItem('justSubmittedProcessing');
         sessionStorage.removeItem('submissionTime');
         
         // Continue showing processing modal
     } else if (sessionStorage.getItem('aiProcessingInProgress') === 'true') {
+        console.log('Processing in progress but not recent submission', { justSubmitted, timeSinceSubmission });
         // We're supposedly processing but submission wasn't recent - might be stale or continuing from before
         // Check if we have saved state to continue from
         const savedStartTime = sessionStorage.getItem('processingStartTime');
@@ -734,9 +736,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return; // Don't show modal
         }
     } else {
+        console.log('Not processing, not showing modal');
         // Not processing at all
         return; // Don't show modal
     }
+    
+    console.log('Conditions met, will show processing modal');
     
     // Check if we were in the middle of processing when page loaded
     if (sessionStorage.getItem('aiProcessingInProgress') === 'true') {
@@ -770,6 +775,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     form.addEventListener('submit', function(e) {
+        console.log('Form submit triggered');
+        
         // Immediately disable button and show feedback
         submitButton.disabled = true;
         submitButton.innerHTML = '<i class="material-icons">hourglass_empty</i> Starting...';
