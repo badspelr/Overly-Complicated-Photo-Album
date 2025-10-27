@@ -729,44 +729,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Check if we were in the middle of processing when page loaded
-    if (sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {    // ALWAYS clear processing state on page load unless we just submitted the form
-    // This prevents stuck modals when navigating back to the page
-    const justSubmitted = sessionStorage.getItem('justSubmittedVideoProcessing') === 'true';
-    if (!justSubmitted) {
-        // Clear all processing state if we're just loading the page normally
-        sessionStorage.removeItem('aiVideoProcessingInProgress');
-        sessionStorage.removeItem('videoProcessingStartTime');
-        sessionStorage.removeItem('estimatedVideoCount');
-        console.log('Cleared video processing state on page load');
-        return; // Don't show modal
-    } else {
-        // Clear the submission flag so next page load won't show modal
-        sessionStorage.removeItem('justSubmittedVideoProcessing');
-    }
-    
-    // If we have a success message, clear processing state
-    if (successMessages.length > 0) {
-        for (let msg of successMessages) {
-            if (msg.textContent.includes('Successfully processed')) {
-                sessionStorage.removeItem('aiVideoProcessingInProgress');
-                sessionStorage.removeItem('videoProcessingStartTime');
-                sessionStorage.removeItem('estimatedVideoCount');
-                processingWarningActive = false;
-                break;
-            }
-        }
-    }
-    
-    // Check for error messages on page load
-    if (errorMessages.length > 0 && sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {
-        // If there's an error and we were processing, show it in the modal
-        const errorText = errorMessages[0].textContent.trim();
-        showProcessingModal();
-        showError(errorText || 'An error occurred during processing. Please try again.');
-        return;
-    }
-    
-    // Check if we were in the middle of processing when page loaded
     if (sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {
         // We might have been processing, show modal and continue progress
         const savedStartTime = sessionStorage.getItem('videoProcessingStartTime');
