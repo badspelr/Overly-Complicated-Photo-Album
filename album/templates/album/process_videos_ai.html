@@ -558,6 +558,12 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('.card form');
+    
+    if (!form) {
+        console.error('Could not find form with selector .card form');
+        return;
+    }
+    
     const submitButton = form.querySelector('button[type="submit"]');
     const modal = document.getElementById('processingModal');
     const statusText = document.getElementById('processingStatus');
@@ -568,6 +574,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorMessage = document.getElementById('errorMessage');
     const modalTitle = document.getElementById('modalTitle');
     const modalSpinner = document.getElementById('modalSpinner');
+    
+    console.log('Video AI processing modal initialized', { form, modal, submitButton });
     
     let processingStartTime = null;
     let estimatedVideoCount = 0;
@@ -760,6 +768,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     form.addEventListener('submit', function(e) {
+        console.log('Video form submit triggered');
+        
         // Immediately disable button and show feedback
         submitButton.disabled = true;
         submitButton.innerHTML = '<i class="material-icons">hourglass_empty</i> Starting...';
