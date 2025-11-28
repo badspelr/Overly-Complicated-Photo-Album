@@ -1,0 +1,929 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}Process Videos with AI{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/_forms.css' %}">
+<link rel="stylesheet" href="{% static 'album/css/_buttons.css' %}">
+<style>
+/* AI Processing Page Styles */
+.content-wrapper {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    color: var(--text-primary);
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stats-card {
+    background: var(--bg-paper);
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid var(--divider);
+}
+
+.stats-card h3 {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-main);
+    margin: 0;
+}
+
+.stat-description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin: 0.5rem 0 0 0;
+}
+
+.stat-number.warning {
+    color: #ff9800;
+}
+
+.progress-indicator {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-top: 1rem;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-main);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.card {
+    background: var(--bg-paper);
+    border-radius: 8px;
+    padding: 2rem;
+    border: 1px solid var(--divider);
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-title {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.alert-info {
+    background: rgba(144, 202, 249, 0.1);
+    border: 1px solid rgba(144, 202, 249, 0.3);
+    color: var(--primary-main);
+}
+
+.alert-warning {
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    color: #ff9800;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.form-section {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-default);
+    border: 1px solid var(--divider);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-family: 'Roboto', sans-serif;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-main);
+    box-shadow: 0 0 0 2px rgba(144, 202, 249, 0.2);
+}
+
+.form-control option {
+    background: var(--bg-paper);
+    color: var(--text-primary);
+}
+
+.form-help {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.info-section {
+    background: rgba(144, 202, 249, 0.05);
+    border: 1px solid rgba(144, 202, 249, 0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-section h3 {
+    color: var(--primary-main);
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-list li {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    padding: 0.25rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.info-list li::before {
+    content: "•";
+    color: var(--primary-main);
+    position: absolute;
+    left: 0.5rem;
+}
+
+.technical-details {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.technical-details h3 {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Processing Modal Styles */
+#processingModal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+#processingModal.hidden {
+    display: none;
+}
+
+#processingModal .modal-content {
+    background: var(--bg-paper);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.close-modal-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.modal-content h3 {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.modal-content p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.spinner {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(144, 202, 249, 0.2);
+    border-top: 3px solid var(--primary-main);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.progress-container {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    height: 6px;
+    margin: 1rem 0;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: var(--primary-main);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+
+    .btn-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="material-icons">videocam</i>
+            Process Videos with AI
+        </h1>
+        {% if user.is_site_admin %}
+        <p class="page-subtitle" style="margin-top: 0.5rem;">
+            <a href="{% url 'album:ai_settings' %}" style="color: var(--primary-main); text-decoration: none;">
+                <i class="material-icons" style="font-size: 16px; vertical-align: middle;">settings</i>
+                Configure AI Processing Settings
+            </a>
+        </p>
+        {% endif %}
+    </div>
+
+    {% if not ai_available %}
+        <div class="alert alert-warning">
+            <i class="material-icons">warning</i>
+            <div class="alert-content">
+                <strong>AI Service Unavailable</strong>
+                The AI analysis service is currently not available. Please check that the AI models are properly loaded.
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stats-card">
+            <h3>Total Videos</h3>
+            <div class="stat-number">{{ total_videos }}</div>
+            <p class="stat-description">All videos in system</p>
+        </div>
+
+        <div class="stats-card">
+            <h3>Processed</h3>
+            <div class="stat-number">{{ processed_videos }}</div>
+            <p class="stat-description">Already analyzed</p>
+            {% if total_videos > 0 %}
+                <div class="progress-indicator">
+                    <div class="progress-fill" style="width: {% widthratio processed_videos total_videos 100 %}%"></div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="stats-card">
+            <h3>Pending</h3>
+            <div class="stat-number">{{ unprocessed_videos }}</div>
+            <p class="stat-description">Need AI analysis</p>
+        </div>
+
+        {% if orphaned_videos > 0 %}
+        <div class="stats-card">
+            <h3>Orphaned Records</h3>
+            <div class="stat-number warning">{{ orphaned_videos }}</div>
+            <p class="stat-description">Database records with missing files</p>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if orphaned_videos > 0 %}
+    <!-- Orphaned Records Warning -->
+    <div class="alert alert-warning">
+        <i class="material-icons">warning</i>
+        <div class="alert-content">
+            <strong>Orphaned Records Found</strong>
+            Found {{ orphaned_videos }} video record{{ orphaned_videos|pluralize }} in the database with missing video files.
+            These records should be cleaned up to maintain data integrity.
+            <form method="post" action="{% url 'album:process_videos_ai' %}" style="display: inline; margin-top: 0.75rem;">
+                {% csrf_token %}
+                <input type="hidden" name="cleanup_orphaned" value="1">
+                <button type="submit" class="btn btn-secondary btn-sm"
+                        onclick="return confirm('This will permanently delete {{ orphaned_videos }} orphaned video records from the database. This action cannot be undone. Continue?')">
+                    <i class="material-icons">cleaning_services</i>
+                    Clean Up Orphaned Records
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Processing Form -->
+    <div class="card">
+        <div class="card-header">
+            <i class="material-icons">rocket_launch</i>
+            <h2 class="card-title">Start AI Processing</h2>
+        </div>
+
+        {% if unprocessed_videos == 0 and not request.GET.force %}
+            <div class="alert alert-info">
+                <i class="material-icons">check_circle</i>
+                <div class="alert-content">
+                    <strong>All videos processed!</strong>
+                    All videos have been analyzed with AI. Use the "Force reprocess" option below if you want to regenerate descriptions.
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="process-form">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-section">
+                <label for="album" class="form-label">Album (Optional)</label>
+                <select name="album" id="album" class="form-control">
+                    <option value="">Process all albums</option>
+                    {% for album in albums %}
+                        <option value="{{ album.title }}">{{ album.title }} ({{ album.videos.count }} videos)</option>
+                    {% endfor %}
+                </select>
+                <div class="form-help">Leave empty to process videos from all albums</div>
+            </div>
+
+            <div class="form-section">
+                <label for="limit" class="form-label">Limit (Optional)</label>
+                <input type="number" name="limit" id="limit" class="form-control" min="1" max="1000" placeholder="e.g., 50">
+                <div class="form-help">Maximum number of videos to process (useful for testing)</div>
+            </div>
+
+            <div class="form-section">
+                <div class="checkbox-group">
+                    <input type="checkbox" name="force" id="force">
+                    <label for="force" class="form-label">Force reprocess already analyzed videos</label>
+                </div>
+                <div class="form-help">Check this to regenerate AI descriptions for videos that have already been processed</div>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary" {% if not ai_available %}disabled{% endif %}>
+                    <i class="material-icons">smart_toy</i>
+                    Start AI Processing
+                </button>
+            </div>
+        </form>
+        </div>
+    </div>
+
+    <!-- Information -->
+    <div class="info-section">
+        <h3>
+            <i class="material-icons">info</i>
+            About Video AI Processing
+        </h3>
+        <ul class="info-list">
+            <li>Analyzes video thumbnail images using advanced AI models</li>
+            <li>Generates descriptive text based on visual content in video frames</li>
+            <li>Creates searchable tags for objects, people, scenes, and activities</li>
+            <li>Generates vector embeddings for semantic similarity search</li>
+            <li>Processing time: approximately 1-2 seconds per video</li>
+            <li>Results improve search functionality and content discovery</li>
+        </ul>
+    </div>
+
+    <!-- Technical Details -->
+    <div class="technical-details">
+        <h3>
+            <i class="material-icons">settings</i>
+            Technical Details
+        </h3>
+        <ul class="info-list">
+            <li><strong>AI Model:</strong> BLIP (Bootstrapping Language-Image Pre-training)</li>
+            <li><strong>Processing:</strong> GPU accelerated when available, CPU fallback</li>
+            <li><strong>Input:</strong> Video thumbnail images (auto-generated)</li>
+            <li><strong>Output:</strong> Natural language descriptions + structured tags</li>
+            <li><strong>Storage:</strong> Descriptions and tags stored in database for fast search</li>
+            <li><strong>Embeddings:</strong> Vector representations for semantic search</li>
+            <li><strong>Prerequisites:</strong> Video thumbnails must be generated first</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Processing Status Modal -->
+<div id="processingModal" class="hidden">
+    <div class="modal-content">
+        <button id="closeModalBtn" class="close-modal-btn" style="display: none;" title="Close">×</button>
+        <div class="spinner" id="modalSpinner"></div>
+        <h3 id="modalTitle">Processing Videos with AI</h3>
+        <p id="processingStatus">Initializing AI analysis...</p>
+        <div class="progress-container">
+            <div id="progressBar" class="progress-bar-fill" style="width: 0%"></div>
+        </div>
+        <p id="processingDetails">This may take several minutes depending on the number of videos.</p>
+        <div id="errorMessage" style="display: none; color: #d32f2f; margin-top: 1rem; padding: 1rem; background: #ffebee; border-radius: 4px;"></div>
+        <button id="dismissModalBtn" style="display: none; margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--primary-main); color: white; border: none; border-radius: 4px; cursor: pointer;">Dismiss</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.card form');
+
+    if (!form) {
+        console.error('Could not find form with selector .card form');
+        return;
+    }
+
+    const submitButton = form.querySelector('button[type="submit"]');
+    const modal = document.getElementById('processingModal');
+    const statusText = document.getElementById('processingStatus');
+    const progressBar = document.getElementById('progressBar');
+    const detailsText = document.getElementById('processingDetails');
+    const closeBtn = document.getElementById('closeModalBtn');
+    const dismissBtn = document.getElementById('dismissModalBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalSpinner = document.getElementById('modalSpinner');
+
+    console.log('Video AI processing modal initialized', { form, modal, submitButton });
+
+    let processingStartTime = null;
+    let estimatedVideoCount = 0;
+    let processingWarningActive = false;
+    let processingTimeout = null;
+
+    // Add click handlers for close/dismiss buttons
+    closeBtn.addEventListener('click', hideModal);
+    dismissBtn.addEventListener('click', hideModal);
+
+    function hideModal() {
+        modal.classList.add('hidden');
+        sessionStorage.removeItem('aiVideoProcessingInProgress');
+        sessionStorage.removeItem('videoProcessingStartTime');
+        sessionStorage.removeItem('estimatedVideoCount');
+        processingWarningActive = false;
+
+        // Clear timeout if exists
+        if (processingTimeout) {
+            clearTimeout(processingTimeout);
+            processingTimeout = null;
+        }
+
+        // Clear progress interval if exists
+        if (window.progressInterval) {
+            clearInterval(window.progressInterval);
+            window.progressInterval = null;
+        }
+
+        // Re-enable submit button
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="material-icons">auto_awesome</i> Start AI Processing';
+        submitButton.style.opacity = '1';
+    }
+
+    function showError(message) {
+        // Hide spinner
+        modalSpinner.style.display = 'none';
+
+        // Update title
+        modalTitle.textContent = 'Processing Error';
+        modalTitle.style.color = '#d32f2f';
+
+        // Show error message
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+
+        // Hide progress elements
+        statusText.style.display = 'none';
+        progressBar.parentElement.style.display = 'none';
+        detailsText.style.display = 'none';
+
+        // Show dismiss button and close button
+        dismissBtn.style.display = 'inline-block';
+        closeBtn.style.display = 'flex';
+
+        // Clear processing state
+        processingWarningActive = false;
+
+        // Clear timeout
+        if (processingTimeout) {
+            clearTimeout(processingTimeout);
+            processingTimeout = null;
+        }
+
+        // Clear progress interval
+        if (window.progressInterval) {
+            clearInterval(window.progressInterval);
+            window.progressInterval = null;
+        }
+    }
+
+    // Check if processing was completed or if we navigated back without processing
+    const successMessages = document.querySelectorAll('.alert-success, .messages .success');
+    const errorMessages = document.querySelectorAll('.alert-error, .messages .error, .alert-danger, .errorlist');
+
+    // Check for error messages FIRST - if there's an error, show it in the modal
+    if (errorMessages.length > 0 && sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {
+        // Extract all error text
+        let errorTexts = [];
+        errorMessages.forEach(function(errEl) {
+            const text = errEl.textContent.trim();
+            if (text && !errorTexts.includes(text)) {
+                errorTexts.push(text);
+            }
+        });
+        const errorText = errorTexts.join(' ');
+
+        // Clear the submission flag
+        sessionStorage.removeItem('justSubmittedVideoProcessing');
+
+        // Show modal with error
+        showProcessingModal();
+        showError(errorText || 'An error occurred during processing. Please try again.');
+        return;
+    }
+
+    // Check if we just submitted the form - only trust this flag for a brief moment
+    const justSubmitted = sessionStorage.getItem('justSubmittedVideoProcessing') === 'true';
+    const submissionTime = parseInt(sessionStorage.getItem('videoSubmissionTime') || '0');
+    const timeSinceSubmission = Date.now() - submissionTime;
+
+    // If we have a success message, processing completed - clear everything
+    if (successMessages.length > 0) {
+        for (let msg of successMessages) {
+            if (msg.textContent.includes('Successfully processed')) {
+                sessionStorage.removeItem('aiVideoProcessingInProgress');
+                sessionStorage.removeItem('videoProcessingStartTime');
+                sessionStorage.removeItem('estimatedVideoCount');
+                sessionStorage.removeItem('justSubmittedVideoProcessing');
+                sessionStorage.removeItem('videoSubmissionTime');
+                processingWarningActive = false;
+                return; // Don't show modal
+            }
+        }
+    }
+
+    // If submission was recent (within 5 seconds) and we're supposedly processing, show the modal
+    if (justSubmitted && timeSinceSubmission < 5000 && sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {
+        // Clear the submission flag so next page load won't show modal
+        sessionStorage.removeItem('justSubmittedVideoProcessing');
+        sessionStorage.removeItem('videoSubmissionTime');
+
+        // Continue showing processing modal
+    } else if (sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {
+        // We're supposedly processing but submission wasn't recent - might be stale or continuing from before
+        // Check if we have saved state to continue from
+        const savedStartTime = sessionStorage.getItem('videoProcessingStartTime');
+        const savedVideoCount = sessionStorage.getItem('estimatedVideoCount');
+
+        if (savedStartTime && savedVideoCount) {
+            // We have state - check if it's not too old (processing should complete within reasonable time)
+            const timeSinceStart = Date.now() - parseInt(savedStartTime);
+            const maxExpectedTime = parseInt(savedVideoCount) * 1500 * 3; // 3x expected time
+
+            if (timeSinceStart < maxExpectedTime) {
+                // State is recent enough, continue processing
+            } else {
+                // State is too old, clear it
+                console.log('Cleared stale video processing state (too old)');
+                sessionStorage.removeItem('aiVideoProcessingInProgress');
+                sessionStorage.removeItem('videoProcessingStartTime');
+                sessionStorage.removeItem('estimatedVideoCount');
+                sessionStorage.removeItem('justSubmittedVideoProcessing');
+                sessionStorage.removeItem('videoSubmissionTime');
+                return; // Don't show modal
+            }
+        } else {
+            // No state saved, clear everything
+            console.log('Cleared video processing state (no saved state)');
+            sessionStorage.removeItem('aiVideoProcessingInProgress');
+            sessionStorage.removeItem('justSubmittedVideoProcessing');
+            sessionStorage.removeItem('videoSubmissionTime');
+            return; // Don't show modal
+        }
+    }
+    
+    // Check if we were in the middle of processing when page loaded
+    if (sessionStorage.getItem('aiVideoProcessingInProgress') === 'true') {
+        // We might have been processing, show modal and continue progress
+        const savedStartTime = sessionStorage.getItem('videoProcessingStartTime');
+        const savedVideoCount = sessionStorage.getItem('estimatedVideoCount');
+
+        if (savedStartTime && savedVideoCount) {
+            processingStartTime = parseInt(savedStartTime);
+            estimatedVideoCount = parseInt(savedVideoCount);
+            showProcessingModal();
+            startProgressSimulation();
+
+            // Activate unload warning since we're continuing processing
+            processingWarningActive = true;
+
+            // Disable submit button
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="material-icons">hourglass_empty</i> Processing...';
+
+            // Set a timeout to detect if processing is stuck
+            const elapsedTime = Date.now() - processingStartTime;
+            const estimatedTotalTime = estimatedVideoCount * 1500; // 1500ms per video
+            const timeoutDuration = Math.max(120000, estimatedTotalTime * 2); // At least 2 minutes or 2x estimated time
+
+            processingTimeout = setTimeout(function() {
+                showError('Processing is taking longer than expected. The process may have failed. You can dismiss this modal and check the processing status.');
+                closeBtn.style.display = 'flex'; // Allow closing if stuck
+            }, timeoutDuration);
+        }
+    }
+    
+    console.log('Attaching video form submit listener');
+    form.addEventListener('submit', function(e) {
+        console.log('Video form submit triggered');
+
+        // Immediately disable button and show feedback
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="material-icons">hourglass_empty</i> Starting...';
+        submitButton.style.opacity = '0.6';
+
+        // Calculate estimated video count for progress estimation
+        const forceReprocess = document.getElementById('force').checked;
+        const albumSelect = document.getElementById('album');
+        const limitInput = document.getElementById('limit');
+
+        if (forceReprocess) {
+            estimatedVideoCount = {{ total_videos }};
+        } else {
+            estimatedVideoCount = {{ unprocessed_videos }};
+        }
+
+        // Apply album filter if selected
+        if (albumSelect.value) {
+            const selectedOption = albumSelect.options[albumSelect.selectedIndex];
+            const albumVideoCount = parseInt(selectedOption.text.match(/\((\d+) videos\)/)?.[1] || '0');
+            if (!forceReprocess) {
+                // Estimate unprocessed videos in selected album (rough estimate)
+                estimatedVideoCount = Math.max(1, Math.round(albumVideoCount * ({{ unprocessed_videos }} / {{ total_videos }})));
+            } else {
+                estimatedVideoCount = albumVideoCount;
+            }
+        }
+
+        // Apply limit if specified
+        const limit = parseInt(limitInput.value);
+        if (limit && limit > 0) {
+            estimatedVideoCount = Math.min(estimatedVideoCount, limit);
+        }
+
+        if (estimatedVideoCount === 0) {
+            // Re-enable button if no videos to process
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="material-icons">smart_toy</i> Start AI Processing';
+            submitButton.style.opacity = '1';
+            return; // Let the form submit normally to show "no videos to process" message
+        }
+
+        // Store processing state in session storage
+        processingStartTime = Date.now();
+        sessionStorage.setItem('aiVideoProcessingInProgress', 'true');
+        sessionStorage.setItem('videoProcessingStartTime', processingStartTime.toString());
+        sessionStorage.setItem('estimatedVideoCount', estimatedVideoCount.toString());
+        sessionStorage.setItem('justSubmittedVideoProcessing', 'true'); // Flag that we just submitted
+        sessionStorage.setItem('videoSubmissionTime', processingStartTime.toString()); // Timestamp of submission
+
+        // Show processing modal immediately
+        showProcessingModal();
+
+        // Start progress simulation
+        startProgressSimulation();
+
+        // Activate unload warning after 3 seconds (give time for form submission to complete)
+        setTimeout(function() {
+            processingWarningActive = true;
+        }, 3000);
+
+        // Update button to show processing state
+        submitButton.innerHTML = '<i class="material-icons">hourglass_empty</i> Processing...';
+
+        // Set a timeout to detect if processing fails or gets stuck
+        const estimatedTotalTime = estimatedVideoCount * 1500; // 1500ms per video
+        const timeoutDuration = Math.max(120000, estimatedTotalTime * 2); // At least 2 minutes or 2x estimated time
+
+        processingTimeout = setTimeout(function() {
+            showError('Processing is taking longer than expected. The process may have failed. You can dismiss this modal and check the processing status.');
+            closeBtn.style.display = 'flex'; // Allow closing if stuck
+        }, timeoutDuration);
+    });
+
+    function showProcessingModal() {
+        // Reset modal to processing state
+        modalSpinner.style.display = 'inline-block';
+        modalTitle.textContent = 'Processing Videos with AI';
+        modalTitle.style.color = '';
+        errorMessage.style.display = 'none';
+        statusText.style.display = 'block';
+        progressBar.parentElement.style.display = 'block';
+        detailsText.style.display = 'block';
+        dismissBtn.style.display = 'none';
+        closeBtn.style.display = 'none';
+
+        modal.classList.remove('hidden');
+        statusText.textContent = `Analyzing ${estimatedVideoCount} video${estimatedVideoCount !== 1 ? 's' : ''} with AI...`;
+        progressBar.style.width = '5%';
+
+        if (estimatedVideoCount > 0) {
+            const estimatedTime = Math.round(estimatedVideoCount * 1.5); // ~1.5 seconds per video
+            detailsText.textContent = `Estimated time: ${formatTime(estimatedTime)}. Please keep this page open.`;
+        }
+    }
+
+    function startProgressSimulation() {
+        // Simulate progress based on estimated processing time
+        const estimatedTotalTime = estimatedVideoCount * 1500; // 1.5 seconds = 1500ms per video
+        const updateInterval = Math.max(100, estimatedTotalTime / 100); // Update every 1% or minimum 100ms
+
+        let currentProgress = 5; // Start at 5%
+
+        const progressInterval = setInterval(function() {
+            const elapsed = Date.now() - processingStartTime;
+            const estimatedProgress = Math.min(90, (elapsed / estimatedTotalTime) * 100);
+
+            // Smooth progress update (don't jump too fast)
+            if (estimatedProgress > currentProgress) {
+                currentProgress = Math.min(currentProgress + 2, estimatedProgress);
+            }
+
+            progressBar.style.width = currentProgress + '%';
+
+            const elapsedSeconds = Math.floor(elapsed / 1000);
+            statusText.textContent = `Processing... (${elapsedSeconds}s elapsed)`;
+
+            // Stop at 90% and wait for actual completion
+            if (currentProgress >= 90) {
+                clearInterval(progressInterval);
+                statusText.textContent = 'Finalizing analysis...';
+                progressBar.style.width = '95%';
+            }
+        }, updateInterval);
+
+        // Store interval ID to clear it if needed
+        window.progressInterval = progressInterval;
+    }
+
+    function formatTime(seconds) {
+        if (seconds < 60) {
+            return `${seconds} seconds`;
+        } else {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            if (remainingSeconds === 0) {
+                return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+            } else {
+                return `${minutes}m ${remainingSeconds}s`;
+            }
+        }
+    }
+
+    // Handle page unload warning (only after processing has been running for a bit)
+    window.addEventListener('beforeunload', function(e) {
+        if (processingWarningActive && !modal.classList.contains('hidden')) {
+            e.preventDefault();
+            e.returnValue = 'AI processing is in progress. Leaving this page may interrupt the process.';
+            return e.returnValue;
+        }
+    });
+});
+</script>
+{% endblock %}

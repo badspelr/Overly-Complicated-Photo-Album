@@ -1,0 +1,167 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .move-form {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+    }
+    .form-group select,
+    .form-group input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .helptext {
+        display: block;
+        margin-top: 5px;
+        font-size: 12px;
+        color: #666;
+    }
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0;
+    }
+    .errorlist li {
+        color: #d32f2f;
+        background: #ffebee;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 5px;
+    }
+    .submit-row {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+        text-align: right;
+    }
+    .submit-row input[type="submit"],
+    .submit-row button {
+        background: #417690;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-left: 10px;
+    }
+    .submit-row input[type="submit"]:hover,
+    .submit-row button:hover {
+        background: #205067;
+    }
+    .submit-row a {
+        margin-right: 15px;
+        color: #666;
+        text-decoration: none;
+    }
+    .submit-row a:hover {
+        text-decoration: underline;
+    }
+    .items-preview {
+        background: white;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+    }
+    .items-preview h3 {
+        margin-top: 0;
+        color: #333;
+        font-size: 16px;
+    }
+    .items-preview ul {
+        max-height: 200px;
+        overflow-y: auto;
+        margin: 10px 0 0 0;
+        padding-left: 20px;
+    }
+    .items-preview li {
+        padding: 5px 0;
+        color: #555;
+    }
+    .button-secondary {
+        background: #6c757d !important;
+    }
+    .button-secondary:hover {
+        background: #5a6268 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<form method="post" class="move-form">
+    {% csrf_token %}
+    
+    {# Hidden fields to preserve the selected items #}
+    <input type="hidden" name="action" value="move_to_album">
+    {% for item in queryset %}
+        <input type="hidden" name="{{ action_checkbox_name }}" value="{{ item.pk }}">
+    {% endfor %}
+    
+    <div class="items-preview">
+        <h3>Items to be moved ({{ queryset.count }}):</h3>
+        <ul>
+            {% for item in queryset %}
+                <li>{{ item.title }}{% if item.album %} (currently in "{{ item.album.title }}"){% endif %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    {{ form.non_field_errors }}
+    
+    <div class="form-group">
+        {{ form.owner.errors }}
+        <label for="{{ form.owner.id_for_label }}">{{ form.owner.label }}</label>
+        {{ form.owner }}
+        {% if form.owner.help_text %}
+            <span class="helptext">{{ form.owner.help_text }}</span>
+        {% endif %}
+        <button type="submit" name="refresh_albums" class="button-secondary" style="margin-top: 10px;">
+            Update Album List
+        </button>
+    </div>
+    
+    <div class="form-group">
+        {{ form.album.errors }}
+        <label for="{{ form.album.id_for_label }}">{{ form.album.label }}</label>
+        {{ form.album }}
+        {% if form.album.help_text %}
+            <span class="helptext">{{ form.album.help_text }}</span>
+        {% endif %}
+    </div>
+    
+    <div class="form-group">
+        {{ form.new_album_title.errors }}
+        <label for="{{ form.new_album_title.id_for_label }}">{{ form.new_album_title.label }}</label>
+        {{ form.new_album_title }}
+        {% if form.new_album_title.help_text %}
+            <span class="helptext">{{ form.new_album_title.help_text }}</span>
+        {% endif %}
+    </div>
+    
+    <div class="submit-row">
+        <a href="{% url 'admin:album_'|add:opts.model_name|add:'_changelist' %}">Cancel</a>
+        <input type="submit" name="apply" value="Move Items" />
+    </div>
+</form>
+{% endblock %}

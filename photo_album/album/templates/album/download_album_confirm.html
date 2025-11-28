@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Download Album - {{ album.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="material-icons align-middle">download</i>
+                        Download Album: {{ album.title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if is_multipart %}
+                        <div class="alert alert-info">
+                            <i class="material-icons align-middle">info</i>
+                            <strong>Multi-Part Download</strong>
+                            <p class="mb-0 mt-2">
+                                This album is too large for a single download. It will be split into 
+                                <strong>{{ total_parts }} separate ZIP files</strong>.
+                            </p>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-success">
+                            <i class="material-icons align-middle">check_circle</i>
+                            <strong>Ready to Download</strong>
+                            <p class="mb-0 mt-2">
+                                This album can be downloaded as a single ZIP file.
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <div class="album-info mb-4">
+                        <h5>Album Contents:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="material-icons text-primary align-middle">photo</i> <strong>{{ total_photos }}</strong> photo(s)</li>
+                            <li><i class="material-icons text-primary align-middle">videocam</i> <strong>{{ total_videos }}</strong> video(s)</li>
+                            <li><i class="material-icons text-primary align-middle">storage</i> <strong>{{ total_size }}</strong> total size</li>
+                        </ul>
+                    </div>
+
+                    {% if is_multipart %}
+                        <div class="parts-breakdown mb-4">
+                            <h5>Download Parts:</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Part</th>
+                                            <th>Photos</th>
+                                            <th>Videos</th>
+                                            <th>Size</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for part in parts %}
+                                        <tr>
+                                            <td><strong>Part {{ part.number }}</strong> of {{ total_parts }}</td>
+                                            <td>{{ part.photo_count }}</td>
+                                            <td>{{ part.video_count }}</td>
+                                            <td>{{ part.size }}</td>
+                                            <td>
+                                                <a href="{% url 'album:download_full_album' album.pk %}?download_part={{ part.number }}" 
+                                                   class="btn btn-sm btn-primary download-part-btn"
+                                                   onclick="showDownloadProgress(this); return true;">
+                                                    <i class="material-icons">download</i> Download
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="material-icons align-middle">warning</i>
+                            <strong>Important:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Click each "Download" button separately to get all parts</li>
+                                <li>Each part will download as a separate ZIP file</li>
+                                <li>You'll need to extract all parts to access all your media</li>
+                                <li>Parts are named: <code>{{ album.title|truncatewords:3 }}_part1_of_{{ total_parts }}.zip</code>, etc.</li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <div class="text-center mb-3">
+                            <a href="{% url 'album:download_full_album' album.pk %}?download_part=1" 
+                               class="btn btn-lg btn-success download-btn"
+                               onclick="showDownloadProgress(this); return true;">
+                                <i class="material-icons">download</i> 
+                                <span class="download-text">Download Complete Album</span>
+                                <span class="download-spinner" style="display: none;">
+                                    <i class="material-icons rotating">hourglass_empty</i> Preparing...
+                                </span>
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    <div class="text-center mt-4">
+                        <a href="{% url 'album:album_detail' album.pk %}" class="btn btn-secondary">
+                            <i class="material-icons">cancel</i> Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .rotating {
+        animation: rotate 2s linear infinite;
+        display: inline-block;
+    }
+    
+    .download-btn.disabled,
+    .download-part-btn.disabled {
+        opacity: 0.7;
+        cursor: wait !important;
+        pointer-events: none;
+    }
+    
+    .material-icons {
+        vertical-align: middle;
+        font-size: 20px;
+    }
+    
+    .card {
+        border-radius: 8px;
+    }
+    
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+    }
+    
+    .table td, .table th {
+        vertical-align: middle;
+    }
+</style>
+
+<script>
+function showDownloadProgress(button) {
+    const textSpan = button.querySelector('.download-text');
+    const spinnerSpan = button.querySelector('.download-spinner');
+    
+    if (textSpan && spinnerSpan) {
+        textSpan.style.display = 'none';
+        spinnerSpan.style.display = 'inline';
+    } else {
+        // For part buttons, just change the button content
+        const icon = button.querySelector('.material-icons');
+        if (icon) {
+            icon.textContent = 'hourglass_empty';
+            icon.classList.add('rotating');
+        }
+        button.innerHTML = '<i class="material-icons rotating">hourglass_empty</i> Preparing...';
+    }
+    
+    button.classList.add('disabled');
+    button.style.pointerEvents = 'none';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+
+<div style="max-width: 800px;">
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h2 style="margin-top: 0;">{{ album.title }}</h2>
+        <p style="color: #666;">{{ album.description|default:"No description" }}</p>
+        <hr>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+            <div>
+                <strong>Owner:</strong> {{ album.owner.username }}
+            </div>
+            <div>
+                <strong>Created:</strong> {{ album.created_at|date:"M d, Y" }}
+            </div>
+            <div>
+                <strong>Photos:</strong> {{ photo_count }}
+            </div>
+            <div>
+                <strong>Videos:</strong> {{ video_count }}
+            </div>
+            <div style="grid-column: span 2;">
+                <strong>Total Size:</strong> <span style="font-size: 1.2em; color: #0066cc;">{{ total_size }}</span>
+            </div>
+        </div>
+    </div>
+    
+    {% if total_size_bytes > 0 %}
+        {% if is_multipart %}
+        <div style="background: #d1ecf1; border: 1px solid #0c5460; padding: 15px; border-radius: 6px; margin-bottom: 20px; color: #0c5460;">
+            <strong>ℹ️ Multi-Part Download:</strong>
+            <p style="margin: 10px 0;">This album will be split into <strong>{{ total_parts }} separate ZIP files</strong> because it exceeds the {{ max_size }} single-part limit.</p>
+        </div>
+        
+        <div style="background: white; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 20px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f8f9fa;">
+                    <tr>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Part</th>
+                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Photos</th>
+                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Videos</th>
+                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #ddd;">Size</th>
+                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for part in parts %}
+                    <tr style="{% if forloop.counter|divisibleby:2 %}background: #f8f9fa;{% endif %}">
+                        <td style="padding: 10px;"><strong>Part {{ part.number }}</strong> of {{ total_parts }}</td>
+                        <td style="padding: 10px; text-align: center;">{{ part.photo_count }}</td>
+                        <td style="padding: 10px; text-align: center;">{{ part.video_count }}</td>
+                        <td style="padding: 10px; text-align: right;">{{ part.size }}</td>
+                        <td style="padding: 10px; text-align: center;">
+                            <a href="?download_part={{ part.number }}&_selected_action={{ album.pk }}" 
+                               class="button" 
+                               style="background-color: #0066cc; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; display: inline-block;">
+                                Download Part {{ part.number }}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+            <strong>⚠️ Important Instructions:</strong>
+            <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                <li>Click each "Download Part" button separately to get all {{ total_parts }} parts</li>
+                <li>Each part will download as a separate ZIP file</li>
+                <li>Files are organized into <code>photos/</code> and <code>videos/</code> folders within each part</li>
+                <li>Part filenames: <code>{{ album.title|truncatewords:3 }}_part1_of_{{ total_parts }}.zip</code>, etc.</li>
+            </ul>
+        </div>
+        {% else %}
+        <div style="background: #d4edda; border: 1px solid #28a745; padding: 15px; border-radius: 6px; margin-bottom: 20px; color: #155724;">
+            <strong>✓ Single Download:</strong>
+            <p style="margin: 10px 0;">This album can be downloaded as a single ZIP file.</p>
+        </div>
+        
+        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+            <strong>⚠️ Download Information:</strong>
+            <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                <li>This will download all {{ photo_count }} photo(s) and {{ video_count }} video(s) as a single ZIP file</li>
+                <li>The download may take some time depending on your connection speed</li>
+                <li>Files will be organized into <code>photos/</code> and <code>videos/</code> folders</li>
+            </ul>
+        </div>
+        
+        <div class="submit-row" style="text-align: center;">
+            <a href="?download_part=1&_selected_action={{ album.pk }}" 
+               class="button default" 
+               style="background-color: #28a745; padding: 12px 24px; font-size: 16px;">
+                Download Complete Album
+            </a>
+            <a href="{% url 'admin:album_album_changelist' %}" class="button cancel-link">Cancel</a>
+        </div>
+        {% endif %}
+        
+        <div class="submit-row" style="margin-top: 20px; text-align: center;">
+            <a href="{% url 'admin:album_album_changelist' %}" class="button cancel-link">Back to Album List</a>
+        </div>
+    {% else %}
+    <div style="background: #f8d7da; border: 1px solid #dc3545; padding: 15px; border-radius: 6px; margin-bottom: 20px; color: #721c24;">
+        <strong>⚠️ Cannot Download:</strong>
+        <p>This album appears to be empty or the media files cannot be accessed.</p>
+    </div>
+    
+    <div class="submit-row">
+        <a href="{% url 'admin:album_album_changelist' %}" class="button cancel-link">Go Back</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.cancel-link {
+    background: #f8f8f8;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+    margin-left: 10px;
+    display: inline-block;
+}
+.cancel-link:hover {
+    background: #e8e8e8;
+}
+code {
+    background: #f4f4f4;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+}
+</style>
+{% endblock %}

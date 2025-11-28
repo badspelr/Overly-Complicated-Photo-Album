@@ -1,0 +1,38 @@
+# Development docker-compose override
+# Use with: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# This mounts source code as volumes for faster development (no rebuild needed)
+
+services:
+  web:
+    volumes:
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
+      - ./logs:/app/logs
+      # Mount source code for development
+      - ./album:/app/album
+      - ./photo_album:/app/photo_album
+      - ./manage.py:/app/manage.py
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=photo_album.settings
+
+  celery-worker:
+    volumes:
+      - ./media:/app/media
+      - ./logs:/app/logs
+      # Mount source code for development
+      - ./album:/app/album
+      - ./photo_album:/app/photo_album
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=photo_album.settings
+
+  celery-beat:
+    volumes:
+      - ./logs:/app/logs
+      # Mount source code for development
+      - ./album:/app/album
+      - ./photo_album:/app/photo_album
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=photo_album.settings

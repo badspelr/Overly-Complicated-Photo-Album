@@ -1,0 +1,337 @@
+{% extends "album/base.html" %}
+{% load static %}
+
+{% block title %}Import from Server - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .import-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    
+    .import-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .import-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 2em;
+    }
+    
+    .import-header p {
+        margin: 0;
+        opacity: 0.9;
+    }
+    
+    .upload-path {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 15px;
+        margin-bottom: 30px;
+        border-radius: 4px;
+    }
+    
+    .upload-path code {
+        background: #e9ecef;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+        color: #495057;
+    }
+    
+    .file-preview {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .file-preview h3 {
+        margin-top: 0;
+        color: #333;
+        font-size: 1.3em;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+    }
+    
+    .file-list {
+        max-height: 400px;
+        overflow-y: auto;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 15px;
+    }
+    
+    .file-item {
+        padding: 10px;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .file-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .file-icon {
+        font-size: 1.5em;
+    }
+    
+    .no-files {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+    
+    .no-files-icon {
+        font-size: 3em;
+        margin-bottom: 10px;
+        opacity: 0.3;
+    }
+    
+    .import-form {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .import-form h3 {
+        margin-top: 0;
+        color: #333;
+        font-size: 1.3em;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #495057;
+    }
+    
+    .form-group select,
+    .form-group input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 1em;
+    }
+    
+    .form-group select:focus,
+    .form-group input[type="text"]:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .help-text {
+        font-size: 0.9em;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .radio-group {
+        display: flex;
+        gap: 20px;
+        margin-top: 10px;
+    }
+    
+    .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: normal;
+    }
+    
+    .btn-import {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-size: 1.1em;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    
+    .btn-import:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .btn-import:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .alert {
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    
+    .alert-error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    
+    .alert-warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="import-container">
+    <div class="import-header">
+        <h1>📂 Import from Server</h1>
+        <p>Import photos and videos from your personal server upload directory</p>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="upload-path">
+        <strong>📁 Your upload directory:</strong><br>
+        <code>{{ user_upload_path }}</code>
+        <p style="margin-top: 10px; margin-bottom: 0;">
+            Upload files here via SFTP, SCP, or rsync, then use this page to import them.<br>
+            <strong>All subdirectories are scanned automatically.</strong>
+        </p>
+    </div>
+    
+    <div class="file-preview">
+        <h3>📷 Photos Available ({{ image_count }})</h3>
+        {% if image_files %}
+            <div class="file-list">
+                {% for filename in image_files %}
+                    <div class="file-item">
+                        <span class="file-icon">🖼️</span>
+                        <span>{{ filename }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-files">
+                <div class="no-files-icon">📷</div>
+                <p>No photo files found</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="file-preview">
+        <h3>🎬 Videos Available ({{ video_count }})</h3>
+        {% if video_files %}
+            <div class="file-list">
+                {% for filename in video_files %}
+                    <div class="file-item">
+                        <span class="file-icon">🎥</span>
+                        <span>{{ filename }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-files">
+                <div class="no-files-icon">🎬</div>
+                <p>No video files found</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% if has_files %}
+        <form method="post" class="import-form">
+            {% csrf_token %}
+            
+            <h3>Import Settings</h3>
+            
+            <div class="form-group">
+                <label>{{ form.media_type.label }}</label>
+                <div class="radio-group">
+                    {% for radio in form.media_type %}
+                        {{ radio }}
+                    {% endfor %}
+                </div>
+                {% if form.media_type.help_text %}
+                    <p class="help-text">{{ form.media_type.help_text }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.album.id_for_label }}">{{ form.album.label }}</label>
+                {{ form.album }}
+                {% if form.album.help_text %}
+                    <p class="help-text">{{ form.album.help_text }}</p>
+                {% endif %}
+                {% if form.album.errors %}
+                    <p class="help-text" style="color: #dc3545;">{{ form.album.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.new_album_title.id_for_label }}">{{ form.new_album_title.label }}</label>
+                {{ form.new_album_title }}
+                {% if form.new_album_title.help_text %}
+                    <p class="help-text">{{ form.new_album_title.help_text }}</p>
+                {% endif %}
+                {% if form.new_album_title.errors %}
+                    <p class="help-text" style="color: #dc3545;">{{ form.new_album_title.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {{ form.non_field_errors.0 }}
+                </div>
+            {% endif %}
+            
+            <button type="submit" class="btn-import">
+                Import Selected Media
+            </button>
+        </form>
+    {% else %}
+        <div class="no-files" style="padding: 60px;">
+            <div class="no-files-icon">📭</div>
+            <h3>No files to import</h3>
+            <p>Upload files to <code>{{ user_upload_path }}</code> via SFTP/SCP to get started.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        .import-preview {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .import-preview h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .file-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 10px;
+        }
+        .file-list li {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .file-list li:last-child {
+            border-bottom: none;
+        }
+        .form-row {
+            margin: 20px 0;
+        }
+        .submit-row {
+            padding: 12px 0;
+            margin: 0;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<div class="import-preview">
+    <h3>Files to Import</h3>
+    <p><strong>
+        {% if image_files %}
+            {{ image_files|length }}
+        {% elif video_files %}
+            {{ video_files|length }}
+        {% else %}
+            0
+        {% endif %}
+        file(s)</strong> found in server uploads directory:</p>
+    <ul class="file-list">
+        {% if image_files %}
+            {% for filename in image_files %}
+                <li>📷 {{ filename }}</li>
+            {% endfor %}
+        {% endif %}
+        {% if video_files %}
+            {% for filename in video_files %}
+                <li>🎬 {{ filename }}</li>
+            {% endfor %}
+        {% endif %}
+    </ul>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="form-row">
+        {{ form.as_p }}
+    </div>
+    
+    <div class="submit-row">
+        <input type="submit" name="apply" value="Import to Selected Album" class="default" />
+        <a href="{% url 'admin:album_photo_changelist' %}" class="button cancel-link">Cancel</a>
+    </div>
+</form>
+{% endblock %}

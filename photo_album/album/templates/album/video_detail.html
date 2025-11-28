@@ -1,0 +1,99 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block title %}{{ video.title }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/album_detail.css' %}">
+<link rel="stylesheet" href="{% static 'album/css/favorites.css' %}">
+<script src="{% static 'album/js/favorites.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    {% with request.GET.return_url as ru %}
+        <a href="{% if ru %}{{ ru }}{% else %}{% url 'album:album_detail' video.album.pk %}{% endif %}" class="btn btn-secondary">&larr; Back to Album</a>
+    {% endwith %}
+</div>
+<div class="media-detail-layout">
+    <div class="media-viewer">
+        {% if previous_video %}
+            <a href="{% url 'album:video_detail' previous_video.pk %}?return_url={{ request.GET.return_url|urlencode }}{% if sort %}&sort={{ sort }}{% endif %}" class="nav-arrow nav-prev">&larr;</a>
+        {% endif %}
+        <video controls class="video-player">
+            <source src="{{ video.video.url }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        {% if next_video %}
+            <a href="{% url 'album:video_detail' next_video.pk %}?return_url={{ request.GET.return_url|urlencode }}{% if sort %}&sort={{ sort }}{% endif %}" class="nav-arrow nav-next">&rarr;</a>
+        {% endif %}
+    </div>
+    <div class="media-info-card">
+        <div class="media-detail-title-row">
+            <h1 class="media-detail-title">{{ video.title }}</h1>
+            {% load album_tags %}
+            {% is_favorited user video as favorited %}
+            <button class="favorite-btn {% if favorited %}favorited{% endif %}" data-video-id="{{ video.id }}" title="{% if favorited %}Remove from favorites{% else %}Add to favorites{% endif %}">
+                <i class="material-icons">{% if favorited %}favorite{% else %}favorite_border{% endif %}</i>
+            </button>
+        </div>
+        <p class="description">{{ video.description }}</p>
+        
+        <ul class="metadata-list">
+            <li><strong>Uploaded:</strong> {{ video.uploaded_at|date:"M j, Y" }}</li>
+            {% if video.category %}
+                <li><strong>Category:</strong> {{ video.category.name }}</li>
+            {% endif %}
+            {% if video.date_recorded %}
+                <li><strong>Date Recorded:</strong> {{ video.date_recorded|date:"M j, Y" }}</li>
+            {% endif %}
+            {% if video.duration %}
+                <li><strong>Duration:</strong> {{ video.duration|floatformat:2 }}s</li>
+            {% endif %}
+            {% if video.width and video.height %}
+                <li><strong>Dimensions:</strong> {{ video.width }} x {{ video.height }}</li>
+            {% endif %}
+            {% if video.codec %}
+                <li><strong>Codec:</strong> {{ video.codec }}</li>
+            {% endif %}
+        </ul>
+        
+        <!-- Tags Section -->
+        {% if video.ai_tags or video.tags.exists %}
+        <div class="tags-section">
+            <h3>Tags</h3>
+            <div class="tags-container">
+                {% if video.ai_tags %}
+                    {% for tag in video.ai_tags %}
+                        <span class="tag ai-tag" title="AI Generated Tag">
+                            <i class="material-icons">smart_toy</i> {{ tag }}
+                        </span>
+                    {% endfor %}
+                {% endif %}
+                {% if video.tags.exists %}
+                    {% for tag in video.tags.all %}
+                        <span class="tag user-tag" title="User Tag">
+                            <i class="material-icons">label</i> {{ tag.name }}
+                        </span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="action-buttons">
+            <a href="{{ video.video.url }}" download class="btn-download">Download Video</a>
+
+            {# Show edit button only to album admins (superuser, owner, or album viewer) #}
+            {% if user.is_superuser or video.album.owner == user or user in video.album.viewers.all %}
+                <a href="{% url 'album:video_edit' video.pk %}" class="btn btn-warning mt-2">Edit Metadata</a>
+                <form method="post" action="{% url 'album:delete_video' video.pk %}" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete this video? This action cannot be undone.');">
+                    {% csrf_token %}
+                    <input type="hidden" name="return_url" value="{{ request.GET.return_url|default:'/' }}">
+                    <button type="submit" class="btn btn-danger mt-2">Delete Video</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

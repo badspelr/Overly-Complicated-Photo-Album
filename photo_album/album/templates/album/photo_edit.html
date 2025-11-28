@@ -1,0 +1,93 @@
+{% extends 'album/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'album/css/photo_edit.css' %}">
+<style>
+  .photo-preview-section {
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  .photo-preview {
+    max-width: 400px;
+    max-height: 400px;
+    margin: 20px auto;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+  }
+  .rotation-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 15px;
+  }
+  .btn-rotate {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .btn-rotate:hover {
+    background: #5a6268;
+  }
+  .btn-rotate i {
+    font-size: 20px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <h1>Edit Photo Metadata</h1>
+  
+  <div class="photo-preview-section">
+    <h3>Preview</h3>
+    <img src="{{ photo.medium.url }}" alt="{{ photo.title }}" class="photo-preview">
+    <div class="rotation-controls">
+      <form method="post" action="{% url 'album:rotate_photo' photo.pk %}" style="display: inline;">
+        {% csrf_token %}
+        <input type="hidden" name="direction" value="left">
+        <input type="hidden" name="return_url" value="{{ request.path }}">
+        <button type="submit" class="btn-rotate" title="Rotate 90° counter-clockwise">
+          <i class="material-icons">rotate_left</i>
+          Rotate Left
+        </button>
+      </form>
+      <form method="post" action="{% url 'album:rotate_photo' photo.pk %}" style="display: inline;">
+        {% csrf_token %}
+        <input type="hidden" name="direction" value="right">
+        <input type="hidden" name="return_url" value="{{ request.path }}">
+        <button type="submit" class="btn-rotate" title="Rotate 90° clockwise">
+          <i class="material-icons">rotate_right</i>
+          Rotate Right
+        </button>
+      </form>
+    </div>
+  </div>
+  
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+          <small class="form-help-text">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <div class="form-error">{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-submit">Save</button>
+      <a href="{% url 'album:photo_detail' photo.pk %}" class="btn btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

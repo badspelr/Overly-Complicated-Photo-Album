@@ -1,0 +1,79 @@
+{
+  "name": "Photo Album Django App",
+  "dockerComposeFile": [
+    "../docker-compose.dev.yml"
+  ],
+  "service": "web",
+  "workspaceFolder": "/app",
+
+  // Configure VSCode settings inside the container
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.languageServer": "Pylance",
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": [
+          "album/tests"
+        ],
+        "[python]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll": "explicit"
+          }
+        }
+      },
+
+      // Extensions to install in the container
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "batisteo.vscode-django",
+        "thebarkman.vscode-djaneiro",
+        "charliermarsh.ruff",
+        "ms-python.black-formatter",
+        "eamodio.gitlens",
+        "redhat.vscode-yaml",
+        "mikestead.dotenv",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg"
+      ]
+    }
+  },
+
+  // Forward ports for web server, database, and Redis
+  "forwardPorts": [8000, 5432, 6379],
+  "portsAttributes": {
+    "8000": {
+      "label": "Django Web Server",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    },
+    "6379": {
+      "label": "Redis",
+      "onAutoForward": "silent"
+    }
+  },
+
+  // Run commands after the container is created
+  "postCreateCommand": "python manage.py migrate",
+
+  // Keep container running
+  "shutdownAction": "stopCompose",
+
+  // Use the default user from the Dockerfile
+  "remoteUser": "root",
+
+  // Mount type
+  "mounts": [
+    "source=${localWorkspaceFolder}/media,target=/app/media,type=bind,consistency=cached",
+    "source=${localWorkspaceFolder}/staticfiles,target=/app/staticfiles,type=bind,consistency=cached",
+    "source=${localWorkspaceFolder}/logs,target=/app/logs,type=bind,consistency=cached"
+  ]
+}
